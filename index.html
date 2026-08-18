@@ -379,6 +379,10 @@ const DEFAULT_ZONES = [
 let zones = loadZones();
 let device = null, characteristic = null;
 let connected = false;
+let autoReconnect = false;
+let reconnectAttempt = 0;
+let reconnectTimeout = null;
+const RECONNECT_DELAYS = [2000, 4000, 8000, 15000, 30000]; // backoff
 let sessionActive = false;
 let sessionStart = null;
 let sessionTimer = null;
@@ -420,16 +424,17 @@ async function connectBLE() {
   }
   setStatus('connecting');
   try {
-    device = await navigator.bluetooth.requestDevice({
-      filters: [{ name: 'Polar H9' }, { services: [HR_SERVICE] }],
-      optionalServices: [HR_SERVICE]
-    });
-    device.addEventListener('gattserverdisconnected', onDisconnected);
-    const server  = await device.gatt.connect();
-    const service = await server.getPrimaryService(HR_SERVICE);
-    characteristic = await service.getCharacteristic(HR_MEASUREMENT);
-    await characteristic.startNotifications();
-    characteristic.addEventListener('characteristicvaluechanged', onHRData);
+    // Prima connessione: serve il picker utente
+    if (!device) {
+      device = await navigator.bluetooth.requestDevice({
+        filters: [{ name: 'Polar H9' }, { services: [HR_SERVICE] }],
+        optionalServices: [HR_SERVICE]
+      });
+      device.addEventListener('gattserverdisconnected', onDisconnected);
+    }
+    await gattConnect();
+    autoReconnect = true;
+    reconnectAttempt = 0;
     setStatus('connected');
     toast('Polar H9 connesso ✓');
   } catch (e) {
@@ -438,9 +443,52 @@ async function connectBLE() {
   }
 }
 
+async function gattConnect() {
+  const server  = await device.gatt.connect();
+  const service = await server.getPrimaryService(HR_SERVICE);
+  characteristic = await service.getCharacteristic(HR_MEASUREMENT);
+  // Rimuovi listener duplicati prima di aggiungerne uno nuovo
+  characteristic.removeEventListener('characteristicvaluechanged', onHRData);
+  await characteristic.startNotifications();
+  characteristic.addEventListener('characteristicvaluechanged', onHRData);
+}
+
 function onDisconnected() {
+  connected = false;
+  if (!autoReconnect) {
+    setStatus('disconnected');
+    toast('Dispositivo disconnesso');
+    return;
+  }
+  // Riconnessione automatica con backoff
+  const delay = RECONNECT_DELAYS[Math.min(reconnectAttempt, RECONNECT_DELAYS.length - 1)];
+  reconnectAttempt++;
+  const secs = Math.round(delay / 1000);
+  setStatus('reconnecting', `Disconnesso — riconnessione in ${secs}s (tentativo ${reconnectAttempt})…`);
+  clearTimeout(reconnectTimeout);
+  reconnectTimeout = setTimeout(async () => {
+    if (!autoReconnect) return;
+    try {
+      setStatus('reconnecting', `Riconnessione in corso… (tentativo ${reconnectAttempt})`);
+      await gattConnect();
+      reconnectAttempt = 0;
+      setStatus('connected');
+      toast('Riconnesso automaticamente ✓');
+    } catch (e) {
+      // onDisconnected verrà richiamato di nuovo dal browser, o ritentiamo
+      if (autoReconnect) onDisconnected();
+    }
+  }, delay);
+}
+
+function cancelAutoReconnect() {
+  autoReconnect = false;
+  reconnectAttempt = 0;
+  clearTimeout(reconnectTimeout);
+  if (device && device.gatt.connected) device.gatt.disconnect();
+  device = null;
+  characteristic = null;
   setStatus('disconnected');
-  toast('Dispositivo disconnesso');
 }
 
 function onHRData(event) {
@@ -450,7 +498,7 @@ function onHRData(event) {
   updateHR(hr);
 }
 
-function setStatus(state) {
+function setStatus(state, customText) {
   const dot  = document.getElementById('status-dot');
   const text = document.getElementById('status-text');
   const btn  = document.getElementById('connect-btn');
@@ -458,16 +506,26 @@ function setStatus(state) {
   if (state === 'connected') {
     dot.classList.add('connected');
     text.textContent = 'Polar H9 connesso';
-    btn.textContent = 'Connesso';
-    btn.disabled = true;
+    btn.textContent = 'Disconnetti';
+    btn.onclick = cancelAutoReconnect;
+    btn.disabled = false;
     connected = true;
   } else if (state === 'connecting') {
     dot.classList.add('connecting');
-    text.textContent = 'Connessione in corso…';
+    text.textContent = customText || 'Connessione in corso…';
+    btn.textContent = '…';
     btn.disabled = true;
+  } else if (state === 'reconnecting') {
+    dot.classList.add('connecting');
+    text.textContent = customText || 'Riconnessione…';
+    btn.textContent = 'Annulla';
+    btn.onclick = cancelAutoReconnect;
+    btn.disabled = false;
+    connected = false;
   } else {
     text.textContent = 'Non connesso';
     btn.textContent = 'Connetti';
+    btn.onclick = connectBLE;
     btn.disabled = false;
     connected = false;
   }
