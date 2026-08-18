@@ -770,6 +770,11 @@ function showView(id, btn) {
 // ── INIT ───────────────────────────────────────────────────────
 loadZoneInputs();
 renderHistory();
+
+// ── SERVICE WORKER (offline) ────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
 </script>
 </body>
 </html>
