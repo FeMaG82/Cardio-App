@@ -78,19 +78,28 @@
 
   /* BIG HR DISPLAY */
   .hr-display {
-    text-align: center; padding: 32px 0 24px;
+    text-align: center; padding: 20px 0 16px;
+    display: flex; flex-direction: column; align-items: center;
   }
-  .hr-label { font-size: 11px; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; }
+  .hr-label { font-size: 11px; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; margin-bottom: 12px; }
+  .hr-circle {
+    width: 210px; height: 210px; border-radius: 50%;
+    background: #fff;
+    border: 10px solid var(--muted);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    transition: border-color .4s;
+    box-shadow: 0 0 32px rgba(0,0,0,.5);
+  }
   .hr-value {
-    font-size: 112px; font-weight: 800; line-height: 1;
+    font-size: 96px; font-weight: 900; line-height: 1;
     font-variant-numeric: tabular-nums;
-    color: var(--text);
-    transition: color .4s;
+    color: #111;
     font-family: var(--mono);
   }
-  .hr-unit { font-size: 18px; color: var(--muted); margin-top: 2px; }
+  .hr-unit { font-size: 14px; color: #555; margin-top: -4px; font-weight: 600; letter-spacing: .08em; }
   .zone-badge {
-    display: inline-block; margin-top: 10px;
+    display: inline-block; margin-top: 12px;
     padding: 6px 20px; border-radius: 20px;
     font-size: 13px; font-weight: 700; letter-spacing: .05em;
     background: var(--border); color: var(--muted);
@@ -197,8 +206,8 @@
   .toast.show { opacity: 1; }
 
   /* HR pulse animation */
-  @keyframes heartbeat { 0%,100%{transform:scale(1)} 15%{transform:scale(1.04)} 30%{transform:scale(1)} }
-  .hr-value.beat { animation: heartbeat .3s ease; }
+  @keyframes heartbeat { 0%,100%{transform:scale(1)} 15%{transform:scale(1.06)} 30%{transform:scale(1)} }
+  .hr-circle.beat { animation: heartbeat .3s ease; }
 </style>
 </head>
 <body>
@@ -220,8 +229,10 @@
 
   <div class="hr-display">
     <div class="hr-label">Frequenza Cardiaca</div>
-    <div class="hr-value" id="hr-value">—</div>
-    <div class="hr-unit">bpm</div>
+    <div class="hr-circle" id="hr-circle">
+      <div class="hr-value" id="hr-value">—</div>
+      <div class="hr-unit">bpm</div>
+    </div>
     <div class="zone-badge" id="zone-badge">— Zona —</div>
   </div>
 
@@ -537,10 +548,11 @@ function updateHR(hr) {
   const el = document.getElementById('hr-value');
   el.textContent = hr;
 
-  // Beat animation
-  el.classList.remove('beat');
-  void el.offsetWidth;
-  el.classList.add('beat');
+  // Beat animation on circle
+  const circle = document.getElementById('hr-circle');
+  circle.classList.remove('beat');
+  void circle.offsetWidth;
+  circle.classList.add('beat');
 
   // Zone detection
   const z = getZone(hr);
@@ -568,9 +580,9 @@ const ZONE_COLORS = ['--z1','--z2','--z3','--z4','--z5'];
 const ZONE_NAMES  = ['Z1 Recupero','Z2 Aerobico','Z3 Tempo','Z4 Soglia','Z5 VO₂max'];
 
 function updateZoneUI(z, hr) {
-  // HR color
-  const hrEl = document.getElementById('hr-value');
-  hrEl.style.color = z >= 0 ? `var(${ZONE_COLORS[z]})` : 'var(--text)';
+  // Circle border color
+  const circle = document.getElementById('hr-circle');
+  circle.style.borderColor = z >= 0 ? `var(${ZONE_COLORS[z]})` : 'var(--muted)';
 
   // Badge
   const badge = document.getElementById('zone-badge');
