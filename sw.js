@@ -1,9 +1,10 @@
 // sw.js — Service Worker per HRM Polar H9
 // Aggiorna CACHE_NAME ogni volta che modifichi i file (es. 'hrm-v2')
-const CACHE_NAME = 'hrm-v4';
+const CACHE_NAME = 'hrm-v6';
 const FILES = [
   './',
   './index.html',
+  'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
 ];
 
 // Installazione: mette in cache i file
@@ -24,19 +25,27 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// Fetch: prima dalla cache, poi dalla rete (cache-first)
+// Fetch: lascia passare le chiamate esterne (API Anthropic ecc.), cache-first per il resto
 self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
+
+  // Non intercettare chiamate a domini esterni (API, CDN ecc.)
+  if (url.origin !== self.location.origin) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then(cached => {
       if (cached) return cached;
       return fetch(event.request).then(response => {
-        // Metti in cache anche le risorse nuove (solo GET riuscite)
+        // Metti in cache solo risorse GET riuscite della stessa origine
         if (event.request.method === 'GET' && response.status === 200) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         }
         return response;
-      }).catch(() => cached); // se offline e non in cache, ritorna cached (o nulla)
+      }).catch(() => cached);
     })
   );
 });
