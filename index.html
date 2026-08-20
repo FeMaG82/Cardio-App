@@ -208,6 +208,159 @@
   /* HR pulse animation */
   @keyframes heartbeat { 0%,100%{transform:scale(1)} 15%{transform:scale(1.06)} 30%{transform:scale(1)} }
   .hr-circle.beat { animation: heartbeat .3s ease; }
+
+  /* ── SALITE ── */
+  .climb-hr-bar {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px 16px; margin-bottom: 14px;
+  }
+  .climb-hr-circle {
+    width: 60px; height: 60px; border-radius: 50%;
+    background: #fff; border: 5px solid var(--muted);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: border-color .4s;
+  }
+  .climb-hr-num { font-size: 22px; font-weight: 900; color: #111; font-family: var(--mono); line-height: 1; }
+  .climb-hr-unit { font-size: 9px; color: #555; font-weight: 600; letter-spacing: .06em; }
+  .climb-hr-info { flex: 1; }
+  .climb-hr-zone { font-size: 13px; font-weight: 700; }
+  .climb-hr-label { font-size: 11px; color: var(--muted); }
+
+  /* Salita library */
+  .climb-lib-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .climb-lib-header h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+  .btn-add-climb {
+    padding: 8px 16px; border-radius: 20px; border: none;
+    background: var(--accent); color: var(--bg);
+    font-size: 13px; font-weight: 700; cursor: pointer;
+  }
+  .climb-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px;
+    cursor: pointer; transition: border-color .2s;
+  }
+  .climb-card:hover { border-color: var(--accent); }
+  .climb-card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+  .climb-card-name { font-size: 15px; font-weight: 700; }
+  .climb-card-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .climb-card-del { background: none; border: 1px solid var(--border); color: var(--muted); padding: 4px 9px; border-radius: 8px; font-size: 11px; cursor: pointer; }
+  .climb-empty { text-align: center; color: var(--muted); padding: 40px 0; font-size: 14px; }
+
+  /* Upload / AI parsing modal */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 300;
+    background: rgba(0,0,0,.75); align-items: flex-end;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-sheet {
+    width: 100%; background: var(--surface);
+    border-radius: 20px 20px 0 0; padding: 24px 20px 40px;
+    border-top: 1px solid var(--border);
+  }
+  .modal-sheet h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .modal-sheet p  { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+  .modal-input {
+    width: 100%; padding: 11px 14px; background: var(--bg);
+    border: 1px solid var(--border); border-radius: 10px;
+    color: var(--text); font-size: 14px; margin-bottom: 10px;
+  }
+  .modal-btn-row { display: flex; gap: 10px; margin-top: 4px; }
+  .modal-btn {
+    flex: 1; padding: 13px; border-radius: var(--radius); border: none;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+  }
+  .modal-btn.primary { background: var(--accent); color: var(--bg); }
+  .modal-btn.cancel  { background: var(--card); color: var(--text); }
+  .upload-area {
+    border: 2px dashed var(--border); border-radius: var(--radius);
+    padding: 24px; text-align: center; margin-bottom: 12px; cursor: pointer;
+    transition: border-color .2s;
+  }
+  .upload-area:hover, .upload-area.dragover { border-color: var(--accent); }
+  .upload-area .icon { font-size: 32px; margin-bottom: 8px; }
+  .upload-area p { font-size: 13px; color: var(--muted); margin: 0; }
+  .upload-preview { font-size: 12px; color: var(--z2); margin-top: 6px; }
+  .ai-status { font-size: 13px; color: var(--accent); text-align: center; padding: 8px 0; min-height: 24px; }
+
+  /* Active climb navigator */
+  .climb-nav-header {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px;
+  }
+  .climb-nav-name { font-size: 17px; font-weight: 800; }
+  .climb-nav-sub  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* Profile chart */
+  .climb-profile-wrap {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px; margin-bottom: 12px;
+    overflow: hidden;
+  }
+  #climb-svg { width: 100%; display: block; }
+
+  /* Current segment info */
+  .climb-seg-info {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px;
+  }
+  .climb-seg-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px; text-align: center;
+  }
+  .climb-seg-card .csl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+  .climb-seg-card .csv { font-size: 24px; font-weight: 800; font-family: var(--mono); }
+  .climb-seg-card .csu { font-size: 11px; color: var(--muted); }
+
+  /* Segments list */
+  .climb-segs-list {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; margin-bottom: 12px;
+  }
+  .climb-seg-row {
+    display: flex; align-items: center; padding: 10px 14px;
+    border-bottom: 1px solid var(--border); font-size: 13px; gap: 10px;
+    transition: background .3s;
+  }
+  .climb-seg-row:last-child { border-bottom: none; }
+  .climb-seg-row.current { background: rgba(79,195,247,.1); }
+  .climb-seg-row.done    { opacity: .45; }
+  .seg-idx  { width: 22px; font-size: 11px; color: var(--muted); font-weight: 700; }
+  .seg-name { flex: 1; }
+  .seg-pct  { font-weight: 700; font-family: var(--mono); min-width: 40px; text-align: right; }
+  .seg-km   { color: var(--muted); font-size: 12px; min-width: 50px; text-align: right; }
+  .seg-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  .btn-stop-climb {
+    width: 100%; padding: 14px; border-radius: var(--radius); border: none;
+    background: var(--z4); color: #1a0a00; font-size: 14px; font-weight: 700; cursor: pointer;
+  }
+  .btn-start-climb {
+    width: 100%; padding: 14px; border-radius: var(--radius); border: none;
+    background: var(--z2); color: #0a1a04; font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 8px;
+  }
+
+  /* Storico ascensioni */
+  .climb-history-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin: 20px 0 12px;
+  }
+  .climb-history-header h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+  .btn-export-csv {
+    padding: 7px 14px; border-radius: 20px; border: 1px solid var(--border);
+    background: none; color: var(--accent); font-size: 12px; font-weight: 700; cursor: pointer;
+  }
+  .ascent-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px;
+  }
+  .ascent-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .ascent-name { font-size: 14px; font-weight: 700; }
+  .ascent-date { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .ascent-del  { background: none; border: 1px solid var(--border); color: var(--muted); padding: 4px 9px; border-radius: 8px; font-size: 11px; cursor: pointer; }
+  .ascent-stats { display: flex; gap: 20px; }
+  .ascent-stat .al { font-size: 11px; color: var(--muted); }
+  .ascent-stat .av { font-size: 18px; font-weight: 700; font-family: var(--mono); }
+  .ascent-stat .au { font-size: 11px; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -215,6 +368,7 @@
 <nav>
   <button class="active" onclick="showView('monitor',this)">Monitor</button>
   <button onclick="showView('history',this)">Sessioni</button>
+  <button onclick="showView('climb',this)">Salite</button>
   <button onclick="showView('settings',this)">Zone</button>
 </nav>
 
@@ -372,6 +526,107 @@
   <div class="settings-section">
     <h2>Dati</h2>
     <button class="settings-btn" style="background:var(--z4);color:#1a0a00;" onclick="clearHistory()">Cancella tutte le sessioni</button>
+  </div>
+</div>
+
+<!-- ══════════ SALITE ══════════ -->
+<div id="view-climb" class="view">
+
+  <!-- Mini HR bar sempre visibile -->
+  <div class="climb-hr-bar">
+    <div class="climb-hr-circle" id="climb-hr-circle">
+      <div class="climb-hr-num" id="climb-hr-num">—</div>
+      <div class="climb-hr-unit">bpm</div>
+    </div>
+    <div class="climb-hr-info">
+      <div class="climb-hr-zone" id="climb-hr-zone">— Zona —</div>
+      <div class="climb-hr-label">Frequenza cardiaca live</div>
+    </div>
+  </div>
+
+  <!-- Navigator attivo (nascosto finché non si avvia una salita) -->
+  <div id="climb-navigator" style="display:none">
+    <div class="climb-nav-header">
+      <div class="climb-nav-name" id="climb-nav-name">—</div>
+      <div class="climb-nav-sub" id="climb-nav-sub">—</div>
+    </div>
+
+    <div class="climb-profile-wrap">
+      <svg id="climb-svg" viewBox="0 0 360 120" preserveAspectRatio="none"></svg>
+    </div>
+
+    <div class="climb-seg-info">
+      <div class="climb-seg-card">
+        <div class="csl">Pendenza</div>
+        <div class="csv" id="nav-grade">—</div>
+        <div class="csu">%</div>
+      </div>
+      <div class="climb-seg-card">
+        <div class="csl">Rimanenti</div>
+        <div class="csv" id="nav-remaining">—</div>
+        <div class="csu">m</div>
+      </div>
+      <div class="climb-seg-card">
+        <div class="csl">Completato</div>
+        <div class="csv" id="nav-pct">—</div>
+        <div class="csu">%</div>
+      </div>
+    </div>
+
+    <div class="climb-seg-info" style="grid-template-columns:1fr 1fr;margin-top:-4px">
+      <div class="climb-seg-card">
+        <div class="csl">Velocità</div>
+        <div class="csv" id="nav-speed">—</div>
+        <div class="csu">km/h</div>
+      </div>
+      <div class="climb-seg-card">
+        <div class="csl">Vel. Ascens.</div>
+        <div class="csv" id="nav-vam">—</div>
+        <div class="csu">m/h</div>
+      </div>
+    </div>
+
+    <div class="climb-segs-list" id="climb-segs-list"></div>
+    <button class="btn-stop-climb" onclick="stopClimb()">■ Termina navigazione</button>
+  </div>
+
+  <!-- Libreria salite (visibile quando non in navigazione) -->
+  <div id="climb-library">
+    <div class="climb-lib-header">
+      <h2>Le mie salite</h2>
+      <button class="btn-add-climb" onclick="openAddModal()">+ Aggiungi</button>
+    </div>
+    <div id="climb-list"></div>
+
+    <div class="climb-history-header">
+      <h2>Storico ascensioni</h2>
+      <button class="btn-export-csv" onclick="exportAscentsCSV()">↓ CSV</button>
+    </div>
+    <div id="ascent-list"></div>
+  </div>
+</div>
+
+<!-- Modal aggiunta salita -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal-sheet">
+    <h3>Aggiungi salita</h3>
+    <p>Carica il grafico del profilo (GIF/PNG da salite.ch o simili) — Claude estrarrà automaticamente sezioni e pendenze.</p>
+
+    <input class="modal-input" id="climb-name-input" type="text" placeholder="Nome salita (es. Passo del Sempione)">
+
+    <div class="upload-area" id="upload-area" onclick="document.getElementById('img-input').click()">
+      <div class="icon">🗻</div>
+      <p>Tocca per selezionare l'immagine del profilo</p>
+      <div class="upload-preview" id="upload-preview"></div>
+    </div>
+    <input type="file" id="img-input" accept="image/*" style="display:none" onchange="onImageSelected(event)">
+
+    <div class="ai-status" id="ai-status"></div>
+
+    <div class="modal-btn-row">
+      <button class="modal-btn cancel" onclick="closeAddModal()">Annulla</button>
+      <button class="modal-btn primary" id="btn-parse" onclick="parseClimbImage()" disabled>Analizza →</button>
+    </div>
   </div>
 </div>
 
@@ -558,6 +813,9 @@ function updateHR(hr) {
   const z = getZone(hr);
   currentZone = z;
   updateZoneUI(z, hr);
+
+  // Sync mini HR in climb view
+  updateClimbHR(hr, z);
 
   if (sessionActive) {
     hrSamples.push(hr);
@@ -771,17 +1029,535 @@ function toast(msg) {
 }
 
 function showView(id, btn) {
+  // Se si lascia la view salite senza terminare, spegni GPS
+  const wasClimb = document.getElementById('view-climb').classList.contains('active');
+  if (wasClimb && id !== 'climb' && gpsWatchId !== null && !activeClimb) stopGPS();
+
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
   document.getElementById('view-' + id).classList.add('active');
   btn.classList.add('active');
   if (id === 'history') renderHistory();
   if (id === 'settings') loadZoneInputs();
+  if (id === 'climb') { renderClimbList(); renderAscentList(); }
+}
+
+// ── SALITE STATE ───────────────────────────────────────────────
+let climbs = loadClimbs();
+let activeClimb = null;       // salita in navigazione
+let gpsWatchId = null;        // Geolocation watch
+let currentSegIdx = -1;       // indice segmento corrente
+let climbDistanceDone = 0;    // metri percorsi nella salita
+let selectedImageBase64 = null;
+let selectedImageType = null;
+let climbHrSamples = [];      // campioni BPM durante la salita
+let climbStartTime = null;    // timestamp inizio salita
+let climbTotalDistM = 0;      // distanza totale percorsa (m) per velocità media
+let climbTotalElevM = 0;      // dislivello totale accumulato (m) per VAM media
+let ascents = loadAscents();
+
+function loadClimbs() {
+  try { return JSON.parse(localStorage.getItem('hrm-climbs') || '[]'); } catch { return []; }
+}
+function saveClimbs() {
+  localStorage.setItem('hrm-climbs', JSON.stringify(climbs));
+}
+function loadAscents() {
+  try { return JSON.parse(localStorage.getItem('hrm-ascents') || '[]'); } catch { return []; }
+}
+function saveAscents() {
+  localStorage.setItem('hrm-ascents', JSON.stringify(ascents));
+}
+
+// ── CLIMB LIBRARY UI ───────────────────────────────────────────
+function renderClimbList() {
+  const el = document.getElementById('climb-list');
+  if (!climbs.length) {
+    el.innerHTML = '<div class="climb-empty">Nessuna salita salvata.<br>Aggiungi il profilo di una salita con il tasto +</div>';
+    return;
+  }
+  el.innerHTML = climbs.map((c, i) => {
+    const totalKm = (c.segments.reduce((s, seg) => s + seg.km, 0)).toFixed(1);
+    const avgGrade = (c.segments.reduce((s, seg) => s + seg.grade * seg.km, 0) /
+                      c.segments.reduce((s, seg) => s + seg.km, 0)).toFixed(1);
+    return `
+    <div class="climb-card" onclick="startClimb(${i})">
+      <div class="climb-card-header">
+        <div>
+          <div class="climb-card-name">${c.name}</div>
+          <div class="climb-card-meta">${totalKm} km · pendenza media ${avgGrade}% · ${c.segments.length} sezioni</div>
+        </div>
+        <button class="climb-card-del" onclick="event.stopPropagation();deleteClimb(${i})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function deleteClimb(i) {
+  climbs.splice(i, 1);
+  saveClimbs();
+  renderClimbList();
+}
+
+// ── ADD MODAL ──────────────────────────────────────────────────
+function openAddModal() {
+  document.getElementById('add-modal').classList.add('open');
+  document.getElementById('climb-name-input').value = '';
+  document.getElementById('upload-preview').textContent = '';
+  document.getElementById('ai-status').textContent = '';
+  document.getElementById('btn-parse').disabled = true;
+  selectedImageBase64 = null;
+}
+function closeAddModal() {
+  document.getElementById('add-modal').classList.remove('open');
+}
+
+function onImageSelected(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const dataUrl = e.target.result;
+    selectedImageType = file.type || 'image/png';
+    selectedImageBase64 = dataUrl.split(',')[1];
+    document.getElementById('upload-preview').textContent = '✓ ' + file.name;
+    document.getElementById('btn-parse').disabled = false;
+    document.getElementById('ai-status').textContent = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── AI IMAGE PARSING ───────────────────────────────────────────
+async function parseClimbImage() {
+  if (!selectedImageBase64) return;
+  const name = document.getElementById('climb-name-input').value.trim() || 'Salita senza nome';
+  const statusEl = document.getElementById('ai-status');
+  const btn = document.getElementById('btn-parse');
+  btn.disabled = true;
+  statusEl.textContent = '🔍 Analisi immagine in corso…';
+
+  const prompt = `Sei un assistente per ciclisti. Analizza questo grafico del profilo altimetrico di una salita.
+Estrai TUTTE le sezioni/sottosezioni visibili nel grafico. Per ogni sezione estrai:
+- la lunghezza in km (numero decimale, es. 1.8)
+- la pendenza media in percentuale (numero decimale, es. 5.4)
+- il nome del punto di riferimento se visibile (es. "Toirano", "Ponte Salto del Lupo"), altrimenti stringa vuota
+
+Rispondi SOLO con un array JSON valido, senza testo aggiuntivo, senza markdown, senza backtick. Formato esatto:
+[{"km":1.8,"grade":1.0,"label":"Borghetto Santo Spirito"},{"km":1.0,"grade":1.7,"label":""},...]
+
+Se non riesci a leggere il grafico con certezza, restituisci un array vuoto [].`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: selectedImageType, data: selectedImageBase64 } },
+            { type: 'text', text: prompt }
+          ]
+        }]
+      })
+    });
+
+    const data = await response.json();
+    const text = (data.content || []).map(b => b.text || '').join('').trim();
+
+    let segments;
+    try {
+      segments = JSON.parse(text);
+    } catch {
+      // Prova a estrarre JSON da testo misto
+      const match = text.match(/\[[\s\S]*\]/);
+      segments = match ? JSON.parse(match[0]) : [];
+    }
+
+    if (!Array.isArray(segments) || segments.length === 0) {
+      statusEl.textContent = '⚠️ Non riesco a leggere il profilo. Riprova con un\'immagine più nitida.';
+      btn.disabled = false;
+      return;
+    }
+
+    // Salva
+    climbs.unshift({ name, segments, addedAt: Date.now() });
+    saveClimbs();
+    renderClimbList();
+    closeAddModal();
+    toast(`"${name}" aggiunta — ${segments.length} sezioni`);
+
+  } catch (e) {
+    statusEl.textContent = '⚠️ Errore di rete. Controlla la connessione.';
+    btn.disabled = false;
+  }
+}
+
+// ── NAVIGATOR ──────────────────────────────────────────────────
+function startClimb(idx) {
+  activeClimb = climbs[idx];
+  climbDistanceDone = 0;
+  currentSegIdx = 0;
+  climbHrSamples = [];
+  climbStartTime = Date.now();
+  climbTotalDistM = 0;
+  climbTotalElevM = 0;
+
+  document.getElementById('climb-library').style.display = 'none';
+  document.getElementById('climb-navigator').style.display = 'block';
+
+  const totalKm = activeClimb.segments.reduce((s, seg) => s + seg.km, 0);
+  document.getElementById('climb-nav-name').textContent = activeClimb.name;
+  document.getElementById('climb-nav-sub').textContent =
+    `${totalKm.toFixed(1)} km totali · ${activeClimb.segments.length} sezioni`;
+
+  drawProfile();
+  renderSegsList();
+  updateNavStats();
+  startGPS();
+}
+
+function stopClimb() {
+  if (!activeClimb) return;
+
+  // Salva ascensione
+  const duration = climbStartTime ? Math.floor((Date.now() - climbStartTime) / 1000) : 0;
+  const avgHR = climbHrSamples.length
+    ? Math.round(climbHrSamples.reduce((a, b) => a + b, 0) / climbHrSamples.length)
+    : null;
+  const maxHR = climbHrSamples.length ? Math.max(...climbHrSamples) : null;
+  const avgSpeed = duration > 0 && climbTotalDistM > 0
+    ? Math.round((climbTotalDistM / 1000) / (duration / 3600) * 10) / 10
+    : null;
+  const avgVAM = duration > 0 && climbTotalElevM > 0
+    ? Math.round(climbTotalElevM / (duration / 3600))
+    : null;
+
+  const ascent = {
+    id:        Date.now(),
+    date:      new Date().toISOString(),
+    climbName: activeClimb.name,
+    duration,
+    avgHR,
+    maxHR,
+    avgSpeed,
+    avgVAM,
+  };
+  ascents.unshift(ascent);
+  saveAscents();
+
+  activeClimb = null;
+  climbHrSamples = [];
+  climbStartTime = null;
+  climbTotalDistM = 0;
+  climbTotalElevM = 0;
+  stopGPS();
+  document.getElementById('climb-navigator').style.display = 'none';
+  document.getElementById('climb-library').style.display = 'block';
+  renderClimbList();
+  renderAscentList();
+  toast('Ascensione salvata ✓');
+}
+
+// ── GPS ────────────────────────────────────────────────────────
+let lastGPSPos = null;
+
+function startGPS() {
+  if (!navigator.geolocation) { toast('GPS non disponibile'); return; }
+  lastGPSPos = null;
+  gpsWatchId = navigator.geolocation.watchPosition(onGPSUpdate, onGPSError, {
+    enableHighAccuracy: true, maximumAge: 2000, timeout: 10000
+  });
+}
+
+function stopGPS() {
+  if (gpsWatchId !== null) { navigator.geolocation.clearWatch(gpsWatchId); gpsWatchId = null; }
+  lastGPSPos = null;
+}
+
+function onGPSUpdate(pos) {
+  if (lastGPSPos) {
+    const d = haversineMeters(lastGPSPos.coords, pos.coords);
+    if (d > 1 && d < 500) {
+      climbDistanceDone += d;
+      climbTotalDistM   += d;
+
+      // Dislivello del tratto (dal segmento corrente)
+      if (activeClimb && currentSegIdx >= 0) {
+        const seg = activeClimb.segments[currentSegIdx];
+        const elevGain = d * seg.grade / 100;
+        climbTotalElevM += elevGain;
+      }
+
+      updateProgress();
+    }
+
+    // Velocità corrente istantanea dal GPS (m/s → km/h)
+    const speedKmh = pos.coords.speed != null && pos.coords.speed >= 0
+      ? (pos.coords.speed * 3.6)
+      : (lastGPSPos
+          ? haversineMeters(lastGPSPos.coords, pos.coords) /
+            ((pos.timestamp - lastGPSPos.timestamp) / 1000) * 3.6
+          : null);
+
+    // VAM istantanea (m/h): velocità × pendenza corrente
+    let vam = null;
+    if (speedKmh != null && activeClimb && currentSegIdx >= 0) {
+      vam = Math.round(speedKmh * 10 * activeClimb.segments[currentSegIdx].grade);
+    }
+
+    // Aggiorna display live
+    if (activeClimb) {
+      document.getElementById('nav-speed').textContent =
+        speedKmh != null ? speedKmh.toFixed(1) : '—';
+      document.getElementById('nav-vam').textContent =
+        vam != null && vam > 0 ? vam : '—';
+    }
+  }
+  lastGPSPos = pos;
+}
+
+function onGPSError(e) {
+  toast('GPS: ' + e.message);
+}
+
+function haversineMeters(a, b) {
+  const R = 6371000;
+  const dLat = (b.latitude - a.latitude) * Math.PI / 180;
+  const dLon = (b.longitude - a.longitude) * Math.PI / 180;
+  const lat1 = a.latitude * Math.PI / 180;
+  const lat2 = b.latitude * Math.PI / 180;
+  const x = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
+}
+
+function updateProgress() {
+  if (!activeClimb) return;
+  const totalM = activeClimb.segments.reduce((s, seg) => s + seg.km * 1000, 0);
+  const done = Math.min(climbDistanceDone, totalM);
+
+  // Trova segmento corrente
+  let cumM = 0;
+  for (let i = 0; i < activeClimb.segments.length; i++) {
+    cumM += activeClimb.segments[i].km * 1000;
+    if (done < cumM) { currentSegIdx = i; break; }
+    if (i === activeClimb.segments.length - 1) currentSegIdx = i;
+  }
+
+  updateNavStats();
+  renderSegsList();
+  drawProfile();
+}
+
+function updateNavStats() {
+  if (!activeClimb) return;
+  const totalM = activeClimb.segments.reduce((s, seg) => s + seg.km * 1000, 0);
+  const done = Math.min(climbDistanceDone, totalM);
+  const remaining = Math.round(totalM - done);
+  const pct = Math.round(done / totalM * 100);
+  const grade = currentSegIdx >= 0 ? activeClimb.segments[currentSegIdx].grade : 0;
+
+  document.getElementById('nav-grade').textContent = grade.toFixed(1);
+  document.getElementById('nav-remaining').textContent = remaining >= 1000
+    ? (remaining/1000).toFixed(1) + ' km' : remaining;
+  document.getElementById('nav-pct').textContent = pct;
+}
+
+// ── PROFILE SVG ────────────────────────────────────────────────
+function gradeColor(g) {
+  if (g < 3)  return '#4caf93';
+  if (g < 6)  return '#8bc34a';
+  if (g < 9)  return '#ffc107';
+  if (g < 12) return '#ff7043';
+  return '#e53935';
+}
+
+function drawProfile() {
+  if (!activeClimb) return;
+  const segs = activeClimb.segments;
+  const W = 360, H = 120, PAD = 6;
+  const totalKm = segs.reduce((s, g) => s + g.km, 0);
+  const totalM = totalKm * 1000;
+  const done = Math.min(climbDistanceDone, totalM);
+
+  // Build elevation profile
+  let points = [{x: 0, y: 0}];
+  let cumKm = 0;
+  segs.forEach(seg => {
+    cumKm += seg.km;
+    const rise = seg.km * 1000 * seg.grade / 100;
+    points.push({ x: cumKm / totalKm, y: points[points.length-1].y + rise });
+  });
+  const maxElev = Math.max(...points.map(p => p.y));
+  const toSVG = p => ({
+    x: PAD + p.x * (W - 2*PAD),
+    y: H - PAD - (p.y / (maxElev || 1)) * (H - 2*PAD - 16)
+  });
+
+  // Build path per segment
+  let svgContent = '';
+  let cumX = 0;
+  segs.forEach((seg, i) => {
+    const x0 = cumX / totalKm;
+    const x1 = (cumX + seg.km) / totalKm;
+    const p0 = toSVG({ x: x0, y: points[i].y });
+    const p1 = toSVG({ x: x1, y: points[i+1].y });
+    const color = gradeColor(seg.grade);
+    const opacity = i < currentSegIdx ? 0.3 : 1;
+    svgContent += `<polygon points="${p0.x},${p0.y} ${p1.x},${p1.y} ${p1.x},${H-PAD} ${p0.x},${H-PAD}"
+      fill="${color}" opacity="${opacity}" stroke="none"/>`;
+    cumX += seg.km;
+  });
+
+  // Cursor line
+  const cursorX = PAD + (done / totalM) * (W - 2*PAD);
+  // Find elevation at cursor
+  let cumM2 = 0, cursorElev = 0;
+  for (let i = 0; i < segs.length; i++) {
+    const segM = segs[i].km * 1000;
+    if (done <= cumM2 + segM) {
+      const frac = (done - cumM2) / segM;
+      cursorElev = points[i].y + frac * (segs[i].km * 1000 * segs[i].grade / 100);
+      break;
+    }
+    cumM2 += segM;
+    cursorElev = points[i+1]?.y || 0;
+  }
+  const cursorPt = toSVG({ x: done/totalM, y: cursorElev });
+  svgContent += `<line x1="${cursorX}" y1="${PAD}" x2="${cursorX}" y2="${H-PAD}" stroke="#fff" stroke-width="2" stroke-dasharray="3,2"/>`;
+  svgContent += `<circle cx="${cursorPt.x}" cy="${cursorPt.y}" r="5" fill="#fff" stroke="#0a0a0f" stroke-width="2"/>`;
+
+  // Axis line
+  svgContent += `<line x1="${PAD}" y1="${H-PAD}" x2="${W-PAD}" y2="${H-PAD}" stroke="var(--border)" stroke-width="1"/>`;
+
+  document.getElementById('climb-svg').innerHTML = svgContent;
+}
+
+// ── SEGMENTS LIST ──────────────────────────────────────────────
+function renderSegsList() {
+  const el = document.getElementById('climb-segs-list');
+  if (!activeClimb) { el.innerHTML = ''; return; }
+  el.innerHTML = activeClimb.segments.map((seg, i) => {
+    const cls = i === currentSegIdx ? 'current' : i < currentSegIdx ? 'done' : '';
+    const color = gradeColor(seg.grade);
+    const label = seg.label ? seg.label : `Sezione ${i+1}`;
+    return `<div class="climb-seg-row ${cls}">
+      <span class="seg-idx">${i+1}</span>
+      <div class="seg-dot" style="background:${color}"></div>
+      <span class="seg-name">${label}</span>
+      <span class="seg-pct" style="color:${color}">${seg.grade.toFixed(1)}%</span>
+      <span class="seg-km">${seg.km.toFixed(1)} km</span>
+    </div>`;
+  }).join('');
+
+  // Auto-scroll to current segment
+  const rows = el.querySelectorAll('.climb-seg-row');
+  if (rows[currentSegIdx]) rows[currentSegIdx].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+
+// ── SYNC MINI HR IN CLIMB VIEW ──────────────────────────────────
+function updateClimbHR(hr, zone) {
+  // Campiona BPM se navigazione attiva
+  if (activeClimb && hr) climbHrSamples.push(hr);
+
+  document.getElementById('climb-hr-num').textContent = hr || '—';
+  const circle = document.getElementById('climb-hr-circle');
+  const zoneEl = document.getElementById('climb-hr-zone');
+  if (zone >= 0) {
+    circle.style.borderColor = `var(${ZONE_COLORS[zone]})`;
+    zoneEl.textContent = ZONE_NAMES[zone];
+    zoneEl.style.color = `var(${ZONE_COLORS[zone]})`;
+  } else {
+    circle.style.borderColor = 'var(--muted)';
+    zoneEl.textContent = '— Zona —';
+    zoneEl.style.color = 'var(--muted)';
+  }
+}
+
+// ── STORICO ASCENSIONI ─────────────────────────────────────────
+function renderAscentList() {
+  const el = document.getElementById('ascent-list');
+  if (!el) return;
+  if (!ascents.length) {
+    el.innerHTML = '<div class="climb-empty" style="padding:20px 0">Nessuna ascensione registrata.</div>';
+    return;
+  }
+  el.innerHTML = ascents.map((a, i) => {
+    const d = new Date(a.date);
+    const dateStr = d.toLocaleDateString('it-IT', { day:'2-digit', month:'short', year:'numeric' });
+    const timeStr = d.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' });
+    const dur = a.duration ? formatTime(a.duration) : '—';
+    return `
+    <div class="ascent-card">
+      <div class="ascent-card-header">
+        <div>
+          <div class="ascent-name">${a.climbName}</div>
+          <div class="ascent-date">${dateStr} · ${timeStr}</div>
+        </div>
+        <button class="ascent-del" onclick="deleteAscent(${a.id})">✕</button>
+      </div>
+      <div class="ascent-stats">
+        <div class="ascent-stat">
+          <div class="al">Durata</div>
+          <div class="av">${dur}</div>
+        </div>
+        <div class="ascent-stat">
+          <div class="al">FC Media</div>
+          <div class="av">${a.avgHR ?? '—'} <span class="au">bpm</span></div>
+        </div>
+        <div class="ascent-stat">
+          <div class="al">FC Max</div>
+          <div class="av">${a.maxHR ?? '—'} <span class="au">bpm</span></div>
+        </div>
+      </div>
+      <div class="ascent-stats" style="margin-top:8px">
+        <div class="ascent-stat">
+          <div class="al">Vel. Media</div>
+          <div class="av">${a.avgSpeed ?? '—'} <span class="au">km/h</span></div>
+        </div>
+        <div class="ascent-stat">
+          <div class="al">VAM Media</div>
+          <div class="av">${a.avgVAM ?? '—'} <span class="au">m/h</span></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function deleteAscent(id) {
+  ascents = ascents.filter(a => a.id !== id);
+  saveAscents();
+  renderAscentList();
+}
+
+function exportAscentsCSV() {
+  if (!ascents.length) { toast('Nessuna ascensione da esportare'); return; }
+  const header = 'Data,Ora,Salita,Durata,FC Media (bpm),FC Max (bpm),Vel. Media (km/h),VAM Media (m/h)';
+  const rows = ascents.map(a => {
+    const d = new Date(a.date);
+    const date = d.toLocaleDateString('it-IT');
+    const time = d.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' });
+    const dur  = a.duration ? formatTime(a.duration) : '';
+    return [date, time, `"${a.climbName}"`, dur, a.avgHR ?? '', a.maxHR ?? '', a.avgSpeed ?? '', a.avgVAM ?? ''].join(',');
+  });
+  const csv = [header, ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `ascensioni_${new Date().toISOString().slice(0,10)}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
+  toast('CSV scaricato ✓');
 }
 
 // ── INIT ───────────────────────────────────────────────────────
 loadZoneInputs();
 renderHistory();
+renderClimbList();
+renderAscentList();
 
 // ── SERVICE WORKER (offline) ────────────────────────────────────
 if ('serviceWorker' in navigator) {
