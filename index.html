@@ -119,35 +119,36 @@
   .zone-seg.active { opacity: 1; transform: scaleY(2); transform-origin: bottom; }
 
   /* STATS GRID */
-  .stats-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;
-  }
+  /* STAT ROWS inline — label: valore sulla stessa riga */
+  .stats-grid { display: flex; flex-direction: column; gap: 0; margin-bottom: 12px;
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
   .stat-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 14px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 16px; border-bottom: 1px solid var(--border);
   }
-  .stat-card .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
-  .stat-card .value { font-size: 28px; font-weight: 700; margin-top: 2px; font-family: var(--mono); }
+  .stats-grid .stat-card:last-child { border-bottom: none; }
+  .stat-card .label { font-size: 15px; color: #ccc; font-weight: 600; }
+  .stat-card .value { font-size: 26px; font-weight: 800; font-family: var(--mono); color: var(--text); }
 
-  /* ZONE TIME BARS */
-  .zone-times { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 20px; }
-  .zone-times h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 14px; }
-  .zone-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-  .zone-row:last-child { margin-bottom: 0; }
-  .zone-name { width: 24px; font-size: 12px; font-weight: 700; }
-  .zone-track { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
-  .zone-fill { height: 100%; border-radius: 4px; transition: width .6s ease; width: 0%; }
-  .zone-pct { width: 38px; text-align: right; font-size: 12px; color: var(--muted); font-family: var(--mono); }
-
-  /* SESSION CONTROLS */
-  .session-controls { display: flex; gap: 10px; margin-bottom: 8px; }
+  /* SESSION CONTROLS — sopra le zone */
+  .session-controls { display: flex; gap: 10px; margin-bottom: 12px; }
   .btn-session {
     flex: 1; padding: 14px; border-radius: var(--radius); border: none;
-    font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity .2s;
+    font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity .2s;
   }
   .btn-session:disabled { opacity: .3; cursor: not-allowed; }
   #btn-start { background: var(--z1); color: #0a1a12; }
   #btn-stop  { background: var(--z4); color: #1a0a00; }
+
+  /* ZONE TIME BARS — sotto i bottoni */
+  .zone-times { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px; }
+  .zone-times h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: #aaa; margin-bottom: 12px; font-weight: 700; }
+  .zone-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+  .zone-row:last-child { margin-bottom: 0; }
+  .zone-name { width: 24px; font-size: 13px; font-weight: 800; }
+  .zone-track { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .zone-fill { height: 100%; border-radius: 4px; transition: width .6s ease; width: 0%; }
+  .zone-pct { width: 38px; text-align: right; font-size: 13px; color: #bbb; font-family: var(--mono); font-weight: 700; }
 
   /* ── HISTORY VIEW ── */
   .history-empty { text-align: center; color: var(--muted); padding: 60px 0; font-size: 14px; }
@@ -222,11 +223,11 @@
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     flex-shrink: 0; transition: border-color .4s;
   }
-  .climb-hr-num { font-size: 22px; font-weight: 900; color: #111; font-family: var(--mono); line-height: 1; }
-  .climb-hr-unit { font-size: 9px; color: #555; font-weight: 600; letter-spacing: .06em; }
+  .climb-hr-num { font-size: 28px; font-weight: 900; color: #111; font-family: var(--mono); line-height: 1; }
+  .climb-hr-unit { font-size: 11px; color: #444; font-weight: 700; letter-spacing: .06em; }
   .climb-hr-info { flex: 1; }
-  .climb-hr-zone { font-size: 13px; font-weight: 700; }
-  .climb-hr-label { font-size: 11px; color: var(--muted); }
+  .climb-hr-zone { font-size: 16px; font-weight: 800; }
+  .climb-hr-label { font-size: 14px; color: #ddd; font-weight: 600; }
 
   /* Salita library */
   .climb-lib-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
@@ -290,7 +291,7 @@
     border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px;
   }
   .climb-nav-name { font-size: 17px; font-weight: 800; }
-  .climb-nav-sub  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .climb-nav-sub  { font-size: 14px; color: #ccc; margin-top: 2px; font-weight: 600; }
 
   /* Profile chart */
   .climb-profile-wrap {
@@ -308,28 +309,32 @@
     background: var(--card); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 12px; text-align: center;
   }
-  .climb-seg-card .csl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
-  .climb-seg-card .csv { font-size: 24px; font-weight: 800; font-family: var(--mono); }
-  .climb-seg-card .csu { font-size: 11px; color: var(--muted); }
+  .climb-seg-card .csl { font-size: 13px; color: #ccc; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+  .climb-seg-card .csv { font-size: 28px; font-weight: 900; font-family: var(--mono); }
+  .climb-seg-card .csu { font-size: 13px; color: #bbb; font-weight: 600; }
 
-  /* Segments list */
+  /* Segments list — fixed 3-row window */
   .climb-segs-list {
     background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--radius); overflow: hidden; margin-bottom: 12px;
+    border-radius: var(--radius); overflow-y: auto; margin-bottom: 12px;
+    height: 156px; /* 3 righe da 52px */
+    scroll-behavior: smooth;
+    overscroll-behavior: contain;
+    scroll-behavior: smooth;
   }
   .climb-seg-row {
-    display: flex; align-items: center; padding: 10px 14px;
-    border-bottom: 1px solid var(--border); font-size: 13px; gap: 10px;
-    transition: background .3s;
+    display: flex; align-items: center; padding: 14px 14px;
+    border-bottom: 1px solid var(--border); font-size: 15px; gap: 10px;
+    transition: background .3s; min-height: 54px;
   }
   .climb-seg-row:last-child { border-bottom: none; }
-  .climb-seg-row.current { background: rgba(79,195,247,.1); }
-  .climb-seg-row.done    { opacity: .45; }
-  .seg-idx  { width: 22px; font-size: 11px; color: var(--muted); font-weight: 700; }
-  .seg-name { flex: 1; }
-  .seg-pct  { font-weight: 700; font-family: var(--mono); min-width: 40px; text-align: right; }
-  .seg-km   { color: var(--muted); font-size: 12px; min-width: 50px; text-align: right; }
-  .seg-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .climb-seg-row.current { background: rgba(79,195,247,.15); border-left: 4px solid var(--accent); padding-left: 10px; }
+  .climb-seg-row.done    { opacity: .35; }
+  .seg-idx  { width: 24px; font-size: 13px; color: #aaa; font-weight: 700; }
+  .seg-name { flex: 1; font-size: 15px; font-weight: 600; }
+  .seg-pct  { font-weight: 800; font-family: var(--mono); min-width: 46px; text-align: right; font-size: 15px; }
+  .seg-km   { color: #bbb; font-size: 13px; min-width: 52px; text-align: right; font-weight: 600; }
+  .seg-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 
   .btn-stop-climb {
     width: 100%; padding: 14px; border-radius: var(--radius); border: none;
@@ -420,7 +425,12 @@
     </div>
   </div>
 
-  <div class="zone-times">
+  <div class="session-controls">
+    <button class="btn-session" id="btn-start" onclick="startSession()">▶ Avvia Sessione</button>
+    <button class="btn-session" id="btn-stop" onclick="stopSession()" disabled>■ Termina</button>
+  </div>
+
+  <div class="zone-times" id="zone-times-panel">
     <h3>Tempo per Zona</h3>
     <div class="zone-row">
       <span class="zone-name" style="color:var(--z1)">Z1</span>
@@ -447,11 +457,6 @@
       <div class="zone-track"><div class="zone-fill" id="fill-z5" style="background:var(--z5)"></div></div>
       <span class="zone-pct" id="pct-z5">0%</span>
     </div>
-  </div>
-
-  <div class="session-controls">
-    <button class="btn-session" id="btn-start" onclick="startSession()">▶ Avvia Sessione</button>
-    <button class="btn-session" id="btn-stop" onclick="stopSession()" disabled>■ Termina</button>
   </div>
 
 </div>
@@ -632,6 +637,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
+<button id="fullscreen-btn" onclick="toggleFullscreen()" title="Schermo intero">⛶</button>
 
 <script>
 // ── STATE ──────────────────────────────────────────────────────
@@ -897,6 +903,7 @@ function startSession() {
     updateZoneBars();
   }, 1000);
 
+  startAutosave();
   toast('Sessione avviata');
 }
 
@@ -909,6 +916,8 @@ function stopSession() {
   document.getElementById('btn-start').disabled = false;
   document.getElementById('btn-stop').disabled  = true;
 
+  stopAutosave();
+  clearSessionSnapshot();
   if (hrSamples.length === 0) { toast('Nessun dato registrato'); return; }
 
   const duration = Math.floor((Date.now() - sessionStart) / 1000);
@@ -1222,6 +1231,7 @@ function startClimb(idx) {
   renderSegsList();
   updateNavStats();
   startGPS();
+  startAutosave();
 }
 
 function stopClimb() {
@@ -1253,6 +1263,8 @@ function stopClimb() {
   ascents.unshift(ascent);
   saveAscents();
 
+  stopAutosave();
+  clearClimbSnapshot();
   activeClimb = null;
   climbHrSamples = [];
   climbStartTime = null;
@@ -1558,11 +1570,114 @@ function exportAscentsCSV() {
   toast('CSV scaricato ✓');
 }
 
-// ── INIT ───────────────────────────────────────────────────────
+// ── SCHERMO INTERO ─────────────────────────────────────────────
+function toggleFullscreen() {
+  const btn = document.getElementById('fullscreen-btn');
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {
+      // Fallback: nascondi nav del browser con scroll trick
+    });
+    btn.textContent = '✕';
+    btn.title = 'Esci da schermo intero';
+  } else {
+    document.exitFullscreen();
+    btn.textContent = '⛶';
+    btn.title = 'Schermo intero';
+  }
+}
+document.addEventListener('fullscreenchange', () => {
+  const btn = document.getElementById('fullscreen-btn');
+  if (btn) btn.textContent = document.fullscreenElement ? '✕' : '⛶';
+});
+
+// ── AUTOSALVATAGGIO ────────────────────────────────────────────
+const AUTOSAVE_KEY_SESSION = 'hrm-autosave-session';
+const AUTOSAVE_KEY_CLIMB   = 'hrm-autosave-climb';
+let autosaveInterval = null;
+
+function startAutosave() {
+  clearInterval(autosaveInterval);
+  autosaveInterval = setInterval(() => {
+    if (sessionActive) saveSessionSnapshot();
+    if (activeClimb)   saveClimbSnapshot();
+  }, 10 * 60 * 1000); // ogni 10 minuti
+}
+
+function stopAutosave() {
+  clearInterval(autosaveInterval);
+  autosaveInterval = null;
+}
+
+function saveSessionSnapshot() {
+  if (!sessionActive || hrSamples.length === 0) return;
+  const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
+  const snap = {
+    date:      new Date(sessionStart).toISOString(),
+    duration:  elapsed,
+    maxHR:     Math.max(...hrSamples),
+    avgHR:     Math.round(hrSamples.reduce((a,b)=>a+b,0) / hrSamples.length),
+    zonePcts:  zoneTicks.map(t => Math.round(t / (zoneTicks.reduce((a,b)=>a+b,0)||1) * 100)),
+    zoneTicks: [...zoneTicks],
+    partial:   true,
+  };
+  localStorage.setItem(AUTOSAVE_KEY_SESSION, JSON.stringify(snap));
+}
+
+function saveClimbSnapshot() {
+  if (!activeClimb) return;
+  const elapsed = climbStartTime ? Math.floor((Date.now() - climbStartTime) / 1000) : 0;
+  const snap = {
+    date:       new Date(climbStartTime || Date.now()).toISOString(),
+    climbName:  activeClimb.name,
+    duration:   elapsed,
+    avgHR:      climbHrSamples.length ? Math.round(climbHrSamples.reduce((a,b)=>a+b,0)/climbHrSamples.length) : null,
+    maxHR:      climbHrSamples.length ? Math.max(...climbHrSamples) : null,
+    avgSpeed:   elapsed > 0 && climbTotalDistM > 0 ? Math.round((climbTotalDistM/1000)/(elapsed/3600)*10)/10 : null,
+    avgVAM:     elapsed > 0 && climbTotalElevM > 0 ? Math.round(climbTotalElevM/(elapsed/3600)) : null,
+    partial:    true,
+  };
+  localStorage.setItem(AUTOSAVE_KEY_CLIMB, JSON.stringify(snap));
+}
+
+function clearSessionSnapshot()  { localStorage.removeItem(AUTOSAVE_KEY_SESSION); }
+function clearClimbSnapshot()    { localStorage.removeItem(AUTOSAVE_KEY_CLIMB); }
+
+function checkAutosaveRecovery() {
+  const snap = localStorage.getItem(AUTOSAVE_KEY_SESSION) || localStorage.getItem(AUTOSAVE_KEY_CLIMB);
+  if (!snap) return;
+  const s = JSON.parse(snap);
+  const label = s.climbName ? `salita "${s.climbName}"` : 'sessione';
+  const dur = s.duration ? formatTime(s.duration) : '?';
+  if (confirm(`Trovato un salvataggio automatico di una ${label} (durata: ${dur}) da una sessione interrotta. Vuoi recuperarla e salvarla nello storico?`)) {
+    if (s.climbName) {
+      ascents.unshift({ id: Date.now(), date: s.date, climbName: s.climbName, duration: s.duration, avgHR: s.avgHR, maxHR: s.maxHR, avgSpeed: s.avgSpeed, avgVAM: s.avgVAM });
+      saveAscents();
+      toast('Ascensione recuperata e salvata ✓');
+    } else {
+      sessions.unshift({ id: Date.now(), date: s.date, duration: s.duration, maxHR: s.maxHR, avgHR: s.avgHR, zonePcts: s.zonePcts, zoneTicks: s.zoneTicks });
+      saveSessionsToStorage();
+      toast('Sessione recuperata e salvata ✓');
+    }
+  }
+  clearSessionSnapshot();
+  clearClimbSnapshot();
+}
+
+// Pop-up alla chiusura se sessione/salita attiva
+window.addEventListener('beforeunload', e => {
+  if (sessionActive || activeClimb) {
+    // Salva snapshot immediato prima di chiudere
+    if (sessionActive) saveSessionSnapshot();
+    if (activeClimb)   saveClimbSnapshot();
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
 loadZoneInputs();
 renderHistory();
 renderClimbList();
 renderAscentList();
+checkAutosaveRecovery();
 
 // ── SERVICE WORKER (offline) ────────────────────────────────────
 if ('serviceWorker' in navigator) {
