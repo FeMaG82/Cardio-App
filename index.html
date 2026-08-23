@@ -389,6 +389,15 @@
     font-weight: 900; transition: background .2s;
   }
   .fs-btn:active { background: rgba(79,195,247,.35); }
+
+  /* GPS sync banner */
+  .climb-approach-banner {
+    display: none; background: var(--z3); color: #1a1400;
+    border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px;
+    font-size: 17px; font-weight: 800; text-align: center; letter-spacing: .02em;
+  }
+  .climb-approach-banner.visible { display: block; }
+  .climb-approach-banner.near { background: var(--z2); color: #0a1a04; }
 </style>
 </head>
 <body>
@@ -602,6 +611,8 @@
       <div class="climb-nav-sub" id="climb-nav-sub">—</div>
     </div>
 
+    <div class="climb-approach-banner" id="approach-banner">📍 Inizio tra — m</div>
+
     <div class="climb-profile-wrap">
       <svg id="climb-svg" viewBox="0 0 360 120" preserveAspectRatio="none"></svg>
     </div>
@@ -661,7 +672,7 @@
 <div class="modal-overlay" id="add-modal">
   <div class="modal-sheet">
     <h3>Aggiungi salita</h3>
-    <p>Carica il file Excel con il profilo della salita. Colonne: N. Sezione · Alt. Iniziale · Alt. Finale · Lunghezza (mt) · Landmark.</p>
+    <p>Carica il file Excel con il profilo della salita. Colonne: N. Sezione · Alt. Iniziale · Alt. Finale · Lunghezza (mt) · Landmark · GPS Inizio (opz., formato lat,lon es. 44.123,8.456).</p>
 
     <input class="modal-input" id="climb-name-input" type="text" placeholder="Nome salita (es. Passo del Sempione)">
 
@@ -1127,6 +1138,8 @@ let climbHrSamples = [];
 let climbStartTime = null;
 let climbTotalDistM = 0;
 let climbTotalElevM = 0;
+let climbApproaching = false;   // true se siamo prima dell'inizio salita
+let climbApproachDist = 0;      // distanza (m) dal punto di partenza
 let ascents = loadAscents();
 
 // ── ADD MODAL ──────────────────────────────────────────────────
@@ -1148,7 +1161,7 @@ function renderClimbList() {
       <div class="climb-card-header">
         <div>
           <div class="climb-card-name">${c.name}</div>
-          <div class="climb-card-meta">${totalKm} km · +${Math.round(totalElev)} m · pendenza media ${avgGrade}% · ${c.segments.length} sezioni</div>
+          <div class="climb-card-meta">${totalKm} km · +${Math.round(totalElev)} m · pendenza media ${avgGrade}% · ${c.segments.length} sezioni${c.startCoords ? ' · 📍 GPS' : ''}</div>
         </div>
         <button class="climb-card-del" onclick="event.stopPropagation();deleteClimb(${i})">✕</button>
       </div>
@@ -1215,6 +1228,7 @@ function parseXlsx() {
     const colAltEnd   = keys[2];
     const colLength   = keys[3];
     const colLandmark = keys[4];
+    const colGPS      = keys[5]; // opzionale: "lat,lon"
 
     const segments = [];
     for (const row of selectedXlsxData) {
@@ -1248,7 +1262,16 @@ function parseXlsx() {
       return;
     }
 
-    climbs.unshift({ name, segments, addedAt: Date.now() });
+    // Parse GPS start coords from first row if present
+    let startCoords = null;
+    if (colGPS && selectedXlsxData[0][colGPS]) {
+      const raw = String(selectedXlsxData[0][colGPS]).trim();
+      const parts = raw.split(',').map(s => parseFloat(s.trim()));
+      if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+        startCoords = { lat: parts[0], lon: parts[1] };
+      }
+    }
+    climbs.unshift({ name, segments, addedAt: Date.now(), startCoords });
     saveClimbs();
     renderClimbList();
     closeAddModal();
@@ -1268,6 +1291,8 @@ function startClimb(idx) {
   climbStartTime = Date.now();
   climbTotalDistM = 0;
   climbTotalElevM = 0;
+  climbApproaching = false;
+  climbApproachDist = 0;
 
   document.getElementById('climb-library').style.display = 'none';
   document.getElementById('climb-navigator').style.display = 'block';
@@ -1282,6 +1307,13 @@ function startClimb(idx) {
   updateNavStats();
   startGPS();
   startAutosave();
+  // Se la salita ha coordinate GPS di partenza, fai una lettura immediata
+  // per capire dove ci troviamo rispetto all'inizio
+  if (activeClimb.startCoords && navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      syncPositionWithClimbStart(pos.coords);
+    }, null, { enableHighAccuracy: true, timeout: 8000 });
+  }
 }
 
 function stopClimb() {
@@ -1320,12 +1352,65 @@ function stopClimb() {
   climbStartTime = null;
   climbTotalDistM = 0;
   climbTotalElevM = 0;
+  climbApproaching = false;
+  climbApproachDist = 0;
+  updateApproachBanner(false, 0);
   stopGPS();
   document.getElementById('climb-navigator').style.display = 'none';
   document.getElementById('climb-library').style.display = 'block';
   renderClimbList();
   renderAscentList();
   toast('Ascensione salvata ✓');
+}
+
+// ── GPS SYNC WITH CLIMB START ─────────────────────────────────
+function syncPositionWithClimbStart(coords) {
+  if (!activeClimb || !activeClimb.startCoords) return;
+  const sc = activeClimb.startCoords;
+  const distToStart = haversineMeters(
+    { latitude: coords.latitude, longitude: coords.longitude },
+    { latitude: sc.lat, longitude: sc.lon }
+  );
+  const totalM = activeClimb.segments.reduce((s, seg) => s + seg.km * 1000, 0);
+
+  if (distToStart <= 150) {
+    // Entro 150m: probabilmente all'inizio o già dentro la salita.
+    // Proviamo a capire se siamo avanti rispetto all'inizio proiettando
+    // la posizione lungo l'asse della salita (approssimazione: usiamo
+    // solo la distanza dal punto di start come offset iniziale)
+    climbApproaching = false;
+    climbDistanceDone = 0;
+    updateApproachBanner(false, 0);
+    toast('📍 Sincronizzato con l'inizio della salita');
+  } else {
+    // Lontani dall'inizio: siamo in avvicinamento o in ritardo?
+    // Non abbiamo coordinate GPS per ogni punto della salita, quindi
+    // usiamo la distanza dal punto di start come stima.
+    // Se siamo a più di 150m dall'inizio assumiamo approccio.
+    climbApproaching = true;
+    climbApproachDist = distToStart;
+    climbDistanceDone = 0;
+    updateApproachBanner(true, Math.round(distToStart));
+    toast(`📍 Inizio salita a ${Math.round(distToStart)} m`);
+  }
+  drawProfile();
+  updateNavStats();
+}
+
+function updateApproachBanner(visible, distM) {
+  const banner = document.getElementById('approach-banner');
+  if (!banner) return;
+  if (!visible) {
+    banner.classList.remove('visible', 'near');
+    return;
+  }
+  banner.classList.add('visible');
+  banner.classList.toggle('near', distM <= 100);
+  if (distM <= 0) {
+    banner.textContent = '🚀 Sei all'inizio della salita — Vai!';
+  } else {
+    banner.textContent = `📍 Inizio salita tra ${distM} m`;
+  }
 }
 
 // ── GPS ────────────────────────────────────────────────────────
@@ -1345,20 +1430,42 @@ function stopGPS() {
 }
 
 function onGPSUpdate(pos) {
+  // Aggiorna approccio se in modalità avvicinamento
+  if (climbApproaching && activeClimb && activeClimb.startCoords) {
+    const sc = activeClimb.startCoords;
+    const distToStart = haversineMeters(
+      { latitude: pos.coords.latitude, longitude: pos.coords.longitude },
+      { latitude: sc.lat, longitude: sc.lon }
+    );
+    climbApproachDist = distToStart;
+    if (distToStart <= 30) {
+      // Siamo all'inizio: passa a modalità navigazione
+      climbApproaching = false;
+      climbDistanceDone = 0;
+      updateApproachBanner(false, 0);
+      toast('🚀 Inizio salita!');
+    } else {
+      updateApproachBanner(true, Math.round(distToStart));
+    }
+  }
+
   if (lastGPSPos) {
     const d = haversineMeters(lastGPSPos.coords, pos.coords);
     if (d > 1 && d < 500) {
-      climbDistanceDone += d;
-      climbTotalDistM   += d;
+      // Accumula distanza solo se non in approccio
+      if (!climbApproaching) {
+        climbDistanceDone += d;
+        climbTotalDistM   += d;
 
-      // Dislivello del tratto (dal segmento corrente)
-      if (activeClimb && currentSegIdx >= 0) {
-        const seg = activeClimb.segments[currentSegIdx];
-        const elevGain = d * seg.grade / 100;
-        climbTotalElevM += elevGain;
+        // Dislivello del tratto (dal segmento corrente)
+        if (activeClimb && currentSegIdx >= 0) {
+          const seg = activeClimb.segments[currentSegIdx];
+          const elevGain = d * seg.grade / 100;
+          climbTotalElevM += elevGain;
+        }
+
+        updateProgress();
       }
-
-      updateProgress();
     }
 
     // Velocità corrente istantanea dal GPS (m/s → km/h)
