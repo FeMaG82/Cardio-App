@@ -1381,7 +1381,7 @@ function syncPositionWithClimbStart(coords) {
     climbApproaching = false;
     climbDistanceDone = 0;
     updateApproachBanner(false, 0);
-    toast('📍 Sincronizzato con l'inizio della salita');
+    toast("📍 Sincronizzato con l'inizio della salita");
   } else {
     // Lontani dall'inizio: siamo in avvicinamento o in ritardo?
     // Non abbiamo coordinate GPS per ogni punto della salita, quindi
@@ -1407,7 +1407,7 @@ function updateApproachBanner(visible, distM) {
   banner.classList.add('visible');
   banner.classList.toggle('near', distM <= 100);
   if (distM <= 0) {
-    banner.textContent = '🚀 Sei all'inizio della salita — Vai!';
+    banner.textContent = "🚀 Sei all'inizio della salita — Vai!";
   } else {
     banner.textContent = `📍 Inizio salita tra ${distM} m`;
   }
