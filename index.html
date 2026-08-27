@@ -114,7 +114,7 @@
   }
   /* ZONE BAR — vertical on the right */
   .hr-right {
-    width: 210px; display: flex; flex-direction: column; gap: 5px;
+    width: 150px; display: flex; flex-direction: column; gap: 5px;
     align-self: stretch; justify-content: space-between; padding: 4px 0;
     flex-shrink: 0;
   }
@@ -141,16 +141,18 @@
   .stat-card .label { font-size: 16px; color: #ddd; font-weight: 700; }
   .stat-card .value { font-size: 30px; font-weight: 900; font-family: var(--mono); color: #fff; }
 
-  /* SESSION CONTROLS — round buttons alongside stats, fixed 150px */
-  .session-controls { width: 150px; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; justify-content: center; align-items: center; }
+  /* SESSION CONTROLS — oval buttons alongside stats, fixed 150px */
+  .session-controls { width: 150px; flex-shrink: 0; display: flex; flex-direction: column; gap: 6px; justify-content: center; align-items: center; }
   .btn-session {
-    width: 120px; height: 120px; border-radius: 50%; border: none;
+    width: 130px; height: 58px; border-radius: 29px; border: none;
     font-size: 13px; font-weight: 800; cursor: pointer; transition: opacity .2s;
-    line-height: 1.3; text-align: center;
+    line-height: 1.2; text-align: center;
   }
   .btn-session:disabled { opacity: .3; cursor: not-allowed; }
-  #btn-start { background: var(--z1); color: #0a1a12; }
-  #btn-stop  { background: var(--z4); color: #1a0a00; }
+  #btn-start  { background: var(--z1); color: #0a1a12; }
+  #btn-pause  { background: var(--z3); color: #1a0e00; }
+  #btn-resume { background: var(--z2); color: #0a1a04; display: none; }
+  #btn-stop   { background: var(--z4); color: #1a0a00; }
 
   /* ZONE TIME BARS — sotto i bottoni */
   .zone-times { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px; }
@@ -467,8 +469,10 @@
       </div>
     </div>
     <div class="session-controls">
-      <button class="btn-session" id="btn-start" onclick="startSession()">▶ Avvia<br>Sessione</button>
-      <button class="btn-session" id="btn-stop" onclick="stopSession()" disabled>■ Termina</button>
+      <button class="btn-session" id="btn-start"  onclick="startSession()">▶ Avvia<br>Sessione</button>
+      <button class="btn-session" id="btn-pause"  onclick="pauseSession()"  disabled>⏸ Pausa</button>
+      <button class="btn-session" id="btn-resume" onclick="resumeSession()">▶ Riprendi</button>
+      <button class="btn-session" id="btn-stop"   onclick="stopSession()"   disabled>■ Termina</button>
     </div>
   </div>
 
@@ -683,6 +687,13 @@
     </div>
     <input type="file" id="xlsx-input" accept=".xlsx,.xls" style="display:none" onchange="onXlsxSelected(event)">
 
+    <div class="upload-area" id="gpx-area" onclick="document.getElementById('gpx-input').click()" style="margin-top:10px">
+      <div class="icon">🗺️</div>
+      <p>Tocca per selezionare la traccia GPX (opzionale ma consigliato)</p>
+      <div class="upload-preview" id="gpx-preview"></div>
+    </div>
+    <input type="file" id="gpx-input" accept=".gpx" style="display:none" onchange="onGpxSelected(event)">
+
     <div class="ai-status" id="ai-status"></div>
 
     <div class="modal-btn-row">
@@ -713,13 +724,19 @@ let reconnectTimeout = null;
 const RECONNECT_DELAYS = [2000, 4000, 8000, 15000, 30000]; // backoff
 let sessionActive = false;
 let sessionStart = null;
+let sessionPaused = false;
+let sessionPausedAt = null;
+let sessionPausedMs = 0;      // total ms paused
 let sessionTimer = null;
-let hrSamples = [];        // all HR readings during session
-let zoneTicks = [0,0,0,0,0]; // seconds per zone during session
+let hrSamples = [];
+let zoneTicks = [0,0,0,0,0];
 let zoneTickInterval = null;
 let currentZone = -1;
 let currentHR = 0;
 let sessions = loadSessions();
+
+// GPX state
+let selectedGpxPoints = null; // [{lat,lon,dist}] cumulative distance along track
 
 // ── STORAGE ────────────────────────────────────────────────────
 function loadZones() {
@@ -941,25 +958,32 @@ function updateZoneBars() {
 // ── SESSION ────────────────────────────────────────────────────
 function startSession() {
   if (!connected) { toast('Connetti prima il cardiofrequenzimetro'); return; }
-  sessionActive = true;
-  sessionStart  = Date.now();
-  hrSamples     = [];
-  zoneTicks     = [0,0,0,0,0];
-  currentZone   = -1;
+  sessionActive   = true;
+  sessionPaused   = false;
+  sessionPausedMs = 0;
+  sessionStart    = Date.now();
+  hrSamples       = [];
+  zoneTicks       = [0,0,0,0,0];
+  currentZone     = -1;
 
-  document.getElementById('btn-start').disabled = true;
-  document.getElementById('btn-stop').disabled  = false;
-  document.getElementById('avg-hr').textContent = '—';
-  document.getElementById('max-hr').textContent = '—';
+  document.getElementById('btn-start').disabled  = true;
+  document.getElementById('btn-pause').disabled  = false;
+  document.getElementById('btn-pause').style.display  = '';
+  document.getElementById('btn-resume').style.display = 'none';
+  document.getElementById('btn-stop').disabled   = false;
+  document.getElementById('avg-hr').textContent  = '—';
+  document.getElementById('max-hr').textContent  = '—';
   document.getElementById('samples').textContent = '0';
   updateZoneBars();
 
   sessionTimer = setInterval(() => {
-    const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
+    if (sessionPaused) return;
+    const elapsed = Math.floor((Date.now() - sessionStart - sessionPausedMs) / 1000);
     document.getElementById('duration').textContent = formatTime(elapsed);
   }, 1000);
 
   zoneTickInterval = setInterval(() => {
+    if (sessionPaused) return;
     if (currentZone >= 0) zoneTicks[currentZone]++;
     updateZoneBars();
   }, 1000);
@@ -968,20 +992,45 @@ function startSession() {
   toast('Sessione avviata');
 }
 
+function pauseSession() {
+  if (!sessionActive || sessionPaused) return;
+  sessionPaused   = true;
+  sessionPausedAt = Date.now();
+  document.getElementById('btn-pause').style.display  = 'none';
+  document.getElementById('btn-resume').style.display = '';
+  toast('⏸ Sessione in pausa');
+}
+
+function resumeSession() {
+  if (!sessionActive || !sessionPaused) return;
+  sessionPausedMs += Date.now() - sessionPausedAt;
+  sessionPaused    = false;
+  sessionPausedAt  = null;
+  document.getElementById('btn-pause').style.display  = '';
+  document.getElementById('btn-resume').style.display = 'none';
+  toast('▶ Sessione ripresa');
+}
+
 function stopSession() {
   if (!sessionActive) return;
-  sessionActive = false;
+  // Se in pausa, conta il tempo pausa finale
+  if (sessionPaused && sessionPausedAt) sessionPausedMs += Date.now() - sessionPausedAt;
+  sessionActive   = false;
+  sessionPaused   = false;
   clearInterval(sessionTimer);
   clearInterval(zoneTickInterval);
 
-  document.getElementById('btn-start').disabled = false;
-  document.getElementById('btn-stop').disabled  = true;
+  document.getElementById('btn-start').disabled  = false;
+  document.getElementById('btn-pause').disabled  = true;
+  document.getElementById('btn-pause').style.display  = '';
+  document.getElementById('btn-resume').style.display = 'none';
+  document.getElementById('btn-stop').disabled   = true;
 
   stopAutosave();
   clearSessionSnapshot();
   if (hrSamples.length === 0) { toast('Nessun dato registrato'); return; }
 
-  const duration = Math.floor((Date.now() - sessionStart) / 1000);
+  const duration = Math.floor((Date.now() - sessionStart - sessionPausedMs) / 1000);
   const maxHR    = Math.max(...hrSamples);
   const avgHR    = Math.round(hrSamples.reduce((a,b)=>a+b,0) / hrSamples.length);
   const total    = zoneTicks.reduce((a,b)=>a+b, 0) || 1;
@@ -1161,7 +1210,7 @@ function renderClimbList() {
       <div class="climb-card-header">
         <div>
           <div class="climb-card-name">${c.name}</div>
-          <div class="climb-card-meta">${totalKm} km · +${Math.round(totalElev)} m · pendenza media ${avgGrade}% · ${c.segments.length} sezioni${c.startCoords ? ' · 📍 GPS' : ''}</div>
+          <div class="climb-card-meta">${totalKm} km · +${Math.round(totalElev)} m · pendenza media ${avgGrade}% · ${c.segments.length} sezioni${c.startCoords ? ' · 📍' : ''}${c.gpxPoints ? ' · 🗺️ GPX' : ''}</div>
         </div>
         <button class="climb-card-del" onclick="event.stopPropagation();deleteClimb(${i})">✕</button>
       </div>
@@ -1179,9 +1228,11 @@ function openAddModal() {
   document.getElementById('add-modal').classList.add('open');
   document.getElementById('climb-name-input').value = '';
   document.getElementById('upload-preview').textContent = '';
+  document.getElementById('gpx-preview').textContent = '';
   document.getElementById('ai-status').textContent = '';
   document.getElementById('btn-parse').disabled = true;
   selectedXlsxData = null;
+  selectedGpxPoints = null;
 }
 function closeAddModal() {
   document.getElementById('add-modal').classList.remove('open');
@@ -1271,7 +1322,7 @@ function parseXlsx() {
         startCoords = { lat: parts[0], lon: parts[1] };
       }
     }
-    climbs.unshift({ name, segments, addedAt: Date.now(), startCoords });
+    climbs.unshift({ name, segments, addedAt: Date.now(), startCoords, gpxPoints: selectedGpxPoints || null });
     saveClimbs();
     renderClimbList();
     closeAddModal();
@@ -1282,6 +1333,67 @@ function parseXlsx() {
     statusEl.textContent = '⚠️ Errore nel parsing: ' + err.message;
   }
 }
+// ── GPX PARSING & POSITION TRACKING ───────────────────────────
+function onGpxSelected(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const pts = parseGPX(e.target.result);
+      if (pts.length < 2) { document.getElementById('gpx-preview').textContent = '⚠️ File GPX non valido'; return; }
+      selectedGpxPoints = pts;
+      document.getElementById('gpx-preview').textContent = `✓ ${file.name} — ${pts.length} punti, ${(pts[pts.length-1].dist/1000).toFixed(1)} km`;
+    } catch { document.getElementById('gpx-preview').textContent = '⚠️ Errore lettura GPX'; }
+  };
+  reader.readAsText(file);
+}
+
+function parseGPX(xml) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(xml, 'application/xml');
+  const trkpts = Array.from(doc.querySelectorAll('trkpt, rtept, wpt'));
+  const pts = trkpts.map(pt => ({
+    lat: parseFloat(pt.getAttribute('lat')),
+    lon: parseFloat(pt.getAttribute('lon')),
+    dist: 0
+  })).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+
+  // Compute cumulative distance along track
+  for (let i = 1; i < pts.length; i++) {
+    pts[i].dist = pts[i-1].dist + haversineMeters(
+      { latitude: pts[i-1].lat, longitude: pts[i-1].lon },
+      { latitude: pts[i].lat,   longitude: pts[i].lon }
+    );
+  }
+  return pts;
+}
+
+// Project a GPS position onto the GPX track → returns meters along track
+function projectOntoTrack(lat, lon, trackPts) {
+  if (!trackPts || trackPts.length < 2) return null;
+  let bestDist = Infinity, bestAlongTrack = 0;
+
+  for (let i = 0; i < trackPts.length - 1; i++) {
+    const a = trackPts[i], b = trackPts[i+1];
+    // Project point P onto segment AB using dot product in lat/lon space
+    const ax = a.lon, ay = a.lat;
+    const bx = b.lon, by = b.lat;
+    const px = lon,   py = lat;
+    const abx = bx-ax, aby = by-ay;
+    const apx = px-ax, apy = py-ay;
+    const ab2 = abx*abx + aby*aby;
+    const t   = ab2 > 0 ? Math.max(0, Math.min(1, (apx*abx + apy*aby) / ab2)) : 0;
+    const cx  = ax + t*abx, cy = ay + t*aby;
+    const d   = haversineMeters({ latitude: py, longitude: px }, { latitude: cy, longitude: cx });
+    if (d < bestDist) {
+      bestDist = d;
+      bestAlongTrack = a.dist + t * (b.dist - a.dist);
+    }
+  }
+  return { distAlongTrack: bestAlongTrack, perpDist: bestDist };
+}
+
 // ── NAVIGATOR ──────────────────────────────────────────────────
 function startClimb(idx) {
   activeClimb = climbs[idx];
@@ -1365,28 +1477,44 @@ function stopClimb() {
 
 // ── GPS SYNC WITH CLIMB START ─────────────────────────────────
 function syncPositionWithClimbStart(coords) {
-  if (!activeClimb || !activeClimb.startCoords) return;
+  if (!activeClimb) return;
+  const totalM = activeClimb.segments.reduce((s, seg) => s + seg.km * 1000, 0);
+
+  // GPX-based sync: project onto track
+  if (activeClimb.gpxPoints) {
+    const proj = projectOntoTrack(coords.latitude, coords.longitude, activeClimb.gpxPoints);
+    if (proj && proj.perpDist < 200) {
+      const gpxTotalM = activeClimb.gpxPoints[activeClimb.gpxPoints.length - 1].dist;
+      const scaledDist = gpxTotalM > 0 ? (proj.distAlongTrack / gpxTotalM) * totalM : proj.distAlongTrack;
+      if (scaledDist < -50) {
+        climbApproaching = true;
+        updateApproachBanner(true, Math.round(Math.abs(scaledDist)));
+        toast(`📍 Inizio salita a ${Math.round(Math.abs(scaledDist))} m`);
+      } else {
+        climbApproaching = false;
+        climbDistanceDone = Math.max(0, scaledDist);
+        updateApproachBanner(false, 0);
+        toast(`📍 Sincronizzato — ${(climbDistanceDone/1000).toFixed(1)} km percorsi`);
+        updateProgress();
+      }
+      drawProfile();
+      return;
+    }
+  }
+
+  // Fallback: distanza dal punto di start coords
+  if (!activeClimb.startCoords) { toast("⚠️ Nessun GPX: posizione non sincronizzata"); return; }
   const sc = activeClimb.startCoords;
   const distToStart = haversineMeters(
     { latitude: coords.latitude, longitude: coords.longitude },
     { latitude: sc.lat, longitude: sc.lon }
   );
-  const totalM = activeClimb.segments.reduce((s, seg) => s + seg.km * 1000, 0);
-
   if (distToStart <= 150) {
-    // Entro 150m: probabilmente all'inizio o già dentro la salita.
-    // Proviamo a capire se siamo avanti rispetto all'inizio proiettando
-    // la posizione lungo l'asse della salita (approssimazione: usiamo
-    // solo la distanza dal punto di start come offset iniziale)
     climbApproaching = false;
     climbDistanceDone = 0;
     updateApproachBanner(false, 0);
     toast("📍 Sincronizzato con l'inizio della salita");
   } else {
-    // Lontani dall'inizio: siamo in avvicinamento o in ritardo?
-    // Non abbiamo coordinate GPS per ogni punto della salita, quindi
-    // usiamo la distanza dal punto di start come stima.
-    // Se siamo a più di 150m dall'inizio assumiamo approccio.
     climbApproaching = true;
     climbApproachDist = distToStart;
     climbDistanceDone = 0;
@@ -1430,7 +1558,57 @@ function stopGPS() {
 }
 
 function onGPSUpdate(pos) {
-  // Aggiorna approccio se in modalità avvicinamento
+  // ── GPX-based positioning (most accurate) ──
+  if (activeClimb && activeClimb.gpxPoints) {
+    const proj = projectOntoTrack(pos.coords.latitude, pos.coords.longitude, activeClimb.gpxPoints);
+    if (proj && proj.perpDist < 100) { // dentro 100m dalla traccia
+      const totalM = activeClimb.segments.reduce((s, seg) => s + seg.km * 1000, 0);
+      // Scala la distanza GPX alla lunghezza totale della salita
+      const gpxTotalM = activeClimb.gpxPoints[activeClimb.gpxPoints.length - 1].dist;
+      const scaledDist = gpxTotalM > 0 ? (proj.distAlongTrack / gpxTotalM) * totalM : proj.distAlongTrack;
+
+      if (scaledDist < 0) {
+        // Prima dell'inizio
+        climbApproaching = true;
+        const distToStart = Math.abs(scaledDist);
+        updateApproachBanner(true, Math.round(distToStart));
+      } else {
+        climbApproaching = false;
+        updateApproachBanner(false, 0);
+        // Calcola delta rispetto alla posizione precedente per VAM/velocità
+        if (lastGPSPos) {
+          const d = haversineMeters(lastGPSPos.coords, pos.coords);
+          if (d > 0 && d < 500) {
+            climbTotalDistM += d;
+            if (currentSegIdx >= 0) {
+              const seg = activeClimb.segments[currentSegIdx];
+              climbTotalElevM += d * seg.grade / 100;
+            }
+          }
+        }
+        climbDistanceDone = scaledDist;
+        updateProgress();
+      }
+
+      // Speed display
+      const speedKmh = pos.coords.speed != null && pos.coords.speed >= 0
+        ? pos.coords.speed * 3.6
+        : lastGPSPos
+          ? haversineMeters(lastGPSPos.coords, pos.coords) / ((pos.timestamp - lastGPSPos.timestamp) / 1000) * 3.6
+          : null;
+      let vam = null;
+      if (speedKmh != null && activeClimb && currentSegIdx >= 0)
+        vam = Math.round(speedKmh * 10 * activeClimb.segments[currentSegIdx].grade);
+      if (activeClimb) {
+        document.getElementById('nav-speed').textContent = speedKmh != null ? speedKmh.toFixed(1) : '—';
+        document.getElementById('nav-vam').textContent   = vam != null && vam > 0 ? vam : '—';
+      }
+      lastGPSPos = pos;
+      return; // GPX handled, skip fallback
+    }
+  }
+
+  // ── Fallback: approach-by-start-coords or plain accumulation ──
   if (climbApproaching && activeClimb && activeClimb.startCoords) {
     const sc = activeClimb.startCoords;
     const distToStart = haversineMeters(
@@ -1439,7 +1617,6 @@ function onGPSUpdate(pos) {
     );
     climbApproachDist = distToStart;
     if (distToStart <= 30) {
-      // Siamo all'inizio: passa a modalità navigazione
       climbApproaching = false;
       climbDistanceDone = 0;
       updateApproachBanner(false, 0);
@@ -1452,18 +1629,13 @@ function onGPSUpdate(pos) {
   if (lastGPSPos) {
     const d = haversineMeters(lastGPSPos.coords, pos.coords);
     if (d > 1 && d < 500) {
-      // Accumula distanza solo se non in approccio
       if (!climbApproaching) {
         climbDistanceDone += d;
         climbTotalDistM   += d;
-
-        // Dislivello del tratto (dal segmento corrente)
         if (activeClimb && currentSegIdx >= 0) {
           const seg = activeClimb.segments[currentSegIdx];
-          const elevGain = d * seg.grade / 100;
-          climbTotalElevM += elevGain;
+          climbTotalElevM += d * seg.grade / 100;
         }
-
         updateProgress();
       }
     }
