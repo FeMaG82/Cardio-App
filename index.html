@@ -7,6 +7,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <title>HRM · Polar H9</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <style>
   :root {
     --bg:       #0a0a0f;
@@ -44,9 +46,9 @@
     padding: 0 4px;
   }
   nav button {
-    flex: 1; padding: 15px 2px; background: none; border: none;
-    color: #e040fb; font-size: 15px; font-weight: 800;
-    letter-spacing: .04em; text-transform: uppercase; cursor: pointer;
+    flex: 1; padding: 14px 1px; background: none; border: none;
+    color: #e040fb; font-size: 12.5px; font-weight: 800;
+    letter-spacing: .01em; text-transform: uppercase; cursor: pointer;
     border-bottom: 3px solid transparent; transition: all .2s;
   }
   nav button.active {
@@ -418,6 +420,126 @@
   }
   .climb-approach-banner.visible { display: block; }
   .climb-approach-banner.near { background: var(--z2); color: #0a1a04; }
+
+  /* ── MAPPA ── */
+  #view-map { padding: 0; }
+  .map-wrap { position: relative; height: calc(100dvh - 54px); width: 100%; }
+  #leaflet-map { position: absolute; inset: 0; z-index: 1; background: #1a1a26; }
+
+  .map-hr-overlay {
+    position: absolute; top: 12px; left: 12px; z-index: 500;
+    width: 74px; height: 74px; border-radius: 50%;
+    background: #fff; border: 5px solid var(--muted);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    box-shadow: 0 2px 14px rgba(0,0,0,.6); transition: border-color .4s;
+  }
+  .map-hr-num { font-size: 24px; font-weight: 900; color: #111; font-family: var(--mono); line-height: 1; }
+  .map-hr-unit { font-size: 9px; color: #555; font-weight: 700; }
+
+  .map-fs-btn { position: absolute; top: 12px; right: 12px; z-index: 500; }
+
+  .map-record-panel {
+    position: absolute; bottom: 12px; left: 12px; right: 12px; z-index: 500;
+  }
+  .map-stats-row {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 10px;
+  }
+  .map-stat-card {
+    background: rgba(19,19,28,.94); border: 1px solid var(--border);
+    border-radius: 12px; padding: 10px 8px; text-align: center;
+    backdrop-filter: blur(4px);
+  }
+  .map-stat-card .msl { font-size: 13px; color: #ccc; text-transform: uppercase; letter-spacing: .03em; font-weight: 600; }
+  .map-stat-card .msv { font-size: 34px; font-weight: 900; font-family: var(--mono); color: #fff; line-height: 1.15; }
+  .map-stat-card .msu { font-size: 12px; color: #aaa; font-weight: 600; }
+
+  .map-record-btns { display: flex; gap: 8px; }
+  .map-rec-btn {
+    flex: 1; padding: 13px; border-radius: 12px; border: none;
+    font-size: 13px; font-weight: 800; cursor: pointer;
+  }
+  .map-rec-btn:disabled { opacity: .3; cursor: not-allowed; }
+  #map-btn-start  { background: var(--z1); color: #0a1a12; }
+  #map-btn-pause  { background: var(--z3); color: #1a0e00; }
+  #map-btn-resume { background: var(--z2); color: #0a1a04; display: none; }
+  #map-btn-stop   { background: var(--z4); color: #1a0a00; }
+
+  .map-topbar {
+    position: absolute; top: 12px; left: 96px; right: 64px; z-index: 500;
+    display: flex; gap: 8px;
+  }
+  .map-menu-btn {
+    background: rgba(19,19,28,.92); border: 1px solid var(--border);
+    color: var(--text); padding: 9px 14px; border-radius: 20px;
+    font-size: 12px; font-weight: 700; cursor: pointer; backdrop-filter: blur(4px);
+    white-space: nowrap;
+  }
+
+  /* Bottom sheets (tracks library / offline manager) */
+  .map-sheet-overlay {
+    display: none; position: fixed; inset: 0; z-index: 2000;
+    background: rgba(0,0,0,.7); align-items: flex-end;
+  }
+  .map-sheet-overlay.open { display: flex; }
+  .map-sheet {
+    width: 100%; max-height: 82vh; overflow-y: auto;
+    background: var(--surface); border-radius: 18px 18px 0 0;
+    padding: 20px 18px 32px; border-top: 1px solid var(--border);
+  }
+  .map-sheet h3 { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+  .map-sheet p.hint { font-size: 12px; color: #aaa; margin-bottom: 14px; }
+  .map-sheet-close {
+    display: block; width: 100%; padding: 12px; margin-top: 14px;
+    border-radius: 12px; border: 1px solid var(--border); background: var(--card);
+    color: var(--text); font-size: 14px; font-weight: 700; cursor: pointer;
+  }
+
+  .track-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 14px; margin-bottom: 10px;
+  }
+  .track-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .track-name { font-size: 14px; font-weight: 700; }
+  .track-date { font-size: 11px; color: #999; margin-top: 2px; }
+  .track-stats { display: flex; gap: 16px; font-size: 12px; color: #ccc; margin-bottom: 10px; }
+  .track-stats b { color: #fff; font-family: var(--mono); }
+  .track-btns { display: flex; gap: 8px; }
+  .track-btn {
+    flex: 1; padding: 9px; border-radius: 9px; border: none;
+    font-size: 12px; font-weight: 700; cursor: pointer;
+  }
+  .track-btn.dl  { background: var(--accent); color: var(--bg); }
+  .track-btn.del { background: var(--card); border: 1px solid var(--border); color: #ccc; }
+
+  /* Offline tiles manager */
+  .offline-zoom-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .offline-zoom-row label { font-size: 13px; color: #ccc; font-weight: 600; }
+  .offline-zoom-row select {
+    flex: 1; padding: 9px 10px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 9px; color: var(--text); font-size: 14px;
+  }
+  .offline-estimate {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 14px; margin-bottom: 14px; font-size: 13px; color: #ddd;
+  }
+  .offline-estimate b { color: #fff; font-size: 16px; font-family: var(--mono); }
+  .offline-estimate.over { border-color: var(--z4); }
+  .offline-estimate.over b { color: var(--z4); }
+  .offline-progress-wrap { margin-bottom: 12px; display: none; }
+  .offline-progress-wrap.active { display: block; }
+  .offline-progress-track { height: 10px; background: var(--border); border-radius: 5px; overflow: hidden; margin-bottom: 6px; }
+  .offline-progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width .2s; }
+  .offline-progress-label { font-size: 12px; color: #ccc; text-align: center; }
+  .btn-offline-dl {
+    width: 100%; padding: 13px; border-radius: 12px; border: none;
+    background: var(--accent); color: var(--bg); font-size: 14px; font-weight: 800; cursor: pointer;
+  }
+  .btn-offline-dl:disabled { opacity: .4; cursor: not-allowed; }
+  .offline-pack-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 12px; margin-bottom: 8px; font-size: 12px; color: #ccc;
+    display: flex; justify-content: space-between; align-items: center;
+  }
 </style>
 </head>
 <body>
@@ -426,6 +548,7 @@
   <button class="active" onclick="showView('monitor',this)">Monitor</button>
   <button onclick="showView('history',this)">Sessioni</button>
   <button onclick="showView('climb',this)">Salite</button>
+  <button onclick="showView('map',this)">Mappa</button>
   <button onclick="showView('settings',this)">Zone</button>
 </nav>
 
@@ -693,6 +816,100 @@
       <button class="btn-export-csv" onclick="exportAscentsCSV()">↓ CSV</button>
     </div>
     <div id="ascent-list"></div>
+  </div>
+</div>
+
+<!-- ══════════ MAPPA ══════════ -->
+<div id="view-map" class="view">
+  <div class="map-wrap">
+    <div id="leaflet-map"></div>
+
+    <!-- Cerchio FC live -->
+    <div class="map-hr-overlay" id="map-hr-circle">
+      <div class="map-hr-num" id="map-hr-num">—</div>
+      <div class="map-hr-unit">bpm</div>
+    </div>
+
+    <!-- Top bar: menu tracce + offline -->
+    <div class="map-topbar">
+      <button class="map-menu-btn" onclick="openTracksSheet()">🗂️ Tracce</button>
+      <button class="map-menu-btn" onclick="openOfflineSheet()">⬇️ Offline</button>
+    </div>
+
+    <button class="fs-btn map-fs-btn" onclick="toggleFullscreen()">⛶</button>
+
+    <!-- Pannello registrazione in basso -->
+    <div class="map-record-panel">
+      <div class="map-stats-row">
+        <div class="map-stat-card">
+          <div class="msl">Velocità</div>
+          <div class="msv" id="map-speed">—</div>
+          <div class="msu">km/h</div>
+        </div>
+        <div class="map-stat-card">
+          <div class="msl">Vel. Media</div>
+          <div class="msv" id="map-avg-speed">—</div>
+          <div class="msu">km/h</div>
+        </div>
+        <div class="map-stat-card">
+          <div class="msl">Percorsi</div>
+          <div class="msv" id="map-distance">0.0</div>
+          <div class="msu">km</div>
+        </div>
+        <div class="map-stat-card">
+          <div class="msl">Durata</div>
+          <div class="msv" id="map-duration">00:00</div>
+          <div class="msu">&nbsp;</div>
+        </div>
+      </div>
+      <div class="map-record-btns">
+        <button class="map-rec-btn" id="map-btn-start"  onclick="startTrackRecording()">▶ Avvia</button>
+        <button class="map-rec-btn" id="map-btn-pause"  onclick="pauseTrackRecording()" disabled>⏸ Pausa</button>
+        <button class="map-rec-btn" id="map-btn-resume" onclick="resumeTrackRecording()">▶ Riprendi</button>
+        <button class="map-rec-btn" id="map-btn-stop"   onclick="stopTrackRecording()" disabled>■ Termina</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sheet: Le mie tracce -->
+<div class="map-sheet-overlay" id="tracks-sheet">
+  <div class="map-sheet">
+    <h3>Le mie tracce</h3>
+    <p class="hint">Tracce GPS registrate, scaricabili in formato GPX.</p>
+    <div id="tracks-list"></div>
+    <button class="map-sheet-close" onclick="closeTracksSheet()">Chiudi</button>
+  </div>
+</div>
+
+<!-- Sheet: Mappe offline -->
+<div class="map-sheet-overlay" id="offline-sheet">
+  <div class="map-sheet">
+    <h3>Mappa offline</h3>
+    <p class="hint">Scarica i tile della zona visibile sulla mappa per usarla senza connessione. Limite: 180 tile per sessione di download, con una piccola pausa tra le richieste per rispettare le policy di OpenStreetMap.</p>
+
+    <div class="offline-zoom-row">
+      <label>Livello zoom</label>
+      <select id="offline-zoom-select" onchange="updateOfflineEstimate()">
+        <option value="14">14 · vista larga</option>
+        <option value="15">15 · dettaglio medio</option>
+        <option value="16" selected>16 · dettaglio bici (consigliato)</option>
+        <option value="17">17 · dettaglio fine</option>
+      </select>
+    </div>
+
+    <div class="offline-estimate" id="offline-estimate">Sposta/inquadra la mappa per stimare i tile necessari…</div>
+
+    <div class="offline-progress-wrap" id="offline-progress-wrap">
+      <div class="offline-progress-track"><div class="offline-progress-fill" id="offline-progress-fill"></div></div>
+      <div class="offline-progress-label" id="offline-progress-label">0 / 0 tile</div>
+    </div>
+
+    <button class="btn-offline-dl" id="btn-offline-download" onclick="startOfflineDownload()">⬇️ Scarica quest'area</button>
+
+    <h3 style="margin-top:22px">Aree scaricate</h3>
+    <div id="offline-packs-list"></div>
+    <button class="map-sheet-close" onclick="closeOfflineSheet()">Chiudi</button>
   </div>
 </div>
 
@@ -1186,6 +1403,10 @@ function showView(id, btn) {
   const wasClimb = document.getElementById('view-climb').classList.contains('active');
   if (wasClimb && id !== 'climb' && gpsWatchId !== null && !activeClimb) stopGPS();
 
+  // Se si lascia la view mappa, spegni il GPS della mappa (risparmio batteria)
+  const wasMap = document.getElementById('view-map').classList.contains('active');
+  if (wasMap && id !== 'map') stopMapGPS();
+
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
   document.getElementById('view-' + id).classList.add('active');
@@ -1193,6 +1414,7 @@ function showView(id, btn) {
   if (id === 'history') renderHistory();
   if (id === 'settings') loadZoneInputs();
   if (id === 'climb') { renderClimbList(); renderAscentList(); }
+  if (id === 'map') initMapView();
 }
 
 // ── SALITE STORAGE ─────────────────────────────────────────────
@@ -1957,6 +2179,14 @@ function updateClimbHR(hr, zone) {
     zoneEl.textContent = '— Zona —';
     zoneEl.style.color = 'var(--muted)';
   }
+
+  // Sincronizza anche il cerchio FC nella scheda Mappa
+  const mapNum = document.getElementById('map-hr-num');
+  const mapCircle = document.getElementById('map-hr-circle');
+  if (mapNum) {
+    mapNum.textContent = hr || '—';
+    mapCircle.style.borderColor = zone >= 0 ? `var(${ZONE_COLORS[zone]})` : 'var(--muted)';
+  }
 }
 
 // ── STORICO ASCENSIONI ─────────────────────────────────────────
@@ -2135,6 +2365,407 @@ window.addEventListener('beforeunload', e => {
     e.returnValue = '';
   }
 });
+
+// ══════════════════════════════════════════════════════════════
+// ── MAPPA ────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+let leafletMap = null;
+let mapGpsWatchId = null;
+let mapLiveMarker = null;
+let mapLastPos = null;
+
+// Registrazione traccia
+let trackRecording = false;
+let trackPaused = false;
+let trackPoints = [];        // [{lat, lon, ele, t}]
+let trackPolyline = null;
+let trackStartTime = null;
+let trackPausedMs = 0;
+let trackPausedAt = null;
+let trackDistM = 0;
+let trackTimer = null;
+let tracks = loadTracks();
+
+// Offline tiles
+const OFFLINE_TILE_LIMIT = 180;
+const OFFLINE_TILE_DELAY_MS = 600; // ~1.6 richieste/sec, sotto il limite policy OSM
+let offlinePacks = loadOfflinePacks();
+let offlineDownloading = false;
+let offlineCancelRequested = false;
+
+// ── INIT MAPPA (lazy, solo alla prima apertura scheda) ────────
+function initMapView() {
+  if (!leafletMap) {
+    leafletMap = L.map('leaflet-map', { zoomControl: false, attributionControl: true })
+      .setView([45.4642, 9.19], 12); // default: Milano, verrà ricentrata sul GPS
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 19,
+    }).addTo(leafletMap);
+
+    leafletMap.on('moveend zoomend', updateOfflineEstimate);
+  }
+  // Forza il ricalcolo delle dimensioni (il div era display:none finora)
+  setTimeout(() => leafletMap.invalidateSize(), 50);
+  startMapGPS();
+  renderTracksList();
+  renderOfflinePacksList();
+}
+
+// ── GPS LIVE (solo per la mappa) ──────────────────────────────
+function startMapGPS() {
+  if (!navigator.geolocation) { toast('GPS non disponibile'); return; }
+  if (mapGpsWatchId !== null) return; // già attivo
+  mapGpsWatchId = navigator.geolocation.watchPosition(onMapGPSUpdate, e => toast('GPS: ' + e.message), {
+    enableHighAccuracy: true, maximumAge: 2000, timeout: 10000
+  });
+}
+
+function stopMapGPS() {
+  if (mapGpsWatchId !== null) { navigator.geolocation.clearWatch(mapGpsWatchId); mapGpsWatchId = null; }
+  mapLastPos = null;
+}
+
+function onMapGPSUpdate(pos) {
+  const { latitude: lat, longitude: lon, speed, accuracy } = pos.coords;
+
+  // Marker posizione live
+  if (!mapLiveMarker) {
+    mapLiveMarker = L.circleMarker([lat, lon], {
+      radius: 8, color: '#4fc3f7', fillColor: '#4fc3f7', fillOpacity: 0.9, weight: 3
+    }).addTo(leafletMap);
+    leafletMap.setView([lat, lon], 16);
+  } else {
+    mapLiveMarker.setLatLng([lat, lon]);
+  }
+
+  // Velocità corrente
+  let speedKmh = speed != null && speed >= 0 ? speed * 3.6 : null;
+  if (speedKmh == null && mapLastPos) {
+    const d = haversineMeters(mapLastPos.coords, pos.coords);
+    const dt = (pos.timestamp - mapLastPos.timestamp) / 1000;
+    if (dt > 0) speedKmh = (d / dt) * 3.6;
+  }
+  document.getElementById('map-speed').textContent = speedKmh != null ? speedKmh.toFixed(1) : '—';
+
+  // Se registrazione attiva e non in pausa, accumula traccia
+  if (trackRecording && !trackPaused && accuracy != null && accuracy <= 30) {
+    if (mapLastPos) {
+      const d = haversineMeters(mapLastPos.coords, pos.coords);
+      if (d > 1 && d < 300) {
+        trackDistM += d;
+        trackPoints.push({ lat, lon, ele: pos.coords.altitude || null, t: Date.now() });
+        if (trackPolyline) trackPolyline.addLatLng([lat, lon]);
+        updateTrackStats();
+      }
+    } else {
+      trackPoints.push({ lat, lon, ele: pos.coords.altitude || null, t: Date.now() });
+    }
+  }
+
+  mapLastPos = pos;
+}
+
+// ── REGISTRAZIONE TRACCIA (avvia/pausa/riprendi/termina) ──────
+function startTrackRecording() {
+  trackRecording  = true;
+  trackPaused     = false;
+  trackPoints     = [];
+  trackDistM      = 0;
+  trackPausedMs   = 0;
+  trackStartTime  = Date.now();
+
+  if (trackPolyline) { leafletMap.removeLayer(trackPolyline); }
+  trackPolyline = L.polyline([], { color: '#4fc3f7', weight: 4 }).addTo(leafletMap);
+
+  document.getElementById('map-btn-start').disabled  = true;
+  document.getElementById('map-btn-pause').disabled  = false;
+  document.getElementById('map-btn-pause').style.display  = '';
+  document.getElementById('map-btn-resume').style.display = 'none';
+  document.getElementById('map-btn-stop').disabled   = false;
+  document.getElementById('map-avg-speed').textContent = '—';
+  document.getElementById('map-distance').textContent  = '0.0';
+  document.getElementById('map-duration').textContent  = '00:00';
+
+  trackTimer = setInterval(() => {
+    if (trackPaused) return;
+    const elapsed = Math.floor((Date.now() - trackStartTime - trackPausedMs) / 1000);
+    document.getElementById('map-duration').textContent = formatTime(elapsed);
+    updateTrackStats();
+  }, 1000);
+
+  toast('▶ Registrazione traccia avviata');
+}
+
+function pauseTrackRecording() {
+  if (!trackRecording || trackPaused) return;
+  trackPaused   = true;
+  trackPausedAt = Date.now();
+  document.getElementById('map-btn-pause').style.display  = 'none';
+  document.getElementById('map-btn-resume').style.display = '';
+  toast('⏸ Traccia in pausa');
+}
+
+function resumeTrackRecording() {
+  if (!trackRecording || !trackPaused) return;
+  trackPausedMs += Date.now() - trackPausedAt;
+  trackPaused    = false;
+  trackPausedAt  = null;
+  document.getElementById('map-btn-pause').style.display  = '';
+  document.getElementById('map-btn-resume').style.display = 'none';
+  toast('▶ Traccia ripresa');
+}
+
+function stopTrackRecording() {
+  if (!trackRecording) return;
+  if (trackPaused && trackPausedAt) trackPausedMs += Date.now() - trackPausedAt;
+  trackRecording = false;
+  trackPaused    = false;
+  clearInterval(trackTimer);
+
+  document.getElementById('map-btn-start').disabled  = false;
+  document.getElementById('map-btn-pause').disabled  = true;
+  document.getElementById('map-btn-pause').style.display  = '';
+  document.getElementById('map-btn-resume').style.display = 'none';
+  document.getElementById('map-btn-stop').disabled   = true;
+
+  if (trackPoints.length < 2) { toast('Traccia troppo corta, non salvata'); return; }
+
+  const duration = Math.floor((Date.now() - trackStartTime - trackPausedMs) / 1000);
+  const track = {
+    id: Date.now(),
+    date: new Date(trackStartTime).toISOString(),
+    duration,
+    distanceM: Math.round(trackDistM),
+    avgSpeedKmh: duration > 0 ? Math.round((trackDistM/1000) / (duration/3600) * 10) / 10 : 0,
+    points: trackPoints,
+  };
+  tracks.unshift(track);
+  saveTracks();
+  renderTracksList();
+  toast('✓ Traccia salvata');
+}
+
+function updateTrackStats() {
+  const elapsed = Math.floor((Date.now() - trackStartTime - trackPausedMs) / 1000);
+  document.getElementById('map-distance').textContent = (trackDistM / 1000).toFixed(1);
+  const avgKmh = elapsed > 0 ? (trackDistM/1000) / (elapsed/3600) : 0;
+  document.getElementById('map-avg-speed').textContent = avgKmh > 0 ? avgKmh.toFixed(1) : '—';
+}
+
+// ── STORAGE TRACCE ─────────────────────────────────────────────
+function loadTracks() {
+  try { return JSON.parse(localStorage.getItem('hrm-tracks') || '[]'); } catch { return []; }
+}
+function saveTracks() {
+  localStorage.setItem('hrm-tracks', JSON.stringify(tracks));
+}
+
+function renderTracksList() {
+  const el = document.getElementById('tracks-list');
+  if (!el) return;
+  if (!tracks.length) {
+    el.innerHTML = '<div class="climb-empty">Nessuna traccia registrata.</div>';
+    return;
+  }
+  el.innerHTML = tracks.map(t => {
+    const d = new Date(t.date);
+    const dateStr = d.toLocaleDateString('it-IT', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    return `
+    <div class="track-card">
+      <div class="track-card-header">
+        <div>
+          <div class="track-name">Traccia</div>
+          <div class="track-date">${dateStr}</div>
+        </div>
+      </div>
+      <div class="track-stats">
+        <span>Durata <b>${formatTime(t.duration)}</b></span>
+        <span>Distanza <b>${(t.distanceM/1000).toFixed(1)} km</b></span>
+        <span>Vel. media <b>${t.avgSpeedKmh} km/h</b></span>
+      </div>
+      <div class="track-btns">
+        <button class="track-btn dl" onclick="downloadTrackGPX(${t.id})">↓ Scarica GPX</button>
+        <button class="track-btn del" onclick="deleteTrack(${t.id})">✕ Elimina</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function deleteTrack(id) {
+  tracks = tracks.filter(t => t.id !== id);
+  saveTracks();
+  renderTracksList();
+}
+
+function downloadTrackGPX(id) {
+  const track = tracks.find(t => t.id === id);
+  if (!track) return;
+  const gpx = buildGPX(track);
+  const blob = new Blob([gpx], { type: 'application/gpx+xml' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `traccia_${track.date.slice(0,10)}.gpx`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function buildGPX(track) {
+  const pts = track.points.map(p => {
+    const iso = new Date(p.t).toISOString();
+    const ele = p.ele != null ? `<ele>${p.ele.toFixed(1)}</ele>` : '';
+    return `      <trkpt lat="${p.lat.toFixed(6)}" lon="${p.lon.toFixed(6)}">${ele}<time>${iso}</time></trkpt>`;
+  }).join('\n');
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="HRM Polar H9" xmlns="http://www.topografix.com/GPX/1/1">
+  <trk>
+    <name>Traccia ${track.date.slice(0,10)}</name>
+    <trkseg>
+${pts}
+    </trkseg>
+  </trk>
+</gpx>`;
+}
+
+// ── SHEETS (tracce / offline) ──────────────────────────────────
+function openTracksSheet()  { renderTracksList(); document.getElementById('tracks-sheet').classList.add('open'); }
+function closeTracksSheet() { document.getElementById('tracks-sheet').classList.remove('open'); }
+function openOfflineSheet() {
+  renderOfflinePacksList();
+  updateOfflineEstimate();
+  document.getElementById('offline-sheet').classList.add('open');
+}
+function closeOfflineSheet() { document.getElementById('offline-sheet').classList.remove('open'); }
+
+// ── OFFLINE TILES ───────────────────────────────────────────────
+function lonToTileX(lon, zoom) { return Math.floor((lon + 180) / 360 * Math.pow(2, zoom)); }
+function latToTileY(lat, zoom) {
+  const rad = lat * Math.PI / 180;
+  return Math.floor((1 - Math.log(Math.tan(rad) + 1/Math.cos(rad)) / Math.PI) / 2 * Math.pow(2, zoom));
+}
+
+function getVisibleTileList(zoom) {
+  if (!leafletMap) return [];
+  const b = leafletMap.getBounds();
+  const xMin = lonToTileX(b.getWest(), zoom);
+  const xMax = lonToTileX(b.getEast(), zoom);
+  const yMin = latToTileY(b.getNorth(), zoom);
+  const yMax = latToTileY(b.getSouth(), zoom);
+  const tiles = [];
+  for (let x = xMin; x <= xMax; x++) {
+    for (let y = yMin; y <= yMax; y++) {
+      tiles.push({ x, y, z: zoom });
+    }
+  }
+  return tiles;
+}
+
+function updateOfflineEstimate() {
+  const el = document.getElementById('offline-estimate');
+  if (!el || !leafletMap) return;
+  const zoom = parseInt(document.getElementById('offline-zoom-select').value);
+  const tiles = getVisibleTileList(zoom);
+  const n = tiles.length;
+  el.classList.toggle('over', n > OFFLINE_TILE_LIMIT);
+  const btn = document.getElementById('btn-offline-download');
+  if (n > OFFLINE_TILE_LIMIT) {
+    el.innerHTML = `<b>${n}</b> tile richiesti — supera il limite di ${OFFLINE_TILE_LIMIT} per sessione. Riduci lo zoom o inquadra un'area più piccola.`;
+    if (btn) btn.disabled = true;
+  } else {
+    el.innerHTML = `<b>${n}</b> tile nell'area visibile · zoom ${zoom} — entro il limite di ${OFFLINE_TILE_LIMIT}.`;
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function startOfflineDownload() {
+  if (offlineDownloading || !leafletMap) return;
+  const zoom = parseInt(document.getElementById('offline-zoom-select').value);
+  const tiles = getVisibleTileList(zoom);
+  if (tiles.length === 0) { toast('Nessun tile da scaricare'); return; }
+  if (tiles.length > OFFLINE_TILE_LIMIT) {
+    toast(`Troppi tile (${tiles.length}) — riduci l'area o lo zoom`);
+    return;
+  }
+
+  offlineDownloading = true;
+  offlineCancelRequested = false;
+  const btn = document.getElementById('btn-offline-download');
+  btn.disabled = true;
+  btn.textContent = '⏳ Download in corso…';
+  const wrap = document.getElementById('offline-progress-wrap');
+  wrap.classList.add('active');
+
+  let done = 0;
+  const cache = await caches.open('osm-tiles-v1');
+
+  for (const t of tiles) {
+    if (offlineCancelRequested) break;
+    const url = `https://tile.openstreetmap.org/${t.z}/${t.x}/${t.y}.png`;
+    try {
+      const resp = await fetch(url);
+      if (resp.ok) await cache.put(url, resp.clone());
+    } catch (e) { /* tile singolo fallito: continua comunque */ }
+    done++;
+    document.getElementById('offline-progress-fill').style.width = `${(done/tiles.length*100)}%`;
+    document.getElementById('offline-progress-label').textContent = `${done} / ${tiles.length} tile`;
+    // Piccola pausa tra le richieste per rispettare la policy OSM (max ~2 req/sec)
+    await new Promise(r => setTimeout(r, OFFLINE_TILE_DELAY_MS));
+  }
+
+  offlineDownloading = false;
+  btn.disabled = false;
+  btn.textContent = "⬇️ Scarica quest'area";
+  wrap.classList.remove('active');
+
+  // Salva metadati del pacchetto scaricato
+  const b = leafletMap.getBounds();
+  offlinePacks.unshift({
+    id: Date.now(),
+    date: new Date().toISOString(),
+    zoom,
+    tileCount: done,
+    bounds: { n: b.getNorth(), s: b.getSouth(), e: b.getEast(), w: b.getWest() },
+  });
+  saveOfflinePacks();
+  renderOfflinePacksList();
+  toast(`✓ ${done} tile salvati per uso offline`);
+}
+
+function loadOfflinePacks() {
+  try { return JSON.parse(localStorage.getItem('hrm-offline-packs') || '[]'); } catch { return []; }
+}
+function saveOfflinePacks() {
+  localStorage.setItem('hrm-offline-packs', JSON.stringify(offlinePacks));
+}
+
+function renderOfflinePacksList() {
+  const el = document.getElementById('offline-packs-list');
+  if (!el) return;
+  if (!offlinePacks.length) {
+    el.innerHTML = '<div class="climb-empty" style="padding:16px 0">Nessuna area scaricata.</div>';
+    return;
+  }
+  el.innerHTML = offlinePacks.map(p => {
+    const d = new Date(p.date);
+    const dateStr = d.toLocaleDateString('it-IT', { day:'2-digit', month:'short', year:'numeric' });
+    return `<div class="offline-pack-card">
+      <span>${dateStr} · zoom ${p.zoom} · ${p.tileCount} tile</span>
+      <button class="track-btn del" style="flex:none;padding:6px 10px" onclick="deleteOfflinePack(${p.id})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function deleteOfflinePack(id) {
+  // Rimuove solo il riferimento: i tile restano in cache condivisa
+  // (potrebbero essere usati da altre aree sovrapposte). Per liberare
+  // spazio del tutto usa "Cancella tutta la cache offline".
+  offlinePacks = offlinePacks.filter(p => p.id !== id);
+  saveOfflinePacks();
+  renderOfflinePacksList();
+}
+
+
 loadZoneInputs();
 renderHistory();
 renderClimbList();
