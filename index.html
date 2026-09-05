@@ -438,20 +438,34 @@
 
   .map-fs-btn { position: absolute; top: 12px; right: 12px; z-index: 500; }
 
+  .map-locate-btn {
+    position: absolute; top: 50%; right: 12px; z-index: 500;
+    transform: translateY(-50%);
+    width: 54px; height: 54px; border-radius: 50%; border: 2px solid var(--border);
+    background: rgba(19,19,28,.92); color: #aaa; font-size: 24px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; backdrop-filter: blur(4px);
+    transition: color .2s, border-color .2s, background .2s;
+  }
+  .map-locate-btn.active {
+    color: var(--accent); border-color: var(--accent);
+    background: rgba(79,195,247,.15);
+  }
+
   .map-record-panel {
     position: absolute; bottom: 12px; left: 12px; right: 12px; z-index: 500;
   }
   .map-stats-row {
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 10px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px;
   }
   .map-stat-card {
     background: rgba(19,19,28,.94); border: 1px solid var(--border);
-    border-radius: 12px; padding: 10px 8px; text-align: center;
+    border-radius: 11px; padding: 8px 4px; text-align: center;
     backdrop-filter: blur(4px);
   }
-  .map-stat-card .msl { font-size: 13px; color: #ccc; text-transform: uppercase; letter-spacing: .03em; font-weight: 600; }
-  .map-stat-card .msv { font-size: 34px; font-weight: 900; font-family: var(--mono); color: #fff; line-height: 1.15; }
-  .map-stat-card .msu { font-size: 12px; color: #aaa; font-weight: 600; }
+  .map-stat-card .msl { font-size: 10.5px; color: #ccc; text-transform: uppercase; letter-spacing: .02em; font-weight: 600; }
+  .map-stat-card .msv { font-size: 24px; font-weight: 900; font-family: var(--mono); color: #fff; line-height: 1.15; }
+  .map-stat-card .msu { font-size: 10.5px; color: #aaa; font-weight: 600; }
 
   .map-record-btns { display: flex; gap: 8px; }
   .map-rec-btn {
@@ -837,6 +851,7 @@
     </div>
 
     <button class="fs-btn map-fs-btn" onclick="toggleFullscreen()">⛶</button>
+    <button class="map-locate-btn active" id="map-locate-btn" onclick="toggleFollowMode()">◉</button>
 
     <!-- Pannello registrazione in basso -->
     <div class="map-record-panel">
@@ -852,6 +867,11 @@
           <div class="msu">km/h</div>
         </div>
         <div class="map-stat-card">
+          <div class="msl">Quota</div>
+          <div class="msv" id="map-altitude">—</div>
+          <div class="msu">m s.l.m.</div>
+        </div>
+        <div class="map-stat-card">
           <div class="msl">Percorsi</div>
           <div class="msv" id="map-distance">0.0</div>
           <div class="msu">km</div>
@@ -860,6 +880,11 @@
           <div class="msl">Durata</div>
           <div class="msv" id="map-duration">00:00</div>
           <div class="msu">&nbsp;</div>
+        </div>
+        <div class="map-stat-card">
+          <div class="msl">Dislivello +</div>
+          <div class="msv" id="map-elevgain">0</div>
+          <div class="msu">m</div>
         </div>
       </div>
       <div class="map-record-btns">
@@ -886,7 +911,7 @@
 <div class="map-sheet-overlay" id="offline-sheet">
   <div class="map-sheet">
     <h3>Mappa offline</h3>
-    <p class="hint">Scarica i tile della zona visibile sulla mappa per usarla senza connessione. Limite: 180 tile per sessione di download, con una piccola pausa tra le richieste per rispettare le policy di OpenStreetMap.</p>
+    <p class="hint">Scarica i tile della zona visibile sulla mappa (stile topografico OpenTopoMap) per usarla senza connessione. Limite: 180 tile per sessione di download, con una piccola pausa tra le richieste per rispettare le policy di utilizzo.</p>
 
     <div class="offline-zoom-row">
       <label>Livello zoom</label>
@@ -1690,13 +1715,23 @@ function startClimb(idx) {
   climbApproaching = false;
   climbApproachDist = 0;
 
+  // Migrazione automatica: salite salvate prima dell'introduzione della
+  // sincronizzazione GPS potrebbero non avere una coordinata di partenza
+  // pur avendo una traccia GPX. La ripariamo qui, al volo, usando il primo
+  // punto della traccia — evita di dover ricaricare manualmente la salita.
+  if (!activeClimb.startCoords && activeClimb.gpxPoints && activeClimb.gpxPoints.length) {
+    activeClimb.startCoords = { lat: activeClimb.gpxPoints[0].lat, lon: activeClimb.gpxPoints[0].lon };
+    const realIdx = climbs.findIndex(c => c.addedAt === activeClimb.addedAt);
+    if (realIdx !== -1) { climbs[realIdx] = activeClimb; saveClimbs(); }
+  }
+
   document.getElementById('climb-library').style.display = 'none';
   document.getElementById('climb-navigator').style.display = 'block';
 
   const totalKm = activeClimb.segments.reduce((s, seg) => s + seg.km, 0);
   document.getElementById('climb-nav-name').textContent = activeClimb.name;
   document.getElementById('climb-nav-sub').textContent =
-    `${totalKm.toFixed(1)} km totali · ${activeClimb.segments.length} sezioni`;
+    `${totalKm.toFixed(1)} km totali · ${activeClimb.segments.length} sezioni${activeClimb.startCoords ? ' · 📍 sync GPS attivo' : ' · ⚠️ nessun riferimento GPS'}`;
 
   // Mostra il tasto "Avvia Ascensione", nascondi il badge "in corso"
   document.getElementById('btn-start-ascent').style.display = '';
@@ -1757,7 +1792,13 @@ function startAscent() {
 function stopClimb() {
   if (!activeClimb) return;
 
-  const wasStarted = climbStartTime !== null;
+  // Salva solo se la registrazione è stata avviata E la navigazione ha
+  // effettivamente raggiunto/agganciato la salita reale — non solo la
+  // fase di avvicinamento. Se c'è un riferimento GPS (startCoords) ma
+  // non si è mai agganciato, i dati sarebbero solo "rumore" prima
+  // dell'inizio vero e non vengono salvati.
+  const hasGpsRef  = !!activeClimb.startCoords;
+  const wasStarted = climbStartTime !== null && (!hasGpsRef || climbLockedOnTrack);
 
   if (wasStarted) {
     // Salva ascensione solo se era stata effettivamente avviata
@@ -1786,6 +1827,8 @@ function stopClimb() {
     ascents.unshift(ascent);
     saveAscents();
     toast('Ascensione salvata ✓');
+  } else if (climbStartTime !== null) {
+    toast('⚠️ Non salvata: mai raggiunto l\'inizio reale della salita');
   }
 
   stopAutosave();
@@ -2373,6 +2416,7 @@ let leafletMap = null;
 let mapGpsWatchId = null;
 let mapLiveMarker = null;
 let mapLastPos = null;
+let mapFollowMode = true; // segue automaticamente la posizione GPS
 
 // Registrazione traccia
 let trackRecording = false;
@@ -2383,6 +2427,9 @@ let trackStartTime = null;
 let trackPausedMs = 0;
 let trackPausedAt = null;
 let trackDistM = 0;
+let trackElevGainM = 0;      // dislivello positivo accumulato (filtrato a soglia)
+let trackLastEle = null;     // ultima quota "stabile" usata come riferimento per il filtro
+const ELEV_NOISE_THRESHOLD_M = 3; // soglia (m) per ignorare il rumore GPS sulla quota
 let trackTimer = null;
 let tracks = loadTracks();
 
@@ -2398,18 +2445,40 @@ function initMapView() {
   if (!leafletMap) {
     leafletMap = L.map('leaflet-map', { zoomControl: false, attributionControl: true })
       .setView([45.4642, 9.19], 12); // default: Milano, verrà ricentrata sul GPS
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
-      maxZoom: 19,
+    // OpenTopoMap: stile topografico con curve di livello, ideale per bici/montagna.
+    // Sottodominio fisso ('a') per far coincidere le chiavi di cache con i
+    // tile scaricati offline (altrimenti la rotazione a/b/c causherebbe cache-miss).
+    L.tileLayer('https://a.tile.opentopomap.org/{z}/{x}/{y}.png', {
+      attribution: 'Map data: © OpenStreetMap contributors, SRTM | Map style: © OpenTopoMap (CC-BY-SA)',
+      maxZoom: 17,
     }).addTo(leafletMap);
 
     leafletMap.on('moveend zoomend', updateOfflineEstimate);
+
+    // Se l'utente trascina manualmente la mappa, disattiva l'auto-centratura
+    // (comportamento standard tipo Google Maps: il tasto "segui" si spegne)
+    leafletMap.on('dragstart', () => setFollowMode(false));
   }
   // Forza il ricalcolo delle dimensioni (il div era display:none finora)
   setTimeout(() => leafletMap.invalidateSize(), 50);
+  setFollowMode(true);
   startMapGPS();
   renderTracksList();
   renderOfflinePacksList();
+}
+
+// ── FOLLOW MODE (auto-centratura su posizione GPS) ────────────
+function setFollowMode(on) {
+  mapFollowMode = on;
+  const btn = document.getElementById('map-locate-btn');
+  if (btn) btn.classList.toggle('active', on);
+}
+
+function toggleFollowMode() {
+  setFollowMode(!mapFollowMode);
+  if (mapFollowMode && mapLastPos) {
+    leafletMap.panTo([mapLastPos.coords.latitude, mapLastPos.coords.longitude], { animate: true });
+  }
 }
 
 // ── GPS LIVE (solo per la mappa) ──────────────────────────────
@@ -2427,7 +2496,7 @@ function stopMapGPS() {
 }
 
 function onMapGPSUpdate(pos) {
-  const { latitude: lat, longitude: lon, speed, accuracy } = pos.coords;
+  const { latitude: lat, longitude: lon, speed, accuracy, altitude } = pos.coords;
 
   // Marker posizione live
   if (!mapLiveMarker) {
@@ -2437,6 +2506,7 @@ function onMapGPSUpdate(pos) {
     leafletMap.setView([lat, lon], 16);
   } else {
     mapLiveMarker.setLatLng([lat, lon]);
+    if (mapFollowMode) leafletMap.panTo([lat, lon], { animate: true, duration: 0.5 });
   }
 
   // Velocità corrente
@@ -2448,18 +2518,39 @@ function onMapGPSUpdate(pos) {
   }
   document.getElementById('map-speed').textContent = speedKmh != null ? speedKmh.toFixed(1) : '—';
 
-  // Se registrazione attiva e non in pausa, accumula traccia
+  // Quota corrente (sempre mostrata quando disponibile dal GPS)
+  document.getElementById('map-altitude').textContent = altitude != null ? Math.round(altitude) : '—';
+
+  // Se registrazione attiva e non in pausa, accumula traccia + dislivello
   if (trackRecording && !trackPaused && accuracy != null && accuracy <= 30) {
     if (mapLastPos) {
       const d = haversineMeters(mapLastPos.coords, pos.coords);
       if (d > 1 && d < 300) {
         trackDistM += d;
-        trackPoints.push({ lat, lon, ele: pos.coords.altitude || null, t: Date.now() });
+        trackPoints.push({ lat, lon, ele: altitude || null, t: Date.now() });
         if (trackPolyline) trackPolyline.addLatLng([lat, lon]);
         updateTrackStats();
       }
     } else {
-      trackPoints.push({ lat, lon, ele: pos.coords.altitude || null, t: Date.now() });
+      trackPoints.push({ lat, lon, ele: altitude || null, t: Date.now() });
+    }
+
+    // Dislivello positivo live: filtro a soglia per ridurre il rumore
+    // tipico dell'altitudine GPS (±5-10m). Verrà ricalibrato a fine
+    // registrazione con dati di quota più accurati, se disponibili.
+    if (altitude != null) {
+      if (trackLastEle === null) {
+        trackLastEle = altitude;
+      } else {
+        const diff = altitude - trackLastEle;
+        if (diff > ELEV_NOISE_THRESHOLD_M) {
+          trackElevGainM += diff;
+          trackLastEle = altitude;
+        } else if (diff < -ELEV_NOISE_THRESHOLD_M) {
+          trackLastEle = altitude;
+        }
+      }
+      document.getElementById('map-elevgain').textContent = Math.round(trackElevGainM);
     }
   }
 
@@ -2474,6 +2565,8 @@ function startTrackRecording() {
   trackDistM      = 0;
   trackPausedMs   = 0;
   trackStartTime  = Date.now();
+  trackElevGainM  = 0;
+  trackLastEle    = null;
 
   if (trackPolyline) { leafletMap.removeLayer(trackPolyline); }
   trackPolyline = L.polyline([], { color: '#4fc3f7', weight: 4 }).addTo(leafletMap);
@@ -2486,6 +2579,7 @@ function startTrackRecording() {
   document.getElementById('map-avg-speed').textContent = '—';
   document.getElementById('map-distance').textContent  = '0.0';
   document.getElementById('map-duration').textContent  = '00:00';
+  document.getElementById('map-elevgain').textContent  = '0';
 
   trackTimer = setInterval(() => {
     if (trackPaused) return;
@@ -2538,12 +2632,19 @@ function stopTrackRecording() {
     duration,
     distanceM: Math.round(trackDistM),
     avgSpeedKmh: duration > 0 ? Math.round((trackDistM/1000) / (duration/3600) * 10) / 10 : 0,
+    elevGainM: Math.round(trackElevGainM),   // dislivello da GPS grezzo (filtrato a soglia)
+    elevGainRawM: Math.round(trackElevGainM),
+    elevCalibrated: false,
     points: trackPoints,
   };
   tracks.unshift(track);
   saveTracks();
   renderTracksList();
   toast('✓ Traccia salvata');
+
+  // Calibrazione asincrona del dislivello con dati di quota più accurati
+  // (richiede connessione; se fallisce resta il valore da GPS grezzo)
+  calibrateTrackElevation(track.id);
 }
 
 function updateTrackStats() {
@@ -2551,6 +2652,61 @@ function updateTrackStats() {
   document.getElementById('map-distance').textContent = (trackDistM / 1000).toFixed(1);
   const avgKmh = elapsed > 0 ? (trackDistM/1000) / (elapsed/3600) : 0;
   document.getElementById('map-avg-speed').textContent = avgKmh > 0 ? avgKmh.toFixed(1) : '—';
+}
+
+// ── CALIBRAZIONE DISLIVELLO (Open-Elevation) ───────────────────
+// L'altitudine dal GPS è tipicamente imprecisa (±5-10m). A fine
+// registrazione, se c'è connessione, richiediamo le quote reali per i
+// punti della traccia da un servizio di elevazione (dati SRTM), più
+// accurato, e ricalcoliamo il dislivello con lo stesso filtro a soglia.
+const ELEV_CALIBRATION_THRESHOLD_M = 2; // soglia più stretta: dato meno rumoroso
+const ELEV_API_MAX_POINTS = 100;        // limite pratico per una richiesta
+
+async function calibrateTrackElevation(trackId) {
+  const track = tracks.find(t => t.id === trackId);
+  if (!track || track.points.length < 2) return;
+
+  // Decima i punti per restare entro un numero ragionevole di richieste
+  const pts = track.points;
+  const step = Math.max(1, Math.ceil(pts.length / ELEV_API_MAX_POINTS));
+  const sampled = [];
+  for (let i = 0; i < pts.length; i += step) sampled.push(pts[i]);
+  if (sampled[sampled.length - 1] !== pts[pts.length - 1]) sampled.push(pts[pts.length - 1]);
+
+  try {
+    const resp = await fetch('https://api.open-elevation.com/api/v1/lookup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        locations: sampled.map(p => ({ latitude: p.lat, longitude: p.lon }))
+      })
+    });
+    if (!resp.ok) throw new Error('API non disponibile');
+    const data = await resp.json();
+    const elevations = (data.results || []).map(r => r.elevation);
+    if (elevations.length < 2) throw new Error('Dati insufficienti');
+
+    // Ricalcola il dislivello con lo stesso filtro a soglia, sui dati calibrati
+    let gain = 0, lastEle = elevations[0];
+    for (let i = 1; i < elevations.length; i++) {
+      const diff = elevations[i] - lastEle;
+      if (diff > ELEV_CALIBRATION_THRESHOLD_M) { gain += diff; lastEle = elevations[i]; }
+      else if (diff < -ELEV_CALIBRATION_THRESHOLD_M) { lastEle = elevations[i]; }
+    }
+
+    // Aggiorna la traccia salvata
+    const idx = tracks.findIndex(t => t.id === trackId);
+    if (idx !== -1) {
+      tracks[idx].elevGainM = Math.round(gain);
+      tracks[idx].elevCalibrated = true;
+      saveTracks();
+      renderTracksList();
+      toast(`✓ Dislivello calibrato: ${Math.round(gain)} m`);
+    }
+  } catch (e) {
+    // Nessuna connessione o servizio non raggiungibile: resta il dato GPS grezzo
+    toast('⚠️ Calibrazione quota non riuscita — uso dato GPS');
+  }
 }
 
 // ── STORAGE TRACCE ─────────────────────────────────────────────
@@ -2583,6 +2739,9 @@ function renderTracksList() {
         <span>Durata <b>${formatTime(t.duration)}</b></span>
         <span>Distanza <b>${(t.distanceM/1000).toFixed(1)} km</b></span>
         <span>Vel. media <b>${t.avgSpeedKmh} km/h</b></span>
+      </div>
+      <div class="track-stats" style="margin-top:-4px">
+        <span>Dislivello+ <b>${t.elevGainM ?? '—'} m</b> ${t.elevCalibrated ? '✓ calibrato' : '(GPS grezzo)'}</span>
       </div>
       <div class="track-btns">
         <button class="track-btn dl" onclick="downloadTrackGPX(${t.id})">↓ Scarica GPX</button>
@@ -2701,7 +2860,7 @@ async function startOfflineDownload() {
 
   for (const t of tiles) {
     if (offlineCancelRequested) break;
-    const url = `https://tile.openstreetmap.org/${t.z}/${t.x}/${t.y}.png`;
+    const url = `https://a.tile.opentopomap.org/${t.z}/${t.x}/${t.y}.png`;
     try {
       const resp = await fetch(url);
       if (resp.ok) await cache.put(url, resp.clone());

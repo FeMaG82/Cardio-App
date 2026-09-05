@@ -1,6 +1,6 @@
 // sw.js — Service Worker per HRM Polar H9
 // Aggiorna CACHE_NAME ogni volta che modifichi i file (es. 'hrm-v2')
-const CACHE_NAME = 'hrm-v15';
+const CACHE_NAME = 'hrm-v8';
 const FILES = [
   './',
   './index.html',
@@ -33,12 +33,12 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // Tile OpenStreetMap: cache-first, con fallback a rete. Questo rende
+  // Tile OpenTopoMap: cache-first, con fallback a rete. Questo rende
   // disponibili offline i tile scaricati esplicitamente dall'utente
   // (sezione "Mappa offline"), e mette in cache anche i tile visti
   // normalmente durante la navigazione online (utile per riuso, non è
-  // download bulk automatizzato quindi rispetta la policy OSM).
-  if (url.hostname.endsWith('tile.openstreetmap.org')) {
+  // download bulk automatizzato quindi rispetta la policy di utilizzo).
+  if (url.hostname.endsWith('tile.opentopomap.org')) {
     event.respondWith(
       caches.open('osm-tiles-v1').then(cache =>
         cache.match(event.request).then(cached => {
