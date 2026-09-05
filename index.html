@@ -452,6 +452,44 @@
     background: rgba(79,195,247,.15);
   }
 
+  /* Cursore GPS direzionale (triangolo) */
+  .gps-arrow-icon { background: none !important; border: none !important; }
+  .gps-arrow { transition: transform .3s ease; transform-origin: center center; }
+
+  /* Pop-up 1: avvicinamento a salita salvata */
+  .map-climb-approach {
+    display: none;
+    position: absolute; top: 70px; left: 12px; right: 12px; z-index: 550;
+    background: rgba(255,193,7,.95); color: #1a1400;
+    border-radius: 14px; padding: 12px 16px; text-align: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,.5);
+  }
+  .map-climb-approach.visible { display: block; }
+  .map-climb-approach.near { background: rgba(139,195,74,.95); color: #0a1a04; }
+  .mca-name { font-size: 14px; font-weight: 800; margin-bottom: 2px; }
+  .mca-dist { font-size: 20px; font-weight: 900; font-family: var(--mono); }
+
+  /* Pop-up 2: navigazione attiva su salita rilevata */
+  .map-climb-overlay {
+    display: none;
+    position: absolute; top: 70px; left: 12px; right: 12px; z-index: 550;
+    background: rgba(10,10,15,.94); border: 1px solid var(--border);
+    border-radius: 16px; padding: 14px 16px; backdrop-filter: blur(6px);
+    box-shadow: 0 4px 20px rgba(0,0,0,.6);
+  }
+  .map-climb-overlay.visible { display: block; }
+  .mco-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .mco-name { font-size: 15px; font-weight: 800; color: #fff; }
+  .mco-close {
+    background: none; border: 1px solid var(--border); color: #aaa;
+    width: 26px; height: 26px; border-radius: 50%; font-size: 13px; cursor: pointer;
+  }
+  .mco-svg { width: 100%; height: 60px; display: block; margin-bottom: 10px; }
+  .mco-stats { display: flex; gap: 10px; }
+  .mco-stat { flex: 1; text-align: center; }
+  .mco-val { font-size: 40px; font-weight: 900; color: #fff; font-family: var(--mono); line-height: 1; }
+  .mco-unit { font-size: 12px; color: #bbb; font-weight: 600; margin-top: 2px; }
+
   .map-record-panel {
     position: absolute; bottom: 12px; left: 12px; right: 12px; z-index: 500;
   }
@@ -460,12 +498,13 @@
   }
   .map-stat-card {
     background: rgba(19,19,28,.94); border: 1px solid var(--border);
-    border-radius: 11px; padding: 8px 4px; text-align: center;
+    border-radius: 11px; padding: 7px 4px; text-align: center;
     backdrop-filter: blur(4px);
   }
-  .map-stat-card .msl { font-size: 10.5px; color: #ccc; text-transform: uppercase; letter-spacing: .02em; font-weight: 600; }
-  .map-stat-card .msv { font-size: 24px; font-weight: 900; font-family: var(--mono); color: #fff; line-height: 1.15; }
-  .map-stat-card .msu { font-size: 10.5px; color: #aaa; font-weight: 600; }
+  .map-stat-card .msl { font-size: 10.5px; color: #ccc; text-transform: uppercase; letter-spacing: .02em; font-weight: 600; margin-bottom: 1px; }
+  .map-stat-card .msv-row { display: flex; align-items: baseline; justify-content: center; gap: 3px; }
+  .map-stat-card .msv { font-size: 30px; font-weight: 900; font-family: var(--mono); color: #fff; line-height: 1.1; letter-spacing: -.01em; }
+  .map-stat-card .msu { font-size: 12px; color: #bbb; font-weight: 700; }
 
   .map-record-btns { display: flex; gap: 8px; }
   .map-rec-btn {
@@ -853,38 +892,57 @@
     <button class="fs-btn map-fs-btn" onclick="toggleFullscreen()">⛶</button>
     <button class="map-locate-btn active" id="map-locate-btn" onclick="toggleFollowMode()">◉</button>
 
+    <!-- Pop-up 1: avvicinamento a una salita salvata -->
+    <div class="map-climb-approach" id="map-climb-approach">
+      <div class="mca-name" id="mca-name">—</div>
+      <div class="mca-dist" id="mca-dist">—</div>
+    </div>
+
+    <!-- Pop-up 2: navigazione attiva sulla salita -->
+    <div class="map-climb-overlay" id="map-climb-overlay">
+      <div class="mco-header">
+        <div class="mco-name" id="mco-name">—</div>
+        <button class="mco-close" onclick="dismissActiveClimbOverlay()">✕</button>
+      </div>
+      <svg id="map-climb-svg" class="mco-svg" viewBox="0 0 360 90" preserveAspectRatio="none"></svg>
+      <div class="mco-stats">
+        <div class="mco-stat">
+          <div class="mco-val" id="mco-grade">—</div>
+          <div class="mco-unit">% pendenza</div>
+        </div>
+        <div class="mco-stat">
+          <div class="mco-val" id="mco-remaining">—</div>
+          <div class="mco-unit">rimanenti</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Pannello registrazione in basso -->
     <div class="map-record-panel">
       <div class="map-stats-row">
         <div class="map-stat-card">
           <div class="msl">Velocità</div>
-          <div class="msv" id="map-speed">—</div>
-          <div class="msu">km/h</div>
+          <div class="msv-row"><span class="msv" id="map-speed">—</span><span class="msu">km/h</span></div>
         </div>
         <div class="map-stat-card">
           <div class="msl">Vel. Media</div>
-          <div class="msv" id="map-avg-speed">—</div>
-          <div class="msu">km/h</div>
+          <div class="msv-row"><span class="msv" id="map-avg-speed">—</span><span class="msu">km/h</span></div>
         </div>
         <div class="map-stat-card">
           <div class="msl">Quota</div>
-          <div class="msv" id="map-altitude">—</div>
-          <div class="msu">m s.l.m.</div>
+          <div class="msv-row"><span class="msv" id="map-altitude">—</span><span class="msu">mslm</span></div>
         </div>
         <div class="map-stat-card">
           <div class="msl">Percorsi</div>
-          <div class="msv" id="map-distance">0.0</div>
-          <div class="msu">km</div>
+          <div class="msv-row"><span class="msv" id="map-distance">0.0</span><span class="msu">km</span></div>
         </div>
         <div class="map-stat-card">
           <div class="msl">Durata</div>
-          <div class="msv" id="map-duration">00:00</div>
-          <div class="msu">&nbsp;</div>
+          <div class="msv-row"><span class="msv" id="map-duration">00:00</span></div>
         </div>
         <div class="map-stat-card">
           <div class="msl">Dislivello +</div>
-          <div class="msv" id="map-elevgain">0</div>
-          <div class="msu">m</div>
+          <div class="msv-row"><span class="msv" id="map-elevgain">0</span><span class="msu">m</span></div>
         </div>
       </div>
       <div class="map-record-btns">
@@ -1442,13 +1500,97 @@ function showView(id, btn) {
   if (id === 'map') initMapView();
 }
 
-// ── SALITE STORAGE ─────────────────────────────────────────────
-function loadClimbs() {
-  try { return JSON.parse(localStorage.getItem('hrm-climbs') || '[]'); } catch { return []; }
+// ── SALITE STORAGE (IndexedDB — nessun limite pratico di spazio) ──
+// Le salite (con relative tracce GPX, potenzialmente centinaia di KB
+// ciascuna) sono spostate da localStorage (limite tipico 5-10MB totali) a
+// IndexedDB, che su Android Chrome tipicamente concede centinaia di MB.
+// Questo permette di caricarne un numero elevato senza rischio di
+// "ingolfare" lo spazio disponibile.
+const IDB_NAME = 'hrm-db';
+const IDB_VERSION = 1;
+const IDB_STORE_CLIMBS = 'climbs';
+
+function openClimbsDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(IDB_STORE_CLIMBS)) {
+        db.createObjectStore(IDB_STORE_CLIMBS, { keyPath: 'addedAt' });
+      }
+    };
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror = e => reject(e.target.error);
+  });
 }
-function saveClimbs() {
-  localStorage.setItem('hrm-climbs', JSON.stringify(climbs));
+
+async function idbGetAllClimbs() {
+  const db = await openClimbsDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE_CLIMBS, 'readonly');
+    const req = tx.objectStore(IDB_STORE_CLIMBS).getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
 }
+
+async function idbClearClimbs() {
+  const db = await openClimbsDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE_CLIMBS, 'readwrite');
+    tx.objectStore(IDB_STORE_CLIMBS).clear();
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function idbPutClimb(climb) {
+  const db = await openClimbsDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE_CLIMBS, 'readwrite');
+    tx.objectStore(IDB_STORE_CLIMBS).put(climb);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+// Scrive l'intero array `climbs` in IndexedDB (clear + rewrite). Semplice e
+// robusto; il costo è trascurabile rispetto alla frequenza con cui si
+// aggiungono/rimuovono salite (non è un'operazione ad alta frequenza).
+async function saveClimbs() {
+  try {
+    await idbClearClimbs();
+    for (const c of climbs) await idbPutClimb(c);
+  } catch (e) { console.error('Salvataggio salite non riuscito:', e); }
+}
+
+// Carica le salite da IndexedDB all'avvio; se IndexedDB è vuoto ma esiste
+// ancora un vecchio salvataggio in localStorage (da versioni precedenti
+// dell'app), lo migra automaticamente una tantum.
+async function initClimbsStorage() {
+  try {
+    let loaded = await idbGetAllClimbs();
+    if (loaded.length === 0) {
+      const legacy = localStorage.getItem('hrm-climbs');
+      if (legacy) {
+        try {
+          const parsed = JSON.parse(legacy);
+          if (Array.isArray(parsed) && parsed.length) {
+            for (const c of parsed) await idbPutClimb(c);
+            loaded = parsed;
+            localStorage.removeItem('hrm-climbs');
+          }
+        } catch { /* legacy corrotto: ignora */ }
+      }
+    }
+    climbs = loaded.sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0));
+  } catch (e) {
+    console.error('Caricamento salite non riuscito:', e);
+    climbs = [];
+  }
+  renderClimbList();
+}
+
 function loadAscents() {
   try { return JSON.parse(localStorage.getItem('hrm-ascents') || '[]'); } catch { return []; }
 }
@@ -1457,7 +1599,7 @@ function saveAscents() {
 }
 
 // ── SALITE STATE ───────────────────────────────────────────────
-let climbs = loadClimbs();
+let climbs = []; // popolato in modo asincrono da initClimbsStorage() all'avvio
 let activeClimb = null;
 let gpsWatchId = null;
 let currentSegIdx = -1;
@@ -1659,7 +1801,12 @@ function parseGPX(xml) {
 }
 
 // Project a GPS position onto the GPX track → returns meters along track
-function projectOntoTrack(lat, lon, trackPts, searchWindow) {
+// Funzione "pura": non dipende né modifica variabili globali condivise.
+// Il chiamante gestisce il proprio "ultimo indice abbinato" passandolo in
+// lastMatchedIdx e salvando quello restituito in result.matchedIdx.
+// Questo permette a più flussi indipendenti (es. Salite e Mappa) di usarla
+// contemporaneamente senza interferire l'uno con lo stato dell'altro.
+function projectOntoTrack(lat, lon, trackPts, searchWindow, lastMatchedIdx) {
   if (!trackPts || trackPts.length < 2) return null;
 
   // Ricerca localizzata: se abbiamo un ultimo indice abbinato, limita la
@@ -1668,9 +1815,9 @@ function projectOntoTrack(lat, lon, trackPts, searchWindow) {
   // sulla traccia. Se non c'è un indice precedente (prima lettura), cerca
   // su tutta la traccia.
   let startI = 0, endI = trackPts.length - 1;
-  if (searchWindow && climbLastMatchedIdx !== null) {
-    startI = Math.max(0, climbLastMatchedIdx - searchWindow);
-    endI   = Math.min(trackPts.length - 1, climbLastMatchedIdx + searchWindow);
+  if (searchWindow && lastMatchedIdx != null) {
+    startI = Math.max(0, lastMatchedIdx - searchWindow);
+    endI   = Math.min(trackPts.length - 1, lastMatchedIdx + searchWindow);
   }
 
   let bestDist = Infinity, bestAlongTrack = 0, bestIdx = startI;
@@ -1696,11 +1843,10 @@ function projectOntoTrack(lat, lon, trackPts, searchWindow) {
   // Se la ricerca localizzata non trova nulla di plausibile (>150m), riprova
   // sull'intera traccia (es. dopo un salto GPS o alla primissima lettura)
   if (searchWindow && bestDist > 150) {
-    return projectOntoTrack(lat, lon, trackPts, null);
+    return projectOntoTrack(lat, lon, trackPts, null, null);
   }
 
-  climbLastMatchedIdx = bestIdx;
-  return { distAlongTrack: bestAlongTrack, perpDist: bestDist };
+  return { distAlongTrack: bestAlongTrack, perpDist: bestDist, matchedIdx: bestIdx };
 }
 
 // ── NAVIGATOR ──────────────────────────────────────────────────
@@ -1750,8 +1896,7 @@ function startClimb(idx) {
 function computeGpxStartOffset(climb) {
   if (!climb.gpxPoints) return 0;
   if (climb.startCoords) {
-    climbLastMatchedIdx = null; // forza ricerca globale
-    const proj = projectOntoTrack(climb.startCoords.lat, climb.startCoords.lon, climb.gpxPoints, null);
+    const proj = projectOntoTrack(climb.startCoords.lat, climb.startCoords.lon, climb.gpxPoints, null, null);
     if (proj) return proj.distAlongTrack;
   }
   // Fallback: nessuna coordinata di partenza — assumiamo che la traccia
@@ -1877,8 +2022,7 @@ function syncPositionWithClimbStart(coords) {
     // (soglia stretta apposta, per non confondersi con tornanti lontani)
     let midwayProj = null;
     if (activeClimb.gpxPoints) {
-      climbLastMatchedIdx = null;
-      const proj = projectOntoTrack(coords.latitude, coords.longitude, activeClimb.gpxPoints, null);
+      const proj = projectOntoTrack(coords.latitude, coords.longitude, activeClimb.gpxPoints, null, null);
       if (proj && proj.perpDist <= CLIMB_MIDWAY_LOCK_PERP_M) midwayProj = proj;
     }
 
@@ -1888,9 +2032,9 @@ function syncPositionWithClimbStart(coords) {
       climbApproaching = false;
       climbDistanceDone = 0;
       if (activeClimb.gpxPoints) {
-        climbLastMatchedIdx = null;
-        const proj = projectOntoTrack(coords.latitude, coords.longitude, activeClimb.gpxPoints, null);
+        const proj = projectOntoTrack(coords.latitude, coords.longitude, activeClimb.gpxPoints, null, null);
         climbGpxStartOffsetM = proj ? proj.distAlongTrack : 0;
+        climbLastMatchedIdx = proj ? proj.matchedIdx : null;
       }
       updateApproachBanner(false, 0);
       toast("🚀 Sei all'inizio — navigazione agganciata!");
@@ -1901,13 +2045,12 @@ function syncPositionWithClimbStart(coords) {
       climbLockedOnTrack = true;
       climbApproaching = false;
       if (activeClimb.startCoords) {
-        climbLastMatchedIdx = null;
-        const startProj = projectOntoTrack(activeClimb.startCoords.lat, activeClimb.startCoords.lon, activeClimb.gpxPoints, null);
+        const startProj = projectOntoTrack(activeClimb.startCoords.lat, activeClimb.startCoords.lon, activeClimb.gpxPoints, null, null);
         climbGpxStartOffsetM = startProj ? startProj.distAlongTrack : 0;
       } else {
         climbGpxStartOffsetM = 0;
       }
-      climbLastMatchedIdx = null;
+      climbLastMatchedIdx = midwayProj.matchedIdx;
       climbDistanceDone = Math.max(0, midwayProj.distAlongTrack - climbGpxStartOffsetM);
       updateApproachBanner(false, 0);
       updateProgress();
@@ -1925,9 +2068,9 @@ function syncPositionWithClimbStart(coords) {
 
   // ── FASE 2: già agganciato, riproietta sulla traccia (es. dopo pausa) ──
   if (activeClimb.gpxPoints) {
-    climbLastMatchedIdx = null; // permetti ricerca globale per riallineare
-    const proj = projectOntoTrack(coords.latitude, coords.longitude, activeClimb.gpxPoints, null);
+    const proj = projectOntoTrack(coords.latitude, coords.longitude, activeClimb.gpxPoints, null, null);
     if (proj && proj.perpDist < 100) {
+      climbLastMatchedIdx = proj.matchedIdx;
       const realDist = proj.distAlongTrack - climbGpxStartOffsetM;
       climbDistanceDone = Math.max(0, realDist);
       updateProgress();
@@ -1992,8 +2135,9 @@ function onGPSUpdate(pos) {
 
   // ── FASE 2: agganciato — tracciamento fine sulla traccia GPX ──
   if (activeClimb && activeClimb.gpxPoints) {
-    const proj = projectOntoTrack(pos.coords.latitude, pos.coords.longitude, activeClimb.gpxPoints, 80);
+    const proj = projectOntoTrack(pos.coords.latitude, pos.coords.longitude, activeClimb.gpxPoints, 80, climbLastMatchedIdx);
     if (proj && proj.perpDist < 60) { // dentro 60m dalla traccia (ricerca localizzata: evita falsi abbinamenti)
+      climbLastMatchedIdx = proj.matchedIdx;
       const realDist = proj.distAlongTrack - climbGpxStartOffsetM;
 
       climbApproaching = false;
@@ -2417,6 +2561,26 @@ let mapGpsWatchId = null;
 let mapLiveMarker = null;
 let mapLastPos = null;
 let mapFollowMode = true; // segue automaticamente la posizione GPS
+let mapLastHeading = 0;   // ultima direzione nota (gradi, 0=nord), per il cursore triangolare
+let mapElevOffsetM = null; // offset di calibrazione quota (quota mappa - quota GPS grezza)
+
+// ── RILEVAMENTO AUTOMATICO SALITE (scheda Mappa) ──────────────
+// Stato indipendente da quello della sezione Salite (che ha il proprio
+// flusso manuale tramite activeClimb/climbLockedOnTrack ecc.) — i due
+// possono girare contemporaneamente (es. ascensione avviata in Salite e
+// poi si passa alla Mappa) senza interferire tra loro.
+const MAP_CLIMB_APPROACH_RADIUS_M = 2200; // ~2km di preavviso
+const MAP_CLIMB_GIVEUP_RADIUS_M   = 3000; // oltre questa distanza, annulla il rilevamento
+const MAP_CLIMB_LOCK_RADIUS_M     = 20;
+const MAP_CLIMB_MIDWAY_PERP_M     = 20;
+let mapDetectedClimb   = null;   // oggetto salita attualmente rilevata/agganciata
+let mapClimbPhase      = 'none'; // 'none' | 'approaching' | 'active'
+let mapClimbLastMatchedIdx  = null;
+let mapClimbGpxStartOffsetM = 0;
+let mapClimbDistanceDone    = 0;
+let mapClimbCurrentSegIdx   = -1;
+let mapClimbCheckCounter    = 0; // limita la frequenza del controllo "economico" su tutte le salite
+let mapElevCalibrating = false;
 
 // Registrazione traccia
 let trackRecording = false;
@@ -2462,6 +2626,7 @@ function initMapView() {
   // Forza il ricalcolo delle dimensioni (il div era display:none finora)
   setTimeout(() => leafletMap.invalidateSize(), 50);
   setFollowMode(true);
+  mapElevOffsetM = null; // ricalibra la quota ad ogni apertura della scheda
   startMapGPS();
   renderTracksList();
   renderOfflinePacksList();
@@ -2493,20 +2658,72 @@ function startMapGPS() {
 function stopMapGPS() {
   if (mapGpsWatchId !== null) { navigator.geolocation.clearWatch(mapGpsWatchId); mapGpsWatchId = null; }
   mapLastPos = null;
+  resetMapClimbDetection(); // ripartirà da zero alla prossima apertura della scheda
+}
+
+function calcBearing(a, b) {
+  const φ1 = a.latitude * Math.PI / 180, φ2 = b.latitude * Math.PI / 180;
+  const Δλ = (b.longitude - a.longitude) * Math.PI / 180;
+  const y = Math.sin(Δλ) * Math.cos(φ2);
+  const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+  const θ = Math.atan2(y, x);
+  return (θ * 180 / Math.PI + 360) % 360;
+}
+
+const GPS_ARROW_ICON = L.divIcon({
+  className: 'gps-arrow-icon',
+  html: '<svg class="gps-arrow" width="30" height="30" viewBox="0 0 24 24">' +
+        '<polygon points="12,2 20,21 12,16 4,21" fill="#4fc3f7" stroke="#0a0a0f" stroke-width="1.5" stroke-linejoin="round"/>' +
+        '</svg>',
+  iconSize: [30, 30],
+  iconAnchor: [15, 15],
+});
+
+// Calibra la quota GPS confrontandola una volta con la quota "reale" (Open-
+// Elevation, dati SRTM) per il punto corrente. Il GPS da solo sovrastima
+// tipicamente la quota di 60-80m (differenza ellissoide/geoide).
+async function calibrateLiveAltitude(lat, lon, rawAlt) {
+  if (mapElevCalibrating) return;
+  mapElevCalibrating = true;
+  try {
+    const resp = await fetch('https://api.open-elevation.com/api/v1/lookup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ locations: [{ latitude: lat, longitude: lon }] })
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      const trueEle = data.results && data.results[0] ? data.results[0].elevation : null;
+      if (trueEle != null) mapElevOffsetM = trueEle - rawAlt;
+    }
+  } catch (e) { /* offline o servizio non raggiungibile: resta il dato grezzo */ }
+  mapElevCalibrating = false;
 }
 
 function onMapGPSUpdate(pos) {
-  const { latitude: lat, longitude: lon, speed, accuracy, altitude } = pos.coords;
+  const { latitude: lat, longitude: lon, speed, accuracy, altitude, heading } = pos.coords;
 
-  // Marker posizione live
+  // Direzione: usa l'heading del dispositivo se disponibile e affidabile
+  // (richiede movimento), altrimenti calcola il bearing tra due fix GPS
+  if (heading != null && !isNaN(heading) && (speed == null || speed > 0.5)) {
+    mapLastHeading = heading;
+  } else if (mapLastPos) {
+    const d = haversineMeters(mapLastPos.coords, pos.coords);
+    if (d > 3) mapLastHeading = calcBearing(mapLastPos.coords, pos.coords);
+  }
+
+  // Marker posizione live — triangolo direzionale
   if (!mapLiveMarker) {
-    mapLiveMarker = L.circleMarker([lat, lon], {
-      radius: 8, color: '#4fc3f7', fillColor: '#4fc3f7', fillOpacity: 0.9, weight: 3
-    }).addTo(leafletMap);
+    mapLiveMarker = L.marker([lat, lon], { icon: GPS_ARROW_ICON }).addTo(leafletMap);
     leafletMap.setView([lat, lon], 16);
   } else {
     mapLiveMarker.setLatLng([lat, lon]);
     if (mapFollowMode) leafletMap.panTo([lat, lon], { animate: true, duration: 0.5 });
+  }
+  const arrowEl = mapLiveMarker.getElement();
+  if (arrowEl) {
+    const svg = arrowEl.querySelector('.gps-arrow');
+    if (svg) svg.style.transform = `rotate(${mapLastHeading}deg)`;
   }
 
   // Velocità corrente
@@ -2518,8 +2735,17 @@ function onMapGPSUpdate(pos) {
   }
   document.getElementById('map-speed').textContent = speedKmh != null ? speedKmh.toFixed(1) : '—';
 
-  // Quota corrente (sempre mostrata quando disponibile dal GPS)
-  document.getElementById('map-altitude').textContent = altitude != null ? Math.round(altitude) : '—';
+  // Quota corrente, calibrata con dato di elevazione reale (offset una
+  // tantum per sessione mappa) per correggere la sovrastima tipica del GPS
+  if (altitude != null) {
+    if (mapElevOffsetM === null && !mapElevCalibrating) {
+      calibrateLiveAltitude(lat, lon, altitude);
+    }
+    const corrected = mapElevOffsetM !== null ? altitude + mapElevOffsetM : altitude;
+    document.getElementById('map-altitude').textContent = Math.round(corrected);
+  } else {
+    document.getElementById('map-altitude').textContent = '—';
+  }
 
   // Se registrazione attiva e non in pausa, accumula traccia + dislivello
   if (trackRecording && !trackPaused && accuracy != null && accuracy <= 30) {
@@ -2554,10 +2780,233 @@ function onMapGPSUpdate(pos) {
     }
   }
 
+  // Rilevamento automatico salite salvate (background, indipendente dalla
+  // sezione Salite manuale)
+  checkNearbyClimbsForMap(pos.coords);
+
   mapLastPos = pos;
 }
 
-// ── REGISTRAZIONE TRACCIA (avvia/pausa/riprendi/termina) ──────
+// ═══════════════════════════════════════════════════════════════
+// ── RILEVAMENTO AUTOMATICO SALITE — SCHEDA MAPPA ────────────────
+// ═══════════════════════════════════════════════════════════════
+// Due stadi: (1) controllo economico — distanza in linea retta dal punto
+// di partenza di OGNI salita salvata, eseguito ogni pochi fix per non
+// sprecare cicli quando non serve; (2) controllo dettagliato — proiezione
+// sulla traccia GPX, ma solo per la salita già individuata come vicina.
+function checkNearbyClimbsForMap(coords) {
+  if (mapClimbPhase === 'active') {
+    updateActiveMapClimbTracking(coords);
+    return;
+  }
+  if (mapClimbPhase === 'approaching') {
+    updateApproachingMapClimb(coords);
+    return;
+  }
+
+  // Fase 'none': il controllo economico gira ogni 3 fix (~3-6 secondi)
+  // per limitare il lavoro quando si hanno molte salite salvate — la
+  // distanza da un punto di partenza non cambia in modo significativo
+  // in pochi secondi di pedalata.
+  mapClimbCheckCounter++;
+  if (mapClimbCheckCounter % 3 !== 0) return;
+  if (!climbs.length) return;
+
+  let nearest = null, nearestDist = Infinity;
+  for (const c of climbs) {
+    if (!c.startCoords) continue;
+    const d = haversineMeters(coords, { latitude: c.startCoords.lat, longitude: c.startCoords.lon });
+    if (d < nearestDist) { nearestDist = d; nearest = c; }
+  }
+  if (nearest && nearestDist <= MAP_CLIMB_APPROACH_RADIUS_M) {
+    mapDetectedClimb = nearest;
+    mapClimbPhase = 'approaching';
+    mapClimbLastMatchedIdx = null;
+    mapClimbGpxStartOffsetM = 0;
+    showClimbApproachPopup(nearest, nearestDist);
+  }
+}
+
+function updateApproachingMapClimb(coords) {
+  const c = mapDetectedClimb;
+  if (!c || !c.startCoords) { resetMapClimbDetection(); return; }
+
+  const distToStart = haversineMeters(coords, { latitude: c.startCoords.lat, longitude: c.startCoords.lon });
+
+  // Troppo lontani di nuovo (es. svolta su un'altra strada): annulla
+  if (distToStart > MAP_CLIMB_GIVEUP_RADIUS_M) {
+    resetMapClimbDetection();
+    return;
+  }
+
+  updateClimbApproachPopup(c.name, distToStart);
+
+  // Test aggancio: entro il raggio dal punto di partenza, OPPURE molto
+  // vicini alla traccia GPX (permette di agganciare anche a metà salita)
+  let locked = false;
+  if (distToStart <= MAP_CLIMB_LOCK_RADIUS_M) {
+    locked = true;
+    if (c.gpxPoints) {
+      const proj = projectOntoTrack(coords.latitude, coords.longitude, c.gpxPoints, null, null);
+      mapClimbGpxStartOffsetM = proj ? proj.distAlongTrack : 0;
+      mapClimbLastMatchedIdx  = proj ? proj.matchedIdx : null;
+    }
+    mapClimbDistanceDone = 0;
+  } else if (c.gpxPoints) {
+    const proj = projectOntoTrack(coords.latitude, coords.longitude, c.gpxPoints, null, null);
+    if (proj && proj.perpDist <= MAP_CLIMB_MIDWAY_PERP_M) {
+      locked = true;
+      const startProj = c.startCoords
+        ? projectOntoTrack(c.startCoords.lat, c.startCoords.lon, c.gpxPoints, null, null)
+        : null;
+      mapClimbGpxStartOffsetM = startProj ? startProj.distAlongTrack : 0;
+      mapClimbLastMatchedIdx  = proj.matchedIdx;
+      mapClimbDistanceDone = Math.max(0, proj.distAlongTrack - mapClimbGpxStartOffsetM);
+    }
+  }
+
+  if (locked) {
+    mapClimbPhase = 'active';
+    hideClimbApproachPopup();
+    showActiveClimbOverlay(c);
+    updateActiveClimbOverlayUI();
+  }
+}
+
+function updateActiveMapClimbTracking(coords) {
+  const c = mapDetectedClimb;
+  if (!c) { resetMapClimbDetection(); return; }
+
+  const totalM = c.segments.reduce((s, seg) => s + seg.km * 1000, 0);
+
+  if (c.gpxPoints) {
+    const proj = projectOntoTrack(coords.latitude, coords.longitude, c.gpxPoints, 80, mapClimbLastMatchedIdx);
+    if (proj && proj.perpDist < 60) {
+      mapClimbLastMatchedIdx = proj.matchedIdx;
+      mapClimbDistanceDone = Math.max(0, proj.distAlongTrack - mapClimbGpxStartOffsetM);
+    }
+    // Se ci si allontana troppo dalla traccia, non aggiorniamo (probabile
+    // deviazione temporanea o fine registrazione GPX) ma non annulliamo
+    // subito: la salita resta "attiva" finché non si supera la lunghezza
+  } else {
+    // Nessuna traccia GPX: fallback ad accumulo semplice tra fix
+    if (mapLastPos) {
+      const d = haversineMeters(mapLastPos.coords, coords);
+      if (d > 0 && d < 300) mapClimbDistanceDone += d;
+    }
+  }
+
+  // Trova il segmento corrente
+  let cum = 0;
+  mapClimbCurrentSegIdx = c.segments.length - 1;
+  for (let i = 0; i < c.segments.length; i++) {
+    cum += c.segments[i].km * 1000;
+    if (mapClimbDistanceDone < cum) { mapClimbCurrentSegIdx = i; break; }
+  }
+
+  updateActiveClimbOverlayUI();
+
+  // Completamento salita
+  if (mapClimbDistanceDone >= totalM - 15) {
+    toast(`🏁 "${c.name}" completata!`);
+    dismissActiveClimbOverlay();
+  }
+}
+
+function resetMapClimbDetection() {
+  hideClimbApproachPopup();
+  dismissActiveClimbOverlay();
+  mapDetectedClimb = null;
+  mapClimbPhase = 'none';
+  mapClimbLastMatchedIdx = null;
+  mapClimbGpxStartOffsetM = 0;
+  mapClimbDistanceDone = 0;
+  mapClimbCurrentSegIdx = -1;
+}
+
+// ── UI: pop-up avvicinamento ────────────────────────────────────
+function showClimbApproachPopup(climb, distM) {
+  const el = document.getElementById('map-climb-approach');
+  el.classList.add('visible');
+  updateClimbApproachPopup(climb.name, distM);
+}
+function updateClimbApproachPopup(name, distM) {
+  const el = document.getElementById('map-climb-approach');
+  el.classList.toggle('near', distM <= 300);
+  document.getElementById('mca-name').textContent = `🚵 In avvicinamento: ${name}`;
+  document.getElementById('mca-dist').textContent = distM >= 1000
+    ? `${(distM/1000).toFixed(1)} km all'inizio`
+    : `${Math.round(distM)} m all'inizio`;
+}
+function hideClimbApproachPopup() {
+  document.getElementById('map-climb-approach').classList.remove('visible');
+}
+
+// ── UI: pop-up navigazione attiva ───────────────────────────────
+function showActiveClimbOverlay(climb) {
+  const el = document.getElementById('map-climb-overlay');
+  el.classList.add('visible');
+  document.getElementById('mco-name').textContent = climb.name;
+}
+function dismissActiveClimbOverlay() {
+  document.getElementById('map-climb-overlay').classList.remove('visible');
+  resetMapClimbDetection();
+}
+function updateActiveClimbOverlayUI() {
+  const c = mapDetectedClimb;
+  if (!c || mapClimbPhase !== 'active') return;
+  const totalM = c.segments.reduce((s, seg) => s + seg.km * 1000, 0);
+  const remaining = Math.max(0, totalM - mapClimbDistanceDone);
+  const grade = mapClimbCurrentSegIdx >= 0 ? c.segments[mapClimbCurrentSegIdx].grade : 0;
+
+  document.getElementById('mco-grade').textContent = grade.toFixed(1);
+  document.getElementById('mco-remaining').textContent = remaining >= 1000
+    ? `${(remaining/1000).toFixed(1)} km` : `${Math.round(remaining)} m`;
+
+  drawMapClimbProfile(c);
+}
+
+// Mini profilo altimetrico con cursore, stile identico a drawProfile() di
+// Salite ma su un canvas più piccolo adatto all'overlay della mappa.
+function drawMapClimbProfile(c) {
+  const segs = c.segments;
+  const W = 360, H = 90, PAD = 4;
+  const totalKm = segs.reduce((s, g) => s + g.km, 0);
+  const totalM = totalKm * 1000;
+  const done = Math.min(mapClimbDistanceDone, totalM);
+
+  let points = [{ x: 0, y: 0 }];
+  let cumKm = 0;
+  segs.forEach(seg => {
+    cumKm += seg.km;
+    const rise = seg.km * 1000 * seg.grade / 100;
+    points.push({ x: cumKm / totalKm, y: points[points.length-1].y + rise });
+  });
+  const maxElev = Math.max(...points.map(p => p.y), 1);
+  const toSVG = p => ({
+    x: PAD + p.x * (W - 2*PAD),
+    y: H - PAD - (p.y / maxElev) * (H - 2*PAD - 10)
+  });
+
+  let svgContent = '';
+  let cumX = 0;
+  segs.forEach((seg, i) => {
+    const x0 = cumX / totalKm, x1 = (cumX + seg.km) / totalKm;
+    const p0 = toSVG({ x: x0, y: points[i].y });
+    const p1 = toSVG({ x: x1, y: points[i+1].y });
+    const color = gradeColor(seg.grade);
+    const opacity = i < mapClimbCurrentSegIdx ? 0.3 : 1;
+    svgContent += `<polygon points="${p0.x},${p0.y} ${p1.x},${p1.y} ${p1.x},${H-PAD} ${p0.x},${H-PAD}" fill="${color}" opacity="${opacity}"/>`;
+    cumX += seg.km;
+  });
+
+  const cursorX = PAD + (done / totalM) * (W - 2*PAD);
+  svgContent += `<line x1="${cursorX}" y1="${PAD}" x2="${cursorX}" y2="${H-PAD}" stroke="#fff" stroke-width="2" stroke-dasharray="3,2"/>`;
+  svgContent += `<line x1="${PAD}" y1="${H-PAD}" x2="${W-PAD}" y2="${H-PAD}" stroke="var(--border)" stroke-width="1"/>`;
+
+  const svgEl = document.getElementById('map-climb-svg');
+  if (svgEl) svgEl.innerHTML = svgContent;
+}
 function startTrackRecording() {
   trackRecording  = true;
   trackPaused     = false;
@@ -2927,7 +3376,7 @@ function deleteOfflinePack(id) {
 
 loadZoneInputs();
 renderHistory();
-renderClimbList();
+initClimbsStorage(); // carica le salite da IndexedDB (asincrono) e poi renderizza
 renderAscentList();
 checkAutosaveRecovery();
 
