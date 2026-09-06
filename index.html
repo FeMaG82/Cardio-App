@@ -560,8 +560,12 @@
   .track-card {
     background: var(--card); border: 1px solid var(--border);
     border-radius: 12px; padding: 12px 14px; margin-bottom: 10px;
+    transition: border-color .2s;
   }
-  .track-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .track-card.selected { border-color: var(--accent); }
+  .track-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px; }
+  .track-card-header-left { display: flex; align-items: flex-start; gap: 10px; }
+  .track-select-cb { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--accent); flex-shrink: 0; }
   .track-name { font-size: 14px; font-weight: 700; }
   .track-date { font-size: 11px; color: #999; margin-top: 2px; }
   .track-stats { display: flex; gap: 16px; font-size: 12px; color: #ccc; margin-bottom: 10px; }
@@ -573,6 +577,19 @@
   }
   .track-btn.dl  { background: var(--accent); color: var(--bg); }
   .track-btn.del { background: var(--card); border: 1px solid var(--border); color: #ccc; }
+
+  .merge-action-bar {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+    padding: 10px 12px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .merge-action-bar span { flex: 1; font-size: 12px; color: #ccc; }
+  .btn-merge {
+    padding: 8px 16px; border-radius: 20px; border: none;
+    background: var(--accent); color: var(--bg); font-size: 12px; font-weight: 800;
+    cursor: pointer;
+  }
+  .btn-merge:disabled { opacity: .35; cursor: not-allowed; }
 
   /* Offline tiles manager */
   .offline-zoom-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
@@ -970,7 +987,11 @@
 <div class="map-sheet-overlay" id="tracks-sheet">
   <div class="map-sheet">
     <h3>Le mie tracce</h3>
-    <p class="hint">Tracce GPS registrate, scaricabili in formato GPX.</p>
+    <p class="hint">Tracce GPS registrate, scaricabili in formato GPX. Seleziona due o più tracce per unirle in una sola.</p>
+    <div class="merge-action-bar">
+      <span id="merge-selection-count">Nessuna traccia selezionata</span>
+      <button class="btn-merge" id="btn-merge-tracks" onclick="mergeSelectedTracks()" disabled>🔗 Unisci</button>
+    </div>
     <div id="tracks-list"></div>
     <button class="map-sheet-close" onclick="closeTracksSheet()">Chiudi</button>
   </div>
@@ -1341,7 +1362,7 @@ function pauseSession() {
   sessionPaused   = true;
   sessionPausedAt = Date.now();
   document.getElementById('btn-pause').style.display  = 'none';
-  document.getElementById('btn-resume').style.display = '';
+  document.getElementById('btn-resume').style.display = 'block';
   toast('⏸ Sessione in pausa');
 }
 
@@ -2606,7 +2627,12 @@ let trackElevGainM = 0;      // dislivello positivo accumulato (filtrato a sogli
 let trackLastEle = null;     // ultima quota "stabile" usata come riferimento per il filtro
 const ELEV_NOISE_THRESHOLD_M = 3; // soglia (m) per ignorare il rumore GPS sulla quota
 let trackTimer = null;
+let trackLastMoveTime = null; // timestamp dell'ultimo movimento rilevato (per auto-pausa)
+let trackAutoPaused = false;  // true se la pausa è stata attivata automaticamente (non manualmente)
+const AUTO_PAUSE_IDLE_MS = 10000; // 10 secondi senza movimento → pausa automatica
+const AUTO_PAUSE_MOVE_THRESHOLD_M = 3; // sotto questa distanza tra fix, si considera "fermo"
 let tracks = loadTracks();
+let selectedTrackIds = new Set(); // tracce selezionate per l'unione
 
 // Offline tiles
 const OFFLINE_TILE_LIMIT = 180;
@@ -2762,6 +2788,7 @@ function onMapGPSUpdate(pos) {
   if (trackRecording && !trackPaused && accuracy != null && accuracy <= 30) {
     if (mapLastPos) {
       const d = haversineMeters(mapLastPos.coords, pos.coords);
+      if (d > AUTO_PAUSE_MOVE_THRESHOLD_M) trackLastMoveTime = Date.now();
       if (d > 1 && d < 300) {
         trackDistM += d;
         trackPoints.push({ lat, lon, ele: altitude || null, t: Date.now() });
@@ -3030,6 +3057,8 @@ function startTrackRecording() {
   trackStartTime  = Date.now();
   trackElevGainM  = 0;
   trackLastEle    = null;
+  trackLastMoveTime = Date.now();
+  trackAutoPaused = false;
 
   if (trackPolyline) { leafletMap.removeLayer(trackPolyline); }
   trackPolyline = L.polyline([], { color: '#4fc3f7', weight: 4 }).addTo(leafletMap);
@@ -3049,18 +3078,24 @@ function startTrackRecording() {
     const elapsed = Math.floor((Date.now() - trackStartTime - trackPausedMs) / 1000);
     document.getElementById('map-duration').textContent = formatTime(elapsed);
     updateTrackStats();
+
+    // Pausa automatica: nessun movimento rilevato da più di 10 secondi
+    if (trackLastMoveTime && (Date.now() - trackLastMoveTime > AUTO_PAUSE_IDLE_MS)) {
+      pauseTrackRecording(true);
+    }
   }, 1000);
 
   toast('▶ Registrazione traccia avviata');
 }
 
-function pauseTrackRecording() {
+function pauseTrackRecording(automatic) {
   if (!trackRecording || trackPaused) return;
   trackPaused   = true;
   trackPausedAt = Date.now();
+  trackAutoPaused = !!automatic;
   document.getElementById('map-btn-pause').style.display  = 'none';
-  document.getElementById('map-btn-resume').style.display = '';
-  toast('⏸ Traccia in pausa');
+  document.getElementById('map-btn-resume').style.display = 'block';
+  toast(automatic ? '⏸ Pausa automatica — nessun movimento rilevato' : '⏸ Traccia in pausa');
 }
 
 function resumeTrackRecording() {
@@ -3068,7 +3103,9 @@ function resumeTrackRecording() {
   trackPausedMs += Date.now() - trackPausedAt;
   trackPaused    = false;
   trackPausedAt  = null;
-  document.getElementById('map-btn-pause').style.display  = '';
+  trackAutoPaused = false;
+  trackLastMoveTime = Date.now();
+  document.getElementById('map-btn-pause').style.display  = 'block';
   document.getElementById('map-btn-resume').style.display = 'none';
   toast('▶ Traccia ripresa');
 }
@@ -3185,17 +3222,22 @@ function renderTracksList() {
   if (!el) return;
   if (!tracks.length) {
     el.innerHTML = '<div class="climb-empty">Nessuna traccia registrata.</div>';
+    updateMergeBar();
     return;
   }
   el.innerHTML = tracks.map(t => {
     const d = new Date(t.date);
     const dateStr = d.toLocaleDateString('it-IT', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    const isSelected = selectedTrackIds.has(t.id);
     return `
-    <div class="track-card">
+    <div class="track-card ${isSelected ? 'selected' : ''}">
       <div class="track-card-header">
-        <div>
-          <div class="track-name">Traccia</div>
-          <div class="track-date">${dateStr}</div>
+        <div class="track-card-header-left">
+          <input type="checkbox" class="track-select-cb" ${isSelected ? 'checked' : ''} onchange="toggleTrackSelection(${t.id})">
+          <div>
+            <div class="track-name">Traccia</div>
+            <div class="track-date">${dateStr}</div>
+          </div>
         </div>
       </div>
       <div class="track-stats">
@@ -3212,10 +3254,75 @@ function renderTracksList() {
       </div>
     </div>`;
   }).join('');
+  updateMergeBar();
+}
+
+function toggleTrackSelection(id) {
+  if (selectedTrackIds.has(id)) selectedTrackIds.delete(id);
+  else selectedTrackIds.add(id);
+  renderTracksList();
+}
+
+function updateMergeBar() {
+  const count = selectedTrackIds.size;
+  const label = document.getElementById('merge-selection-count');
+  const btn = document.getElementById('btn-merge-tracks');
+  if (!label || !btn) return;
+  label.textContent = count === 0 ? 'Nessuna traccia selezionata'
+    : count === 1 ? '1 traccia selezionata — scegline almeno 2'
+    : `${count} tracce selezionate`;
+  btn.disabled = count < 2;
+}
+
+async function mergeSelectedTracks() {
+  if (selectedTrackIds.size < 2) return;
+  const selected = tracks.filter(t => selectedTrackIds.has(t.id))
+                          .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  const mergedPoints = [];
+  let totalDist = 0, totalDuration = 0, totalElev = 0;
+  selected.forEach(t => {
+    mergedPoints.push(...t.points);
+    totalDist += t.distanceM;
+    totalDuration += t.duration;
+    totalElev += (t.elevGainM || 0);
+  });
+
+  const mergedTrack = {
+    id: Date.now(),
+    date: selected[0].date, // inizia dalla traccia più vecchia
+    duration: totalDuration,
+    distanceM: Math.round(totalDist),
+    avgSpeedKmh: totalDuration > 0 ? Math.round((totalDist/1000) / (totalDuration/3600) * 10) / 10 : 0,
+    elevGainM: Math.round(totalElev),
+    elevGainRawM: Math.round(totalElev),
+    elevCalibrated: false,
+    points: mergedPoints,
+    mergedFrom: selected.length,
+  };
+
+  tracks.unshift(mergedTrack);
+  saveTracks();
+
+  const deleteOriginals = confirm(
+    `Tracce unite in una nuova traccia (${(totalDist/1000).toFixed(1)} km).\n\nEliminare le ${selected.length} tracce originali?`
+  );
+  if (deleteOriginals) {
+    tracks = tracks.filter(t => !selectedTrackIds.has(t.id));
+    saveTracks();
+  }
+
+  selectedTrackIds.clear();
+  renderTracksList();
+  toast('✓ Tracce unite');
+
+  // Ricalibra il dislivello della traccia unita con dati di quota accurati
+  calibrateTrackElevation(mergedTrack.id);
 }
 
 function deleteTrack(id) {
   tracks = tracks.filter(t => t.id !== id);
+  selectedTrackIds.delete(id);
   saveTracks();
   renderTracksList();
 }
@@ -3252,7 +3359,10 @@ ${pts}
 
 // ── SHEETS (tracce / offline) ──────────────────────────────────
 function openTracksSheet()  { renderTracksList(); document.getElementById('tracks-sheet').classList.add('open'); }
-function closeTracksSheet() { document.getElementById('tracks-sheet').classList.remove('open'); }
+function closeTracksSheet() {
+  document.getElementById('tracks-sheet').classList.remove('open');
+  selectedTrackIds.clear();
+}
 function openOfflineSheet() {
   renderOfflinePacksList();
   updateOfflineEstimate();
