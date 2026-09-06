@@ -58,6 +58,16 @@
     border-radius: 8px 8px 0 0;
   }
 
+  /* Tasto accesso Zone in fondo al Monitor — stessa grafica fluo del nav */
+  .zone-access-btn {
+    display: block; width: 100%; margin-top: 16px;
+    padding: 14px 0; background: rgba(224,64,251,.08);
+    border: 1px solid rgba(224,64,251,.3); border-radius: 12px;
+    color: #e040fb; font-size: 14px; font-weight: 800;
+    letter-spacing: .04em; text-transform: uppercase; cursor: pointer;
+  }
+  .zone-access-btn:active { background: rgba(224,64,251,.18); }
+
   /* ── VIEWS ── */
   .view { display: none; padding: 20px 16px 100px; }
   .view.active { display: block; }
@@ -602,7 +612,6 @@
   <button onclick="showView('history',this)">Sessioni</button>
   <button onclick="showView('climb',this)">Salite</button>
   <button onclick="showView('map',this)">Mappa</button>
-  <button onclick="showView('settings',this)">Zone</button>
 </nav>
 
 <!-- ══════════ MONITOR ══════════ -->
@@ -709,6 +718,8 @@
       <span class="zone-pct" id="pct-z5">0%</span>
     </div>
   </div>
+
+  <button class="zone-access-btn" onclick="showView('settings',this)">Zone</button>
 
 </div>
 
@@ -2915,7 +2926,7 @@ function updateActiveMapClimbTracking(coords) {
 
 function resetMapClimbDetection() {
   hideClimbApproachPopup();
-  dismissActiveClimbOverlay();
+  hideActiveClimbOverlayUI();
   mapDetectedClimb = null;
   mapClimbPhase = 'none';
   mapClimbLastMatchedIdx = null;
@@ -2948,8 +2959,11 @@ function showActiveClimbOverlay(climb) {
   el.classList.add('visible');
   document.getElementById('mco-name').textContent = climb.name;
 }
-function dismissActiveClimbOverlay() {
+function hideActiveClimbOverlayUI() {
   document.getElementById('map-climb-overlay').classList.remove('visible');
+}
+function dismissActiveClimbOverlay() {
+  hideActiveClimbOverlayUI();
   resetMapClimbDetection();
 }
 function updateActiveClimbOverlayUI() {
