@@ -500,6 +500,18 @@
   .mco-val { font-size: 40px; font-weight: 900; color: #fff; font-family: var(--mono); line-height: 1; }
   .mco-unit { font-size: 12px; color: #bbb; font-weight: 600; margin-top: 2px; }
 
+  /* Banner navigazione traccia registrata */
+  .map-track-nav-banner {
+    display: none;
+    position: absolute; bottom: 245px; left: 12px; right: 12px; z-index: 540;
+    background: rgba(139,195,74,.94); color: #0a1a04;
+    border-radius: 12px; padding: 10px 14px;
+    align-items: center; justify-content: space-between;
+    box-shadow: 0 4px 14px rgba(0,0,0,.5);
+  }
+  .map-track-nav-banner.visible { display: flex; }
+  .map-track-nav-banner span { font-size: 13px; font-weight: 800; }
+
   .map-record-panel {
     position: absolute; bottom: 12px; left: 12px; right: 12px; z-index: 500;
   }
@@ -572,9 +584,10 @@
   .track-stats b { color: #fff; font-family: var(--mono); }
   .track-btns { display: flex; gap: 8px; }
   .track-btn {
-    flex: 1; padding: 9px; border-radius: 9px; border: none;
-    font-size: 12px; font-weight: 700; cursor: pointer;
+    flex: 1; padding: 9px 4px; border-radius: 9px; border: none;
+    font-size: 11.5px; font-weight: 700; cursor: pointer;
   }
+  .track-btn.nav { background: var(--z2); color: #0a1a04; }
   .track-btn.dl  { background: var(--accent); color: var(--bg); }
   .track-btn.del { background: var(--card); border: 1px solid var(--border); color: #ccc; }
 
@@ -945,6 +958,12 @@
       </div>
     </div>
 
+    <!-- Banner: navigazione traccia registrata caricata -->
+    <div class="map-track-nav-banner" id="map-track-nav-banner">
+      <span id="track-nav-label">Navigazione traccia</span>
+      <button class="mco-close" onclick="stopTrackNavigation()">✕</button>
+    </div>
+
     <!-- Pannello registrazione in basso -->
     <div class="map-record-panel">
       <div class="map-stats-row">
@@ -1021,6 +1040,8 @@
     </div>
 
     <button class="btn-offline-dl" id="btn-offline-download" onclick="startOfflineDownload()">⬇️ Scarica quest'area</button>
+
+    <button class="btn-offline-dl" id="btn-toggle-offline-overlay" style="background:var(--card);border:1px solid var(--border);color:var(--text);margin-top:8px" onclick="toggleOfflineAreasOverlay()">👁️ Mostra aree scaricate sulla mappa</button>
 
     <h3 style="margin-top:22px">Aree scaricate</h3>
     <div id="offline-packs-list"></div>
@@ -2619,6 +2640,13 @@ let trackRecording = false;
 let trackPaused = false;
 let trackPoints = [];        // [{lat, lon, ele, t}]
 let trackPolyline = null;
+
+// ── NAVIGAZIONE TRACCIA REGISTRATA (traccia di riferimento) ────
+let navTrackRef = null;          // traccia caricata come riferimento (oggetto track)
+let navTrackPoints = null;       // punti con distanza cumulativa {lat,lon,dist}
+let navTrackLastMatchedIdx = null;
+let navTrackDoneLine = null;     // L.polyline: tratto già percorso
+let navTrackAheadLine = null;    // L.polyline: tratto ancora davanti
 let trackStartTime = null;
 let trackPausedMs = 0;
 let trackPausedAt = null;
@@ -2639,6 +2667,8 @@ const OFFLINE_TILE_LIMIT = 180;
 const OFFLINE_TILE_DELAY_MS = 600; // ~1.6 richieste/sec, sotto il limite policy OSM
 let offlinePacks = loadOfflinePacks();
 let offlineDownloading = false;
+let offlineAreaLayers = [];      // rettangoli L.rectangle disegnati sulla mappa
+let offlineAreasVisible = false;
 let offlineCancelRequested = false;
 
 // ── INIT MAPPA (lazy, solo alla prima apertura scheda) ────────
@@ -2821,6 +2851,9 @@ function onMapGPSUpdate(pos) {
   // Rilevamento automatico salite salvate (background, indipendente dalla
   // sezione Salite manuale)
   checkNearbyClimbsForMap(pos.coords);
+
+  // Aggiorna la suddivisione colorata della traccia di riferimento caricata
+  if (navTrackPoints) updateTrackNavigationSplit(pos.coords);
 
   mapLastPos = pos;
 }
@@ -3249,12 +3282,74 @@ function renderTracksList() {
         <span>Dislivello+ <b>${t.elevGainM ?? '—'} m</b> ${t.elevCalibrated ? '✓ calibrato' : '(GPS grezzo)'}</span>
       </div>
       <div class="track-btns">
-        <button class="track-btn dl" onclick="downloadTrackGPX(${t.id})">↓ Scarica GPX</button>
-        <button class="track-btn del" onclick="deleteTrack(${t.id})">✕ Elimina</button>
+        <button class="track-btn nav" onclick="startTrackNavigation(${t.id})">▶ Naviga</button>
+        <button class="track-btn dl" onclick="downloadTrackGPX(${t.id})">↓ GPX</button>
+        <button class="track-btn del" onclick="deleteTrack(${t.id})">✕</button>
       </div>
     </div>`;
   }).join('');
   updateMergeBar();
+}
+
+// ── NAVIGAZIONE TRACCIA REGISTRATA ──────────────────────────────
+// Carica una traccia salvata come riferimento sulla mappa: il tratto
+// ancora davanti viene mostrato di un colore, quello già percorso
+// (rispetto alla posizione GPS live) di un altro colore.
+function startTrackNavigation(id) {
+  const track = tracks.find(t => t.id === id);
+  if (!track || track.points.length < 2) { toast('Traccia non valida'); return; }
+
+  closeTracksSheet();
+  navTrackRef = track;
+  navTrackLastMatchedIdx = null;
+
+  // Precalcola le distanze cumulative lungo la traccia (stesso formato di gpxPoints)
+  navTrackPoints = track.points.map(p => ({ lat: p.lat, lon: p.lon, dist: 0 }));
+  for (let i = 1; i < navTrackPoints.length; i++) {
+    navTrackPoints[i].dist = navTrackPoints[i-1].dist + haversineMeters(
+      { latitude: navTrackPoints[i-1].lat, longitude: navTrackPoints[i-1].lon },
+      { latitude: navTrackPoints[i].lat,   longitude: navTrackPoints[i].lon }
+    );
+  }
+
+  if (navTrackDoneLine)  leafletMap.removeLayer(navTrackDoneLine);
+  if (navTrackAheadLine) leafletMap.removeLayer(navTrackAheadLine);
+
+  const allLatLngs = navTrackPoints.map(p => [p.lat, p.lon]);
+  navTrackDoneLine  = L.polyline([], { color: '#8bc34a', weight: 5, opacity: 0.85 }).addTo(leafletMap);
+  navTrackAheadLine = L.polyline(allLatLngs, { color: '#ff7043', weight: 5, opacity: 0.85, dashArray: '2,8' }).addTo(leafletMap);
+
+  // Centra la mappa sull'intera traccia di riferimento
+  leafletMap.fitBounds(navTrackAheadLine.getBounds(), { padding: [30, 30] });
+
+  document.getElementById('track-nav-label').textContent =
+    `🗺️ Navigazione: ${(track.distanceM/1000).toFixed(1)} km`;
+  document.getElementById('map-track-nav-banner').classList.add('visible');
+  toast('▶ Traccia caricata come riferimento');
+}
+
+function stopTrackNavigation() {
+  if (navTrackDoneLine)  { leafletMap.removeLayer(navTrackDoneLine);  navTrackDoneLine = null; }
+  if (navTrackAheadLine) { leafletMap.removeLayer(navTrackAheadLine); navTrackAheadLine = null; }
+  navTrackRef = null;
+  navTrackPoints = null;
+  navTrackLastMatchedIdx = null;
+  document.getElementById('map-track-nav-banner').classList.remove('visible');
+}
+
+// Aggiorna la suddivisione colorata "fatto/da fare" in base alla posizione live
+function updateTrackNavigationSplit(coords) {
+  if (!navTrackPoints) return;
+  const proj = projectOntoTrack(coords.latitude, coords.longitude, navTrackPoints, 80, navTrackLastMatchedIdx);
+  if (!proj || proj.perpDist > 150) return; // troppo lontani dalla traccia: non aggiornare
+  navTrackLastMatchedIdx = proj.matchedIdx;
+
+  const idx = proj.matchedIdx;
+  const donePts  = navTrackPoints.slice(0, idx + 1).map(p => [p.lat, p.lon]);
+  const aheadPts = navTrackPoints.slice(idx).map(p => [p.lat, p.lon]);
+
+  if (navTrackDoneLine)  navTrackDoneLine.setLatLngs(donePts);
+  if (navTrackAheadLine) navTrackAheadLine.setLatLngs(aheadPts);
 }
 
 function toggleTrackSelection(id) {
@@ -3461,6 +3556,7 @@ async function startOfflineDownload() {
   });
   saveOfflinePacks();
   renderOfflinePacksList();
+  if (offlineAreasVisible) drawOfflineAreasOverlay();
   toast(`✓ ${done} tile salvati per uso offline`);
 }
 
@@ -3495,6 +3591,41 @@ function deleteOfflinePack(id) {
   offlinePacks = offlinePacks.filter(p => p.id !== id);
   saveOfflinePacks();
   renderOfflinePacksList();
+  if (offlineAreasVisible) drawOfflineAreasOverlay(); // ridisegna senza l'area eliminata
+}
+
+// ── VISUALIZZAZIONE AREE OFFLINE SULLA MAPPA ────────────────────
+// Disegna un rettangolo semi-trasparente per ciascuna area scaricata,
+// usando i confini salvati al momento del download. Aree sovrapposte
+// (scaricate in momenti diversi) si sommano visivamente, dando un'idea
+// immediata di cosa è coperto.
+function toggleOfflineAreasOverlay() {
+  offlineAreasVisible = !offlineAreasVisible;
+  const btn = document.getElementById('btn-toggle-offline-overlay');
+  if (offlineAreasVisible) {
+    drawOfflineAreasOverlay();
+    if (btn) { btn.textContent = '🙈 Nascondi aree scaricate'; btn.style.background = 'rgba(79,195,247,.15)'; btn.style.borderColor = 'var(--accent)'; btn.style.color = 'var(--accent)'; }
+  } else {
+    clearOfflineAreasOverlay();
+    if (btn) { btn.textContent = '👁️ Mostra aree scaricate sulla mappa'; btn.style.background = 'var(--card)'; btn.style.borderColor = 'var(--border)'; btn.style.color = 'var(--text)'; }
+  }
+}
+
+function drawOfflineAreasOverlay() {
+  clearOfflineAreasOverlay();
+  if (!leafletMap) return;
+  offlinePacks.forEach(p => {
+    const rect = L.rectangle(
+      [[p.bounds.s, p.bounds.w], [p.bounds.n, p.bounds.e]],
+      { color: '#4fc3f7', weight: 2, fillColor: '#4fc3f7', fillOpacity: 0.12, dashArray: '4,4' }
+    ).addTo(leafletMap);
+    offlineAreaLayers.push(rect);
+  });
+}
+
+function clearOfflineAreasOverlay() {
+  offlineAreaLayers.forEach(l => leafletMap && leafletMap.removeLayer(l));
+  offlineAreaLayers = [];
 }
 
 
