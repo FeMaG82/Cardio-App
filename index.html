@@ -591,6 +591,25 @@
   .track-btn.dl  { background: var(--accent); color: var(--bg); }
   .track-btn.del { background: var(--card); border: 1px solid var(--border); color: #ccc; }
 
+  .tracks-sheet-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .map-sheet-close-top {
+    padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border);
+    background: var(--card); color: var(--text); font-size: 13px; font-weight: 700;
+    cursor: pointer; flex-shrink: 0;
+  }
+  .btn-import-gpx {
+    width: 100%; padding: 11px; border-radius: 10px; border: 1px dashed var(--border);
+    background: none; color: var(--accent); font-size: 13px; font-weight: 700;
+    cursor: pointer; margin: 10px 0;
+  }
+  .track-rename-btn {
+    background: none; border: none; color: #999; font-size: 13px; cursor: pointer;
+    padding: 2px 4px; flex-shrink: 0;
+  }
+
   .merge-action-bar {
     display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
     padding: 10px 12px; background: var(--card); border: 1px solid var(--border);
@@ -1005,14 +1024,20 @@
 <!-- Sheet: Le mie tracce -->
 <div class="map-sheet-overlay" id="tracks-sheet">
   <div class="map-sheet">
-    <h3>Le mie tracce</h3>
+    <div class="tracks-sheet-header">
+      <h3 style="margin-bottom:0">Le mie tracce</h3>
+      <button class="map-sheet-close-top" onclick="closeTracksSheet()">✕ Chiudi</button>
+    </div>
     <p class="hint">Tracce GPS registrate, scaricabili in formato GPX. Seleziona due o più tracce per unirle in una sola.</p>
+
+    <button class="btn-import-gpx" onclick="document.getElementById('track-gpx-input').click()">📂 Carica GPX dal telefono</button>
+    <input type="file" id="track-gpx-input" accept=".gpx" style="display:none" onchange="onTrackGpxImport(event)">
+
     <div class="merge-action-bar">
       <span id="merge-selection-count">Nessuna traccia selezionata</span>
       <button class="btn-merge" id="btn-merge-tracks" onclick="mergeSelectedTracks()" disabled>🔗 Unisci</button>
     </div>
     <div id="tracks-list"></div>
-    <button class="map-sheet-close" onclick="closeTracksSheet()">Chiudi</button>
   </div>
 </div>
 
@@ -3159,9 +3184,11 @@ function stopTrackRecording() {
   if (trackPoints.length < 2) { toast('Traccia troppo corta, non salvata'); return; }
 
   const duration = Math.floor((Date.now() - trackStartTime - trackPausedMs) / 1000);
+  const startD = new Date(trackStartTime);
   const track = {
     id: Date.now(),
-    date: new Date(trackStartTime).toISOString(),
+    name: `Traccia ${startD.toLocaleDateString('it-IT')} ${startD.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}`,
+    date: startD.toISOString(),
     duration,
     distanceM: Math.round(trackDistM),
     avgSpeedKmh: duration > 0 ? Math.round((trackDistM/1000) / (duration/3600) * 10) / 10 : 0,
@@ -3258,17 +3285,22 @@ function renderTracksList() {
     updateMergeBar();
     return;
   }
-  el.innerHTML = tracks.map(t => {
+  // Ordine alfabetico per nome (non per data)
+  const sorted = [...tracks].sort((a, b) =>
+    (a.name || 'Traccia').localeCompare((b.name || 'Traccia'), 'it', { sensitivity: 'base' })
+  );
+  el.innerHTML = sorted.map(t => {
     const d = new Date(t.date);
     const dateStr = d.toLocaleDateString('it-IT', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
     const isSelected = selectedTrackIds.has(t.id);
+    const name = t.name || 'Traccia';
     return `
     <div class="track-card ${isSelected ? 'selected' : ''}">
       <div class="track-card-header">
         <div class="track-card-header-left">
           <input type="checkbox" class="track-select-cb" ${isSelected ? 'checked' : ''} onchange="toggleTrackSelection(${t.id})">
           <div>
-            <div class="track-name">Traccia</div>
+            <div class="track-name">${name} <button class="track-rename-btn" onclick="renameTrack(${t.id})">✏️</button></div>
             <div class="track-date">${dateStr}</div>
           </div>
         </div>
@@ -3385,6 +3417,7 @@ async function mergeSelectedTracks() {
 
   const mergedTrack = {
     id: Date.now(),
+    name: `${selected[0].name || 'Traccia'} + ${selected.length - 1} altr${selected.length - 1 === 1 ? 'a' : 'e'}`,
     date: selected[0].date, // inizia dalla traccia più vecchia
     duration: totalDuration,
     distanceM: Math.round(totalDist),
@@ -3413,6 +3446,97 @@ async function mergeSelectedTracks() {
 
   // Ricalibra il dislivello della traccia unita con dati di quota accurati
   calibrateTrackElevation(mergedTrack.id);
+}
+
+function renameTrack(id) {
+  const track = tracks.find(t => t.id === id);
+  if (!track) return;
+  const newName = prompt('Nome traccia:', track.name || 'Traccia');
+  if (newName === null) return; // annullato
+  const trimmed = newName.trim();
+  if (!trimmed) return;
+  track.name = trimmed;
+  saveTracks();
+  renderTracksList();
+}
+
+// ── IMPORT GPX DALLA MEMORIA DEL TELEFONO ───────────────────────
+function onTrackGpxImport(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const points = parseGPXForTrack(e.target.result);
+      if (points.length < 2) { toast('⚠️ File GPX non valido o vuoto'); return; }
+
+      // Distanza totale
+      let distM = 0;
+      for (let i = 1; i < points.length; i++) {
+        distM += haversineMeters(
+          { latitude: points[i-1].lat, longitude: points[i-1].lon },
+          { latitude: points[i].lat,   longitude: points[i].lon }
+        );
+      }
+
+      // Durata dai timestamp, se presenti nel GPX
+      const firstT = points[0].t, lastT = points[points.length-1].t;
+      const duration = (firstT && lastT) ? Math.max(0, Math.round((lastT - firstT) / 1000)) : 0;
+
+      // Dislivello positivo (filtro a soglia, come per le tracce registrate)
+      let elevGain = 0, lastEle = null;
+      points.forEach(p => {
+        if (p.ele == null) return;
+        if (lastEle === null) { lastEle = p.ele; return; }
+        const diff = p.ele - lastEle;
+        if (diff > ELEV_NOISE_THRESHOLD_M) { elevGain += diff; lastEle = p.ele; }
+        else if (diff < -ELEV_NOISE_THRESHOLD_M) { lastEle = p.ele; }
+      });
+
+      const defaultName = file.name.replace(/\.gpx$/i, '');
+      const track = {
+        id: Date.now(),
+        name: defaultName || 'Traccia importata',
+        date: firstT ? new Date(firstT).toISOString() : new Date().toISOString(),
+        duration,
+        distanceM: Math.round(distM),
+        avgSpeedKmh: duration > 0 ? Math.round((distM/1000) / (duration/3600) * 10) / 10 : 0,
+        elevGainM: Math.round(elevGain),
+        elevGainRawM: Math.round(elevGain),
+        elevCalibrated: false,
+        points: points.map(p => ({ lat: p.lat, lon: p.lon, ele: p.ele, t: p.t || Date.now() })),
+        imported: true,
+      };
+      tracks.unshift(track);
+      saveTracks();
+      renderTracksList();
+      toast(`✓ "${track.name}" importata (${(distM/1000).toFixed(1)} km)`);
+
+      // Prova comunque la calibrazione quota con dati più accurati
+      calibrateTrackElevation(track.id);
+    } catch (err) {
+      toast('⚠️ Errore nella lettura del file GPX');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = ''; // permette di ricaricare lo stesso file in seguito
+}
+
+// Parser GPX dedicato all'import tracce: estrae anche quota e timestamp
+// (parseGPX, usata per le Salite, estrae solo lat/lon/distanza cumulativa)
+function parseGPXForTrack(xml) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(xml, 'application/xml');
+  const trkpts = Array.from(doc.querySelectorAll('trkpt, rtept'));
+  return trkpts.map(pt => {
+    const lat = parseFloat(pt.getAttribute('lat'));
+    const lon = parseFloat(pt.getAttribute('lon'));
+    const eleEl = pt.querySelector('ele');
+    const timeEl = pt.querySelector('time');
+    const ele = eleEl ? parseFloat(eleEl.textContent) : null;
+    const t = timeEl ? new Date(timeEl.textContent).getTime() : null;
+    return { lat, lon, ele: isNaN(ele) ? null : ele, t: (t && !isNaN(t)) ? t : null };
+  }).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
 }
 
 function deleteTrack(id) {
