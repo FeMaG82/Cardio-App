@@ -600,6 +600,80 @@
     background: var(--card); color: var(--text); font-size: 13px; font-weight: 700;
     cursor: pointer; flex-shrink: 0;
   }
+
+  .offline-top-row {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+  }
+  .btn-toggle-overlay-compact {
+    flex: 1; min-width: 0; padding: 9px 8px; border-radius: 20px;
+    border: 1px solid var(--border); background: var(--card); color: var(--text);
+    font-size: 12.5px; font-weight: 700; cursor: pointer;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .btn-toggle-overlay-compact.on {
+    background: rgba(79,195,247,.15); border-color: var(--accent); color: var(--accent);
+  }
+
+  .climb-history-access-btn {
+    display: block; width: 100%; margin-top: 16px;
+    padding: 14px 0; background: rgba(79,195,247,.08);
+    border: 1px solid rgba(79,195,247,.3); border-radius: 12px;
+    color: var(--accent); font-size: 14px; font-weight: 800;
+    letter-spacing: .02em; cursor: pointer;
+  }
+  .climb-history-access-btn:active { background: rgba(79,195,247,.18); }
+
+  /* Previsioni prestazioni */
+  .pred-period-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .pred-period-row label { font-size: 13px; color: #ccc; font-weight: 600; }
+  .pred-period-row select {
+    flex: 1; padding: 9px 10px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 9px; color: var(--text); font-size: 14px;
+  }
+  .fitness-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 16px; margin-bottom: 8px;
+  }
+  .fitness-card.insufficient { text-align: center; color: #aaa; font-size: 13px; padding: 20px 16px; }
+  .fitness-stat-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .fitness-stat-row:last-child { margin-bottom: 0; }
+  .fitness-label { font-size: 13px; color: #ccc; font-weight: 600; }
+  .fitness-value { font-size: 22px; font-weight: 900; font-family: var(--mono); color: #fff; }
+  .fitness-trend { font-size: 13px; font-weight: 800; padding: 3px 10px; border-radius: 12px; }
+  .fitness-trend.up   { background: rgba(139,195,74,.18); color: var(--z2); }
+  .fitness-trend.down { background: rgba(229,57,53,.18); color: var(--z5); }
+  .fitness-trend.flat { background: var(--border); color: #ccc; }
+  .fitness-note { font-size: 11px; color: #888; margin-top: 8px; }
+
+  .pred-mode-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+  .pred-mode-tab {
+    flex: 1; padding: 9px 4px; border-radius: 9px; border: 1px solid var(--border);
+    background: var(--card); color: #aaa; font-size: 12px; font-weight: 700; cursor: pointer;
+  }
+  .pred-mode-tab.active { background: rgba(79,195,247,.15); border-color: var(--accent); color: var(--accent); }
+  .pred-select {
+    width: 100%; padding: 11px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text); font-size: 14px; margin-bottom: 6px;
+  }
+  .pred-manual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .pred-manual-field label { font-size: 11px; color: #aaa; display: block; margin-bottom: 4px; }
+  .pred-manual-field input {
+    width: 100%; padding: 9px 10px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 9px; color: var(--text); font-size: 14px;
+  }
+  .btn-run-prediction {
+    width: 100%; padding: 13px; border-radius: 12px; border: none;
+    background: var(--z2); color: #0a1a04; font-size: 14px; font-weight: 800; cursor: pointer;
+    margin-top: 12px;
+  }
+  .prediction-result-card {
+    background: var(--card); border: 1px solid var(--z2); border-radius: 12px;
+    padding: 16px; margin-top: 14px; text-align: center;
+  }
+  .pred-time { font-size: 40px; font-weight: 900; font-family: var(--mono); color: #fff; }
+  .pred-sub { font-size: 12px; color: #aaa; margin-top: 4px; }
+  .pred-compare { font-size: 12px; color: #ccc; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+
   .btn-import-gpx {
     width: 100%; padding: 11px; border-radius: 10px; border: 1px dashed var(--border);
     background: none; color: var(--accent); font-size: 13px; font-weight: 700;
@@ -780,6 +854,21 @@
 <!-- ══════════ SETTINGS ══════════ -->
 <div id="view-settings" class="view">
   <div class="settings-section">
+    <h2>Dati Fisici</h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Usati per calcolare la potenza nelle Previsioni prestazioni (sezione Salite). Includi anche una stima di bici e abbigliamento per risultati più precisi.</p>
+    <div class="zone-settings-card">
+      <div class="zone-setting-row">
+        <label>Peso totale (tu + bici)</label>
+        <div class="zone-inputs">
+          <input type="number" id="user-weight-kg" min="30" max="200" step="0.5" placeholder="es. 75">
+          <span style="font-size:11px;color:var(--muted)">kg</span>
+        </div>
+      </div>
+    </div>
+    <button class="settings-btn" onclick="saveWeight()">Salva Peso</button>
+  </div>
+
+  <div class="settings-section">
     <h2>Zone di Frequenza Cardiaca</h2>
     <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Imposta i valori minimi e massimi in bpm per ciascuna zona. Assicurati che i range siano contigui.</p>
 
@@ -924,11 +1013,74 @@
     </div>
     <div id="climb-list"></div>
 
-    <div class="climb-history-header">
-      <h2>Storico ascensioni</h2>
-      <button class="btn-export-csv" onclick="exportAscentsCSV()">↓ CSV</button>
+    <button class="climb-history-access-btn" onclick="openAscentHistorySheet()">📜 Storico ascensioni</button>
+    <button class="climb-history-access-btn" style="margin-top:8px;background:rgba(139,195,74,.08);border-color:rgba(139,195,74,.3);color:var(--z2)" onclick="openPredictionsSheet()">📈 Previsioni prestazioni</button>
+  </div>
+</div>
+
+<!-- Sheet: Storico ascensioni -->
+<div class="map-sheet-overlay" id="ascent-history-sheet">
+  <div class="map-sheet">
+    <div class="tracks-sheet-header">
+      <h3 style="margin-bottom:0">Storico ascensioni</h3>
+      <button class="map-sheet-close-top" onclick="closeAscentHistorySheet()">✕ Chiudi</button>
+    </div>
+    <div class="offline-top-row">
+      <button class="btn-toggle-overlay-compact" onclick="exportAscentsCSV()">↓ Esporta CSV</button>
     </div>
     <div id="ascent-list"></div>
+  </div>
+</div>
+
+<!-- Sheet: Previsioni prestazioni -->
+<div class="map-sheet-overlay" id="predictions-sheet">
+  <div class="map-sheet">
+    <div class="tracks-sheet-header">
+      <h3 style="margin-bottom:0">Previsioni prestazioni</h3>
+      <button class="map-sheet-close-top" onclick="closePredictionsSheet()">✕ Chiudi</button>
+    </div>
+    <p class="hint">Stima basata su un modello fisico (gravità, resistenza aerodinamica e di rotolamento) applicato allo storico delle tue ascensioni. È una stima, non una misura di laboratorio.</p>
+
+    <div class="pred-period-row">
+      <label>Periodo di analisi</label>
+      <select id="pred-period-select" onchange="renderFitnessSummary()">
+        <option value="1">Ultimo mese</option>
+        <option value="3" selected>Ultimi 3 mesi</option>
+        <option value="6">Ultimi 6 mesi</option>
+      </select>
+    </div>
+
+    <div id="fitness-summary-card"></div>
+
+    <h3 style="margin-top:22px">Simula un'ascensione</h3>
+    <div class="pred-mode-tabs">
+      <button class="pred-mode-tab active" id="pred-tab-saved" onclick="setPredMode('saved')">Salita salvata</button>
+      <button class="pred-mode-tab" id="pred-tab-gpx" onclick="setPredMode('gpx')">Carica GPX</button>
+      <button class="pred-mode-tab" id="pred-tab-manual" onclick="setPredMode('manual')">Manuale</button>
+    </div>
+
+    <div id="pred-mode-saved" class="pred-mode-panel">
+      <select id="pred-climb-select" class="pred-select"></select>
+    </div>
+
+    <div id="pred-mode-gpx" class="pred-mode-panel" style="display:none">
+      <button class="btn-import-gpx" onclick="document.getElementById('pred-gpx-input').click()">📂 Carica file GPX</button>
+      <input type="file" id="pred-gpx-input" accept=".gpx" style="display:none" onchange="onPredGpxSelected(event)">
+      <div id="pred-gpx-status" style="font-size:12px;color:#aaa;text-align:center"></div>
+    </div>
+
+    <div id="pred-mode-manual" class="pred-mode-panel" style="display:none">
+      <div class="pred-manual-grid">
+        <div class="pred-manual-field"><label>Lunghezza (km)</label><input type="number" id="pred-m-km" step="0.1" placeholder="es. 10"></div>
+        <div class="pred-manual-field"><label>Pend. media (%)</label><input type="number" id="pred-m-grade" step="0.1" placeholder="es. 6"></div>
+        <div class="pred-manual-field"><label>Pend. massima (%)</label><input type="number" id="pred-m-maxgrade" step="0.1" placeholder="es. 12"></div>
+        <div class="pred-manual-field"><label>Altitudine media (m)</label><input type="number" id="pred-m-alt" step="10" placeholder="es. 800"></div>
+      </div>
+      <p class="hint" style="margin-top:6px">La pendenza massima è informativa (senza dati di sezione, il calcolo usa la pendenza media sull'intera lunghezza).</p>
+    </div>
+
+    <button class="btn-run-prediction" onclick="runPrediction()">▶ Calcola tempo previsto</button>
+    <div id="prediction-result"></div>
   </div>
 </div>
 
@@ -1045,6 +1197,12 @@
 <div class="map-sheet-overlay" id="offline-sheet">
   <div class="map-sheet">
     <h3>Mappa offline</h3>
+
+    <div class="offline-top-row">
+      <button class="btn-toggle-overlay-compact" id="btn-toggle-offline-overlay" onclick="toggleOfflineAreasOverlay()">👁️ Mostra aree scaricate</button>
+      <button class="map-sheet-close-top" onclick="closeOfflineSheet()">✕ Chiudi</button>
+    </div>
+
     <p class="hint">Scarica i tile della zona visibile sulla mappa (stile topografico OpenTopoMap) per usarla senza connessione. Limite: 180 tile per sessione di download, con una piccola pausa tra le richieste per rispettare le policy di utilizzo.</p>
 
     <div class="offline-zoom-row">
@@ -1066,13 +1224,11 @@
 
     <button class="btn-offline-dl" id="btn-offline-download" onclick="startOfflineDownload()">⬇️ Scarica quest'area</button>
 
-    <button class="btn-offline-dl" id="btn-toggle-offline-overlay" style="background:var(--card);border:1px solid var(--border);color:var(--text);margin-top:8px" onclick="toggleOfflineAreasOverlay()">👁️ Mostra aree scaricate sulla mappa</button>
-
     <h3 style="margin-top:22px">Aree scaricate</h3>
     <div id="offline-packs-list"></div>
-    <button class="map-sheet-close" onclick="closeOfflineSheet()">Chiudi</button>
   </div>
 </div>
+
 
 <!-- Modal aggiunta salita -->
 <div class="modal-overlay" id="add-modal">
@@ -1127,6 +1283,7 @@ const DEFAULT_ZONES = [
 ];
 
 let zones = loadZones();
+let userWeightKg = loadUserWeight();
 let device = null, characteristic = null;
 let connected = false;
 let autoReconnect = false;
@@ -1519,11 +1676,25 @@ function clearHistory() {
 }
 
 // ── SETTINGS ───────────────────────────────────────────────────
+// ── PESO UTENTE (per calcolo potenza) ───────────────────────────
+function loadUserWeight() {
+  const v = localStorage.getItem('hrm-user-weight-kg');
+  return v ? parseFloat(v) : null;
+}
+function saveWeight() {
+  const val = parseFloat(document.getElementById('user-weight-kg').value);
+  if (isNaN(val) || val < 30 || val > 200) { toast('Inserisci un peso valido (30-200 kg)'); return; }
+  localStorage.setItem('hrm-user-weight-kg', val);
+  userWeightKg = val;
+  toast('Peso salvato ✓');
+}
+
 function loadZoneInputs() {
   zones.forEach((z, i) => {
     document.getElementById(`z${i+1}-min`).value = z.min;
     document.getElementById(`z${i+1}-max`).value = z.max;
   });
+  if (userWeightKg) document.getElementById('user-weight-kg').value = userWeightKg;
 }
 
 function saveZones() {
@@ -1684,6 +1855,7 @@ let currentSegIdx = -1;
 let climbDistanceDone = 0;
 let selectedXlsxData = null;
 let climbHrSamples = [];
+let climbSegmentSplits = []; // [{segIdx, elapsedS}] tempo di passaggio per ogni sezione
 let climbStartTime = null;
 let climbTotalDistM = 0;
 let climbTotalElevM = 0;
@@ -1986,6 +2158,7 @@ function startAscent() {
   if (!activeClimb) return;
   climbStartTime  = Date.now();
   climbHrSamples  = [];
+  climbSegmentSplits = [];
   climbTotalDistM = 0;
   climbTotalElevM = 0;
   climbDistanceDone = 0;
@@ -2040,12 +2213,15 @@ function stopClimb() {
     const ascent = {
       id:        Date.now(),
       date:      new Date().toISOString(),
+      climbId:   activeClimb.addedAt,
       climbName: activeClimb.name,
       duration,
       avgHR,
       maxHR,
       avgSpeed,
       avgVAM,
+      segmentSplits: climbSegmentSplits.length ? [...climbSegmentSplits] : null,
+      weightAtTimeKg: userWeightKg || null, // peso al momento della registrazione, per coerenza storica
     };
     ascents.unshift(ascent);
     saveAscents();
@@ -2293,6 +2469,182 @@ function onGPSError(e) {
   toast('GPS: ' + e.message);
 }
 
+// ═══════════════════════════════════════════════════════════════
+// ── FISICA DEL CICLISMO — modulo per le Previsioni prestazioni ──
+// ═══════════════════════════════════════════════════════════════
+// Formule standard usate dai calcolatori di potenza ciclistici
+// (es. Analytic Cycling, Martin et al. 1998). Valori di default per
+// CdA (area frontale × coeff. aerodinamico) e Crr (resistenza al
+// rotolamento) sono stime tipiche per un ciclista in posizione da
+// salita su asfalto — non misure specifiche del singolo utente.
+const PHYS_G = 9.80665;          // accelerazione di gravità (m/s²)
+const PHYS_CDA = 0.32;           // m² — posizione in salita, mani su leve/tops
+const PHYS_CRR = 0.005;          // resistenza al rotolamento, asfalto
+const PHYS_DRIVETRAIN_EFF = 0.975; // efficienza trasmissione (~97.5%)
+const PHYS_BIKE_GEAR_KG = 9;     // massa tipica bici da strada + accessori + abbigliamento
+
+// Densità dell'aria in funzione della quota (formula barometrica
+// semplificata, atmosfera standard)
+function airDensityAtAltitude(altM) {
+  const alt = altM || 0;
+  return 1.225 * Math.exp(-alt / 8434);
+}
+
+// Potenza (W) necessaria per mantenere velocità v (m/s) su pendenza
+// gradeFraction (es. 0.08 per 8%), con massa totale massKg
+function powerAtSpeed(v, gradeFraction, massKg, rho) {
+  const theta = Math.atan(gradeFraction);
+  const pGravity = massKg * PHYS_G * Math.sin(theta) * v;
+  const pRolling = PHYS_CRR * massKg * PHYS_G * Math.cos(theta) * v;
+  const pAero    = 0.5 * rho * PHYS_CDA * v * v * v;
+  return (pGravity + pRolling + pAero) / PHYS_DRIVETRAIN_EFF;
+}
+
+// Inversa: trova la velocità (m/s) che richiede la potenza targetP,
+// per ricerca numerica (bisezione — la funzione è monotona crescente)
+function speedForPower(targetP, gradeFraction, massKg, rho) {
+  let lo = 0.3, hi = 25; // range plausibile: 1 km/h → 90 km/h
+  for (let i = 0; i < 40; i++) {
+    const mid = (lo + hi) / 2;
+    const p = powerAtSpeed(mid, gradeFraction, massKg, rho);
+    if (p > targetP) hi = mid; else lo = mid;
+  }
+  return (lo + hi) / 2;
+}
+
+// Stima la potenza media (e W/kg) espressa in una ascensione storica.
+// Se sono disponibili gli split per sezione (ascensioni registrate dopo
+// l'introduzione di questa funzione), il calcolo pesa ogni sezione con
+// la sua pendenza reale — altrimenti ricade su una stima aggregata
+// sull'intera salita (pendenza media, velocità media).
+function estimateAscentPower(ascent) {
+  const weight = ascent.weightAtTimeKg || userWeightKg;
+  if (!weight) return null;
+  const totalMass = weight + PHYS_BIKE_GEAR_KG;
+
+  const climb = climbs.find(c => c.addedAt === ascent.climbId) || climbs.find(c => c.name === ascent.climbName);
+  if (!climb || !climb.segments || !climb.segments.length) return null;
+
+  const avgAlt = climb.segments.reduce((s, seg) => s + (seg.altStart + seg.altEnd) / 2, 0) / climb.segments.length;
+  const rho = airDensityAtAltitude(avgAlt);
+
+  if (ascent.segmentSplits && ascent.segmentSplits.length) {
+    const splitsMap = { 0: 0 };
+    ascent.segmentSplits.forEach(s => { splitsMap[s.segIdx] = s.elapsedS; });
+
+    let weightedPowerSum = 0, totalTime = 0;
+    for (let i = 0; i < climb.segments.length; i++) {
+      const startT = splitsMap[i] != null ? splitsMap[i] : null;
+      const endT   = (i + 1 < climb.segments.length && splitsMap[i+1] != null) ? splitsMap[i+1] : ascent.duration;
+      if (startT == null || endT == null || endT <= startT) continue;
+      const segTime = endT - startT;
+      const segDistM = climb.segments[i].km * 1000;
+      const segGrade = climb.segments[i].grade / 100;
+      const v = segDistM / segTime;
+      const p = powerAtSpeed(v, segGrade, totalMass, rho);
+      weightedPowerSum += p * segTime;
+      totalTime += segTime;
+    }
+    if (totalTime > 0) {
+      const avgP = weightedPowerSum / totalTime;
+      return { avgPowerW: avgP, wPerKg: avgP / weight, method: 'segments' };
+    }
+  }
+
+  // Fallback: stima aggregata sull'intera salita
+  if (!ascent.avgSpeed || !ascent.duration) return null;
+  const totalDistM = climb.segments.reduce((s, seg) => s + seg.km * 1000, 0);
+  const totalElevM = climb.segments.reduce((s, seg) => s + Math.max(0, seg.altEnd - seg.altStart), 0);
+  const grade = totalDistM > 0 ? totalElevM / totalDistM : 0;
+  const v = ascent.avgSpeed * 1000 / 3600;
+  const p = powerAtSpeed(v, grade, totalMass, rho);
+  return { avgPowerW: p, wPerKg: p / weight, method: 'whole' };
+}
+
+// Suddivide una traccia GPX (punti con lat/lon/ele) in "sezioni" di
+// lunghezza approssimativamente costante, calcolando la pendenza media
+// di ciascuna dai dati di quota — per analizzare salite non salvate
+// come oggetto strutturato in libreria.
+function deriveSegmentsFromGpxPoints(points, chunkM) {
+  const withEle = points.filter(p => p.ele != null);
+  if (withEle.length < 2) return null;
+
+  const segments = [];
+  let chunkStart = withEle[0];
+  let chunkDistM = 0;
+  let lastPoint = withEle[0];
+
+  for (let i = 1; i < withEle.length; i++) {
+    const p = withEle[i];
+    const d = haversineMeters({ latitude: lastPoint.lat, longitude: lastPoint.lon }, { latitude: p.lat, longitude: p.lon });
+    chunkDistM += d;
+    lastPoint = p;
+    if (chunkDistM >= chunkM || i === withEle.length - 1) {
+      const km = chunkDistM / 1000;
+      const grade = km > 0 ? ((p.ele - chunkStart.ele) / (chunkDistM)) * 100 : 0;
+      segments.push({ km, grade, altStart: chunkStart.ele, altEnd: p.ele, label: '' });
+      chunkStart = p;
+      chunkDistM = 0;
+    }
+  }
+  return segments.filter(s => s.km > 0.01);
+}
+
+// Calcola il tempo previsto (s) per percorrere una serie di sezioni a una
+// potenza target costante
+function predictClimbTime(segments, targetPowerW, weightKg) {
+  const totalMass = weightKg + PHYS_BIKE_GEAR_KG;
+  let totalTime = 0;
+  segments.forEach(seg => {
+    const avgAlt = (seg.altStart + seg.altEnd) / 2;
+    const rho = airDensityAtAltitude(avgAlt);
+    const v = speedForPower(targetPowerW, seg.grade / 100, totalMass, rho);
+    totalTime += (seg.km * 1000) / v;
+  });
+  return totalTime;
+}
+
+// ── ANALISI FORMA ATTUALE (periodo selezionabile) ───────────────
+function computeFitnessSummary(periodMonths) {
+  const cutoff = new Date();
+  cutoff.setMonth(cutoff.getMonth() - periodMonths);
+
+  const inPeriod = ascents
+    .filter(a => new Date(a.date) >= cutoff)
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  const estimates = inPeriod
+    .map(a => ({ ascent: a, est: estimateAscentPower(a) }))
+    .filter(x => x.est !== null);
+
+  if (estimates.length < 3) {
+    return { sufficient: false, count: estimates.length, totalInPeriod: inPeriod.length };
+  }
+
+  const avgWPerKg = estimates.reduce((s, x) => s + x.est.wPerKg, 0) / estimates.length;
+
+  // Trend: confronta prima metà vs seconda metà cronologica
+  const mid = Math.floor(estimates.length / 2);
+  const firstHalf  = estimates.slice(0, mid || 1);
+  const secondHalf = estimates.slice(mid);
+  const avgFirst  = firstHalf.reduce((s, x) => s + x.est.wPerKg, 0) / firstHalf.length;
+  const avgSecond = secondHalf.reduce((s, x) => s + x.est.wPerKg, 0) / secondHalf.length;
+  const pctChange = avgFirst > 0 ? ((avgSecond - avgFirst) / avgFirst) * 100 : 0;
+
+  let trend = 'stabile';
+  if (pctChange > 3) trend = 'miglioramento';
+  else if (pctChange < -3) trend = 'calo';
+
+  return {
+    sufficient: true,
+    count: estimates.length,
+    totalInPeriod: inPeriod.length,
+    avgWPerKg,
+    trend,
+    pctChange,
+  };
+}
+
 function haversineMeters(a, b) {
   const R = 6371000;
   const dLat = (b.latitude - a.latitude) * Math.PI / 180;
@@ -2308,12 +2660,26 @@ function updateProgress() {
   const totalM = activeClimb.segments.reduce((s, seg) => s + seg.km * 1000, 0);
   const done = Math.min(climbDistanceDone, totalM);
 
+  const prevSegIdx = currentSegIdx;
+
   // Trova segmento corrente
   let cumM = 0;
   for (let i = 0; i < activeClimb.segments.length; i++) {
     cumM += activeClimb.segments[i].km * 1000;
     if (done < cumM) { currentSegIdx = i; break; }
     if (i === activeClimb.segments.length - 1) currentSegIdx = i;
+  }
+
+  // Split per sezione: quando si passa a una sezione nuova, registra il
+  // tempo trascorso dall'inizio dell'ascensione — usato dalla sezione
+  // Previsioni per stimare la potenza tenendo conto dei picchi di pendenza
+  if (currentSegIdx > prevSegIdx && climbStartTime) {
+    const elapsedS = Math.floor((Date.now() - climbStartTime) / 1000);
+    for (let i = prevSegIdx + 1; i <= currentSegIdx; i++) {
+      if (!climbSegmentSplits.some(s => s.segIdx === i)) {
+        climbSegmentSplits.push({ segIdx: i, elapsedS });
+      }
+    }
   }
 
   updateNavStats();
@@ -2455,6 +2821,163 @@ function updateClimbHR(hr, zone) {
 }
 
 // ── STORICO ASCENSIONI ─────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+// ── PREVISIONI PRESTAZIONI — UI ──────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+let predMode = 'saved'; // 'saved' | 'gpx' | 'manual'
+let predGpxSegments = null;
+
+function openPredictionsSheet() {
+  populatePredClimbSelect();
+  renderFitnessSummary();
+  document.getElementById('prediction-result').innerHTML = '';
+  document.getElementById('predictions-sheet').classList.add('open');
+}
+function closePredictionsSheet() {
+  document.getElementById('predictions-sheet').classList.remove('open');
+}
+
+function renderFitnessSummary() {
+  const months = parseInt(document.getElementById('pred-period-select').value);
+  const summary = computeFitnessSummary(months);
+  const el = document.getElementById('fitness-summary-card');
+
+  if (!summary.sufficient) {
+    el.innerHTML = `
+      <div class="fitness-card insufficient">
+        Servono almeno 3 ascensioni con dati sufficienti nel periodo selezionato per stimare la forma attuale.<br>
+        Trovate: <b>${summary.count}</b> su ${summary.totalInPeriod} ascensioni nel periodo.<br>
+        <span style="font-size:11px">(serve un peso impostato nelle Impostazioni e che le salite siano ancora presenti in libreria)</span>
+      </div>`;
+    return;
+  }
+
+  const trendClass = summary.trend === 'miglioramento' ? 'up' : summary.trend === 'calo' ? 'down' : 'flat';
+  const trendIcon  = summary.trend === 'miglioramento' ? '↗' : summary.trend === 'calo' ? '↘' : '→';
+  const trendLabel = summary.trend === 'miglioramento' ? 'In miglioramento' : summary.trend === 'calo' ? 'In calo' : 'Stabile';
+
+  el.innerHTML = `
+    <div class="fitness-card">
+      <div class="fitness-stat-row">
+        <span class="fitness-label">Potenza media stimata</span>
+        <span class="fitness-value">${summary.avgWPerKg.toFixed(2)} <span style="font-size:13px;color:#aaa">W/kg</span></span>
+      </div>
+      <div class="fitness-stat-row">
+        <span class="fitness-label">Tendenza</span>
+        <span class="fitness-trend ${trendClass}">${trendIcon} ${trendLabel} (${summary.pctChange >= 0 ? '+' : ''}${summary.pctChange.toFixed(1)}%)</span>
+      </div>
+      <div class="fitness-note">Basata su ${summary.count} ascensioni con dati sufficienti nel periodo selezionato. Stima indicativa, non una misura di laboratorio.</div>
+    </div>`;
+}
+
+function populatePredClimbSelect() {
+  const sel = document.getElementById('pred-climb-select');
+  if (!climbs.length) {
+    sel.innerHTML = '<option value="">Nessuna salita in libreria</option>';
+    return;
+  }
+  sel.innerHTML = climbs.map((c, i) => {
+    const km = c.segments.reduce((s, seg) => s + seg.km, 0).toFixed(1);
+    return `<option value="${i}">${c.name} (${km} km)</option>`;
+  }).join('');
+}
+
+function setPredMode(mode) {
+  predMode = mode;
+  ['saved', 'gpx', 'manual'].forEach(m => {
+    document.getElementById(`pred-tab-${m}`).classList.toggle('active', m === mode);
+    document.getElementById(`pred-mode-${m}`).style.display = m === mode ? 'block' : 'none';
+  });
+  document.getElementById('prediction-result').innerHTML = '';
+}
+
+function onPredGpxSelected(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById('pred-gpx-status');
+  statusEl.textContent = '⏳ Analisi in corso…';
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const points = parseGPXForTrack(e.target.result);
+      const segments = deriveSegmentsFromGpxPoints(points, 400);
+      if (!segments || segments.length === 0) {
+        statusEl.textContent = '⚠️ Il file non contiene dati di quota utilizzabili';
+        predGpxSegments = null;
+        return;
+      }
+      predGpxSegments = segments;
+      const totalKm = segments.reduce((s, g) => s + g.km, 0);
+      const totalElev = segments.reduce((s, g) => s + Math.max(0, g.altEnd - g.altStart), 0);
+      statusEl.textContent = `✓ ${file.name} — ${totalKm.toFixed(1)} km, +${Math.round(totalElev)} m, ${segments.length} sezioni`;
+    } catch {
+      statusEl.textContent = '⚠️ Errore nella lettura del file';
+      predGpxSegments = null;
+    }
+  };
+  reader.readAsText(file);
+}
+
+function runPrediction() {
+  if (!userWeightKg) { toast('Imposta il tuo peso nella scheda Zone (in fondo a Monitor)'); return; }
+
+  const months = parseInt(document.getElementById('pred-period-select').value);
+  const summary = computeFitnessSummary(months);
+  if (!summary.sufficient) { toast('Servono almeno 3 ascensioni nel periodo per stimare la potenza'); return; }
+  const targetPower = summary.avgWPerKg * userWeightKg;
+
+  let segments = null, climbLabel = '', realAscent = null;
+
+  if (predMode === 'saved') {
+    const idx = document.getElementById('pred-climb-select').value;
+    if (idx === '') { toast('Seleziona una salita'); return; }
+    const climb = climbs[idx];
+    segments = climb.segments;
+    climbLabel = climb.name;
+    // Cerca l'ultima ascensione reale di questa salita per il confronto
+    realAscent = ascents.find(a => a.climbId === climb.addedAt) || ascents.find(a => a.climbName === climb.name);
+  } else if (predMode === 'gpx') {
+    if (!predGpxSegments) { toast('Carica prima un file GPX valido'); return; }
+    segments = predGpxSegments;
+    climbLabel = 'Traccia GPX caricata';
+  } else if (predMode === 'manual') {
+    const km = parseFloat(document.getElementById('pred-m-km').value);
+    const grade = parseFloat(document.getElementById('pred-m-grade').value);
+    const alt = parseFloat(document.getElementById('pred-m-alt').value) || 0;
+    if (isNaN(km) || km <= 0 || isNaN(grade)) { toast('Inserisci lunghezza e pendenza media valide'); return; }
+    segments = [{ km, grade, altStart: alt, altEnd: alt + (km * 1000 * grade / 100), label: '' }];
+    climbLabel = 'Salita manuale';
+  }
+
+  if (!segments || !segments.length) { toast('Dati insufficienti per la simulazione'); return; }
+
+  const predictedS = predictClimbTime(segments, targetPower, userWeightKg);
+  const totalKm = segments.reduce((s, g) => s + g.km, 0);
+  const avgSpeedKmh = predictedS > 0 ? (totalKm / (predictedS / 3600)) : 0;
+
+  let compareHtml = '';
+  if (realAscent) {
+    const diff = predictedS - realAscent.duration;
+    const diffLabel = diff > 0 ? `+${formatTime(Math.round(diff))} più lento` : `${formatTime(Math.round(-diff))} più veloce`;
+    compareHtml = `<div class="pred-compare">Ultima ascensione reale di questa salita: <b>${formatTime(realAscent.duration)}</b> — previsione: ${diffLabel} rispetto a quella.</div>`;
+  }
+
+  document.getElementById('prediction-result').innerHTML = `
+    <div class="prediction-result-card">
+      <div class="pred-time">${formatTime(Math.round(predictedS))}</div>
+      <div class="pred-sub">${climbLabel} — ${totalKm.toFixed(1)} km, ${avgSpeedKmh.toFixed(1)} km/h medi, ${Math.round(targetPower)} W target (${summary.avgWPerKg.toFixed(2)} W/kg)</div>
+      ${compareHtml}
+    </div>`;
+}
+
+function openAscentHistorySheet() {
+  renderAscentList();
+  document.getElementById('ascent-history-sheet').classList.add('open');
+}
+function closeAscentHistorySheet() {
+  document.getElementById('ascent-history-sheet').classList.remove('open');
+}
+
 function renderAscentList() {
   const el = document.getElementById('ascent-list');
   if (!el) return;
@@ -3728,10 +4251,10 @@ function toggleOfflineAreasOverlay() {
   const btn = document.getElementById('btn-toggle-offline-overlay');
   if (offlineAreasVisible) {
     drawOfflineAreasOverlay();
-    if (btn) { btn.textContent = '🙈 Nascondi aree scaricate'; btn.style.background = 'rgba(79,195,247,.15)'; btn.style.borderColor = 'var(--accent)'; btn.style.color = 'var(--accent)'; }
+    if (btn) { btn.textContent = '👁️ Nascondi aree scaricate'; btn.classList.add('on'); }
   } else {
     clearOfflineAreasOverlay();
-    if (btn) { btn.textContent = '👁️ Mostra aree scaricate sulla mappa'; btn.style.background = 'var(--card)'; btn.style.borderColor = 'var(--border)'; btn.style.color = 'var(--text)'; }
+    if (btn) { btn.textContent = '👁️ Mostra aree scaricate'; btn.classList.remove('on'); }
   }
 }
 
