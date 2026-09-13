@@ -16,7 +16,7 @@
     --card:     #1a1a26;
     --border:   #2a2a3e;
     --text:     #e8e8f0;
-    --muted:    #6b6b88;
+    --muted:    #cfcfe6;
     --accent:   #4fc3f7;
     --z1:       #4caf93;
     --z2:       #8bc34a;
@@ -101,6 +101,53 @@
     padding: 8px 0 12px;
   }
   .hr-left { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 210px; }
+
+  /* LAP badge + feedback */
+  .hr-circle-wrap { position: relative; }
+  .lap-badge {
+    position: absolute; top: -6px; left: -6px; z-index: 20;
+    width: 34px; height: 34px; border-radius: 50%;
+    background: #e91e8c; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 900; font-family: var(--mono);
+    border: 3px solid var(--bg);
+    box-shadow: 0 2px 8px rgba(0,0,0,.5);
+    display: none; /* mostrato solo a sessione attiva */
+    transition: transform .15s ease;
+  }
+  .lap-badge.visible { display: flex; }
+  .lap-badge.pulse { animation: lapPulse .5s ease; }
+  @keyframes lapPulse {
+    0%   { transform: scale(1);   background: #e91e8c; }
+    30%  { transform: scale(1.5); background: #ff2fb0; }
+    100% { transform: scale(1);   background: #e91e8c; }
+  }
+
+  .lap-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 14px; margin-bottom: 10px;
+  }
+  .lap-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .lap-num { font-size: 15px; font-weight: 800; color: #fff; }
+  .lap-duration { font-size: 15px; font-weight: 800; font-family: var(--mono); color: var(--accent); }
+  .lap-stats { display: flex; gap: 18px; font-size: 12px; color: #ccc; margin-bottom: 8px; }
+  .lap-stats b { color: #fff; font-family: var(--mono); }
+  .lap-zone-mini { display: flex; gap: 3px; height: 8px; border-radius: 4px; overflow: hidden; }
+  .lap-zone-mini > div { transition: flex .3s; }
+
+  .lap-flash {
+    position: fixed; inset: 0; z-index: 3000; pointer-events: none;
+    box-shadow: inset 0 0 0 0 rgba(233,30,140,0);
+    opacity: 0;
+  }
+  .lap-flash.active {
+    animation: lapFlash .45s ease-out;
+  }
+  @keyframes lapFlash {
+    0%   { opacity: 1; box-shadow: inset 0 0 60px 18px rgba(233,30,140,.9); }
+    100% { opacity: 0; box-shadow: inset 0 0 60px 18px rgba(233,30,140,0); }
+  }
+
   .hr-label { font-size: 11px; letter-spacing: .1em; color: #aaa; text-transform: uppercase; margin-bottom: 8px; }
   .hr-circle {
     width: 210px; height: 210px; border-radius: 50%;
@@ -110,6 +157,7 @@
     align-items: center; justify-content: center;
     transition: border-color .4s;
     box-shadow: 0 0 32px rgba(0,0,0,.5);
+    cursor: pointer;
   }
   .hr-value {
     font-size: 96px; font-weight: 900; line-height: 1;
@@ -471,13 +519,20 @@
     display: none;
     position: absolute; top: 70px; left: 12px; right: 12px; z-index: 550;
     background: rgba(255,193,7,.95); color: #1a1400;
-    border-radius: 14px; padding: 12px 16px; text-align: center;
+    border-radius: 14px; padding: 12px 16px;
     box-shadow: 0 4px 16px rgba(0,0,0,.5);
+    align-items: center; justify-content: space-between; gap: 10px;
   }
-  .map-climb-approach.visible { display: block; }
+  .map-climb-approach.visible { display: flex; }
   .map-climb-approach.near { background: rgba(139,195,74,.95); color: #0a1a04; }
+  .mca-text { flex: 1; text-align: center; }
   .mca-name { font-size: 14px; font-weight: 800; margin-bottom: 2px; }
   .mca-dist { font-size: 20px; font-weight: 900; font-family: var(--mono); }
+  .mca-close {
+    background: rgba(0,0,0,.15); border: none; color: inherit;
+    width: 28px; height: 28px; border-radius: 50%; font-size: 14px;
+    font-weight: 800; cursor: pointer; flex-shrink: 0;
+  }
 
   /* Pop-up 2: navigazione attiva su salita rilevata */
   .map-climb-overlay {
@@ -730,6 +785,8 @@
 </head>
 <body>
 
+<div class="lap-flash" id="lap-flash"></div>
+
 <nav>
   <button class="active" onclick="showView('monitor',this)">Monitor</button>
   <button onclick="showView('history',this)">Sessioni</button>
@@ -754,9 +811,12 @@
     <!-- Left: circle + zone badge -->
     <div class="hr-left">
       <div class="hr-label">Frequenza Cardiaca</div>
-      <div class="hr-circle" id="hr-circle">
-        <div class="hr-value" id="hr-value">—</div>
-        <div class="hr-unit">bpm</div>
+      <div class="hr-circle-wrap">
+        <div class="hr-circle" id="hr-circle" onclick="recordLap()">
+          <div class="hr-value" id="hr-value">—</div>
+          <div class="hr-unit">bpm</div>
+        </div>
+        <div class="lap-badge" id="lap-badge">1</div>
       </div>
       <div class="zone-badge" id="zone-badge">— Zona —</div>
     </div>
@@ -855,13 +915,20 @@
 <div id="view-settings" class="view">
   <div class="settings-section">
     <h2>Dati Fisici</h2>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Usati per calcolare la potenza nelle Previsioni prestazioni (sezione Salite). Includi anche una stima di bici e abbigliamento per risultati più precisi.</p>
+    <p style="font-size:13px;color:#ccc;margin-bottom:16px;">Usati per calcolare la potenza nelle Previsioni prestazioni (sezione Salite). Aggiorna il peso bici+attrezzatura se cambi bicicletta o porti bagagli/zaino.</p>
     <div class="zone-settings-card">
       <div class="zone-setting-row">
-        <label>Peso totale (tu + bici)</label>
+        <label>Peso corporeo</label>
         <div class="zone-inputs">
           <input type="number" id="user-weight-kg" min="30" max="200" step="0.5" placeholder="es. 75">
-          <span style="font-size:11px;color:var(--muted)">kg</span>
+          <span style="font-size:11px;color:#ccc">kg</span>
+        </div>
+      </div>
+      <div class="zone-setting-row">
+        <label>Peso bici + attrezzatura</label>
+        <div class="zone-inputs">
+          <input type="number" id="bike-gear-kg" min="3" max="40" step="0.5" placeholder="es. 9">
+          <span style="font-size:11px;color:#ccc">kg</span>
         </div>
       </div>
     </div>
@@ -1002,7 +1069,7 @@
     </div>
 
     <div class="climb-segs-list" id="climb-segs-list"></div>
-    <button class="btn-stop-climb" onclick="stopClimb()">■ Termina navigazione</button>
+    <button class="btn-stop-climb" id="btn-stop-climb" onclick="stopClimb()">✕ Chiudi dettaglio salita</button>
   </div>
 
   <!-- Libreria salite (visibile quando non in navigazione) -->
@@ -1032,6 +1099,17 @@
   </div>
 </div>
 
+<!-- Sheet: Dettaglio Lap -->
+<div class="map-sheet-overlay" id="lap-sheet">
+  <div class="map-sheet">
+    <div class="tracks-sheet-header">
+      <h3 style="margin-bottom:0">Dettaglio Lap</h3>
+      <button class="map-sheet-close-top" onclick="closeLapSheet()">✕ Chiudi</button>
+    </div>
+    <div id="lap-detail-list"></div>
+  </div>
+</div>
+
 <!-- Sheet: Previsioni prestazioni -->
 <div class="map-sheet-overlay" id="predictions-sheet">
   <div class="map-sheet">
@@ -1040,6 +1118,10 @@
       <button class="map-sheet-close-top" onclick="closePredictionsSheet()">✕ Chiudi</button>
     </div>
     <p class="hint">Stima basata su un modello fisico (gravità, resistenza aerodinamica e di rotolamento) applicato allo storico delle tue ascensioni. È una stima, non una misura di laboratorio.</p>
+
+    <div class="offline-top-row">
+      <button class="btn-toggle-overlay-compact" onclick="goToWeightSettings()">⚖️ Imposta peso corporeo e bici</button>
+    </div>
 
     <div class="pred-period-row">
       <label>Periodo di analisi</label>
@@ -1106,8 +1188,11 @@
 
     <!-- Pop-up 1: avvicinamento a una salita salvata -->
     <div class="map-climb-approach" id="map-climb-approach">
-      <div class="mca-name" id="mca-name">—</div>
-      <div class="mca-dist" id="mca-dist">—</div>
+      <div class="mca-text">
+        <div class="mca-name" id="mca-name">—</div>
+        <div class="mca-dist" id="mca-dist">—</div>
+      </div>
+      <button class="mca-close" onclick="dismissClimbApproachPopup()">✕</button>
     </div>
 
     <!-- Pop-up 2: navigazione attiva sulla salita -->
@@ -1284,6 +1369,7 @@ const DEFAULT_ZONES = [
 
 let zones = loadZones();
 let userWeightKg = loadUserWeight();
+let bikeGearKg = loadBikeGearWeight();
 let device = null, characteristic = null;
 let connected = false;
 let autoReconnect = false;
@@ -1295,6 +1381,15 @@ let sessionStart = null;
 let sessionPaused = false;
 let sessionPausedAt = null;
 let sessionPausedMs = 0;      // total ms paused
+
+// ── LAP ──────────────────────────────────────────────────────────
+let laps = [];                 // lap completati della sessione in corso
+let lapCount = 1;              // numero del lap corrente (in corso)
+let lapStartElapsedS = 0;      // secondi di sessione trascorsi all'inizio del lap corrente
+let lapHrSamples = [];         // campioni BPM nel lap corrente
+let lapZoneTicks = [0,0,0,0,0];// secondi per zona nel lap corrente
+let lastLapTapTime = 0;        // per il cooldown anti-doppio-tap
+const LAP_COOLDOWN_MS = 3000;
 let sessionTimer = null;
 let hrSamples = [];
 let zoneTicks = [0,0,0,0,0];
@@ -1471,6 +1566,7 @@ function updateHR(hr) {
     const avgHR = Math.round(hrSamples.reduce((a,b)=>a+b,0) / hrSamples.length);
     document.getElementById('max-hr').textContent = maxHR;
     document.getElementById('avg-hr').textContent = avgHR;
+    if (!sessionPaused) lapHrSamples.push(hr);
   }
 }
 
@@ -1523,6 +1619,55 @@ function updateZoneBars() {
   }
 }
 
+// ── LAP ────────────────────────────────────────────────────────
+function recordLap() {
+  if (!sessionActive || sessionPaused) return; // attivo solo a sessione avviata e non in pausa
+  const now = Date.now();
+  if (now - lastLapTapTime < LAP_COOLDOWN_MS) return; // anti-doppio-tap
+  lastLapTapTime = now;
+
+  closeCurrentLap();
+  lapCount++;
+  document.getElementById('lap-badge').textContent = lapCount;
+  triggerLapFeedback();
+  toast(`🏁 Lap ${lapCount - 1} registrato`);
+}
+
+// Chiude il lap corrente e lo salva in laps[], poi resetta gli accumulatori
+// per il lap successivo. Usata sia dal tap manuale sia da stopSession().
+function closeCurrentLap() {
+  const elapsedNow = Math.floor((Date.now() - sessionStart - sessionPausedMs) / 1000);
+  const durationS = Math.max(0, elapsedNow - lapStartElapsedS);
+  const avgHR = lapHrSamples.length ? Math.round(lapHrSamples.reduce((a,b)=>a+b,0) / lapHrSamples.length) : null;
+  const maxHR = lapHrSamples.length ? Math.max(...lapHrSamples) : null;
+
+  laps.push({
+    lapNum: lapCount,
+    durationS,
+    avgHR,
+    maxHR,
+    zoneTicks: [...lapZoneTicks],
+  });
+
+  lapStartElapsedS = elapsedNow;
+  lapHrSamples = [];
+  lapZoneTicks = [0,0,0,0,0];
+}
+
+function triggerLapFeedback() {
+  // Flash fucsia a tutto schermo
+  const flash = document.getElementById('lap-flash');
+  flash.classList.remove('active');
+  void flash.offsetWidth;
+  flash.classList.add('active');
+
+  // Badge che pulsa
+  const badge = document.getElementById('lap-badge');
+  badge.classList.remove('pulse');
+  void badge.offsetWidth;
+  badge.classList.add('pulse');
+}
+
 // ── SESSION ────────────────────────────────────────────────────
 function startSession() {
   if (!connected) { toast('Connetti prima il cardiofrequenzimetro'); return; }
@@ -1533,6 +1678,16 @@ function startSession() {
   hrSamples       = [];
   zoneTicks       = [0,0,0,0,0];
   currentZone     = -1;
+
+  // Reset LAP
+  laps = [];
+  lapCount = 1;
+  lapStartElapsedS = 0;
+  lapHrSamples = [];
+  lapZoneTicks = [0,0,0,0,0];
+  lastLapTapTime = 0;
+  document.getElementById('lap-badge').textContent = '1';
+  document.getElementById('lap-badge').classList.add('visible');
 
   document.getElementById('btn-start').disabled  = true;
   document.getElementById('btn-pause').disabled  = false;
@@ -1552,7 +1707,10 @@ function startSession() {
 
   zoneTickInterval = setInterval(() => {
     if (sessionPaused) return;
-    if (currentZone >= 0) zoneTicks[currentZone]++;
+    if (currentZone >= 0) {
+      zoneTicks[currentZone]++;
+      lapZoneTicks[currentZone]++;
+    }
     updateZoneBars();
   }, 1000);
 
@@ -1593,10 +1751,14 @@ function stopSession() {
   document.getElementById('btn-pause').style.display  = '';
   document.getElementById('btn-resume').style.display = 'none';
   document.getElementById('btn-stop').disabled   = true;
+  document.getElementById('lap-badge').classList.remove('visible');
 
   stopAutosave();
   clearSessionSnapshot();
   if (hrSamples.length === 0) { toast('Nessun dato registrato'); return; }
+
+  // Chiude l'ultimo lap ancora aperto (dall'ultimo tap fino alla fine sessione)
+  closeCurrentLap();
 
   const duration = Math.floor((Date.now() - sessionStart - sessionPausedMs) / 1000);
   const maxHR    = Math.max(...hrSamples);
@@ -1612,6 +1774,7 @@ function stopSession() {
     avgHR,
     zonePcts,
     zoneTicks: [...zoneTicks],
+    laps:     [...laps],
   };
   sessions.unshift(session);
   saveSessionsToStorage();
@@ -1657,8 +1820,41 @@ function renderHistory() {
         <div class="mini-zones">${bars}</div>
         <div style="font-size:11px;color:var(--muted);padding-bottom:2px">${s.zonePcts.map((p,i)=>`Z${i+1}:${p}%`).join(' ')}</div>
       </div>
+      ${s.laps && s.laps.length > 1 ? `<button class="track-btn nav" style="width:100%;margin-top:10px" onclick="openLapSheet(${s.id})">🏁 Vedi Lap (${s.laps.length})</button>` : ''}
     </div>`;
   }).join('');
+}
+
+// ── DETTAGLIO LAP ────────────────────────────────────────────────
+function openLapSheet(sessionId) {
+  const session = sessions.find(s => s.id === sessionId);
+  if (!session || !session.laps || !session.laps.length) return;
+
+  const el = document.getElementById('lap-detail-list');
+  el.innerHTML = session.laps.map(l => {
+    const total = l.zoneTicks.reduce((a,b) => a+b, 0) || 1;
+    const zoneBar = l.zoneTicks.map((t, i) => {
+      const pct = Math.round(t / total * 100);
+      return pct > 0 ? `<div style="flex:${pct};background:var(${ZONE_COLORS[i]})" title="Z${i+1}: ${pct}%"></div>` : '';
+    }).join('');
+    return `
+    <div class="lap-card">
+      <div class="lap-card-header">
+        <span class="lap-num">Lap ${l.lapNum}</span>
+        <span class="lap-duration">${formatTime(l.durationS)}</span>
+      </div>
+      <div class="lap-stats">
+        <span>FC Media <b>${l.avgHR ?? '—'}</b></span>
+        <span>FC Max <b>${l.maxHR ?? '—'}</b></span>
+      </div>
+      <div class="lap-zone-mini">${zoneBar}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('lap-sheet').classList.add('open');
+}
+function closeLapSheet() {
+  document.getElementById('lap-sheet').classList.remove('open');
 }
 
 function deleteSession(id) {
@@ -1676,16 +1872,28 @@ function clearHistory() {
 }
 
 // ── SETTINGS ───────────────────────────────────────────────────
-// ── PESO UTENTE (per calcolo potenza) ───────────────────────────
+// ── PESO CORPOREO E BICI+ATTREZZATURA (per calcolo potenza) ─────
+// Due valori separati e indipendenti: il peso corporeo (usato anche come
+// riferimento per i W/kg, metrica standard nel ciclismo) e il peso di
+// bici+attrezzatura (variabile: cambia con la bici usata, zaini, bagagli
+// per cicloturismo ecc.) — entrambi modificabili in qualsiasi momento.
 function loadUserWeight() {
   const v = localStorage.getItem('hrm-user-weight-kg');
   return v ? parseFloat(v) : null;
 }
+function loadBikeGearWeight() {
+  const v = localStorage.getItem('hrm-bike-gear-kg');
+  return v ? parseFloat(v) : 9; // valore di partenza tipico, comunque modificabile
+}
 function saveWeight() {
-  const val = parseFloat(document.getElementById('user-weight-kg').value);
-  if (isNaN(val) || val < 30 || val > 200) { toast('Inserisci un peso valido (30-200 kg)'); return; }
-  localStorage.setItem('hrm-user-weight-kg', val);
-  userWeightKg = val;
+  const bodyVal = parseFloat(document.getElementById('user-weight-kg').value);
+  const bikeVal = parseFloat(document.getElementById('bike-gear-kg').value);
+  if (isNaN(bodyVal) || bodyVal < 30 || bodyVal > 200) { toast('Inserisci un peso corporeo valido (30-200 kg)'); return; }
+  if (isNaN(bikeVal) || bikeVal < 3 || bikeVal > 40) { toast('Inserisci un peso bici+attrezzatura valido (3-40 kg)'); return; }
+  localStorage.setItem('hrm-user-weight-kg', bodyVal);
+  localStorage.setItem('hrm-bike-gear-kg', bikeVal);
+  userWeightKg = bodyVal;
+  bikeGearKg = bikeVal;
   toast('Peso salvato ✓');
 }
 
@@ -1695,6 +1903,7 @@ function loadZoneInputs() {
     document.getElementById(`z${i+1}-max`).value = z.max;
   });
   if (userWeightKg) document.getElementById('user-weight-kg').value = userWeightKg;
+  if (bikeGearKg) document.getElementById('bike-gear-kg').value = bikeGearKg;
 }
 
 function saveZones() {
@@ -2132,6 +2341,7 @@ function startClimb(idx) {
   // Mostra il tasto "Avvia Ascensione", nascondi il badge "in corso"
   document.getElementById('btn-start-ascent').style.display = '';
   document.getElementById('ascent-live-badge').style.display = 'none';
+  document.getElementById('btn-stop-climb').textContent = '✕ Chiudi dettaglio salita';
 
   drawProfile();
   renderSegsList();
@@ -2172,6 +2382,7 @@ function startAscent() {
 
   document.getElementById('btn-start-ascent').style.display = 'none';
   document.getElementById('ascent-live-badge').style.display = 'flex';
+  document.getElementById('btn-stop-climb').textContent = '■ Termina navigazione';
 
   startGPS();
   startAutosave();
@@ -2222,6 +2433,7 @@ function stopClimb() {
       avgVAM,
       segmentSplits: climbSegmentSplits.length ? [...climbSegmentSplits] : null,
       weightAtTimeKg: userWeightKg || null, // peso al momento della registrazione, per coerenza storica
+      bikeGearAtTimeKg: bikeGearKg != null ? bikeGearKg : null,
     };
     ascents.unshift(ascent);
     saveAscents();
@@ -2481,7 +2693,9 @@ const PHYS_G = 9.80665;          // accelerazione di gravità (m/s²)
 const PHYS_CDA = 0.32;           // m² — posizione in salita, mani su leve/tops
 const PHYS_CRR = 0.005;          // resistenza al rotolamento, asfalto
 const PHYS_DRIVETRAIN_EFF = 0.975; // efficienza trasmissione (~97.5%)
-const PHYS_BIKE_GEAR_KG = 9;     // massa tipica bici da strada + accessori + abbigliamento
+// Il peso di bici+attrezzatura è variabile e impostabile dall'utente
+// (vedi bikeGearKg, caricato dalle Impostazioni) — non è più una costante
+// fissa, perché cambia con la bici usata, zaini, bagagli ecc.
 
 // Densità dell'aria in funzione della quota (formula barometrica
 // semplificata, atmosfera standard)
@@ -2520,7 +2734,8 @@ function speedForPower(targetP, gradeFraction, massKg, rho) {
 function estimateAscentPower(ascent) {
   const weight = ascent.weightAtTimeKg || userWeightKg;
   if (!weight) return null;
-  const totalMass = weight + PHYS_BIKE_GEAR_KG;
+  const bikeW = ascent.bikeGearAtTimeKg != null ? ascent.bikeGearAtTimeKg : bikeGearKg;
+  const totalMass = weight + (bikeW || 0);
 
   const climb = climbs.find(c => c.addedAt === ascent.climbId) || climbs.find(c => c.name === ascent.climbName);
   if (!climb || !climb.segments || !climb.segments.length) return null;
@@ -2592,8 +2807,8 @@ function deriveSegmentsFromGpxPoints(points, chunkM) {
 
 // Calcola il tempo previsto (s) per percorrere una serie di sezioni a una
 // potenza target costante
-function predictClimbTime(segments, targetPowerW, weightKg) {
-  const totalMass = weightKg + PHYS_BIKE_GEAR_KG;
+function predictClimbTime(segments, targetPowerW, weightKg, bikeKg) {
+  const totalMass = weightKg + (bikeKg || 0);
   let totalTime = 0;
   segments.forEach(seg => {
     const avgAlt = (seg.altStart + seg.altEnd) / 2;
@@ -2827,6 +3042,19 @@ function updateClimbHR(hr, zone) {
 let predMode = 'saved'; // 'saved' | 'gpx' | 'manual'
 let predGpxSegments = null;
 
+// Scorciatoia: chiude il pannello Previsioni e apre direttamente le
+// Impostazioni (scheda Zone) sulla sezione peso — evita di dover cercare
+// il bottone "Zone" in fondo a Monitor.
+function goToWeightSettings() {
+  closePredictionsSheet();
+  const dummyBtn = document.createElement('button'); // showView richiede un elemento bottone, non serve sia visibile
+  showView('settings', dummyBtn);
+  setTimeout(() => {
+    const input = document.getElementById('user-weight-kg');
+    if (input) input.focus();
+  }, 150);
+}
+
 function openPredictionsSheet() {
   populatePredClimbSelect();
   renderFitnessSummary();
@@ -2919,7 +3147,7 @@ function onPredGpxSelected(event) {
 }
 
 function runPrediction() {
-  if (!userWeightKg) { toast('Imposta il tuo peso nella scheda Zone (in fondo a Monitor)'); return; }
+  if (!userWeightKg) { toast('Imposta il tuo peso col bottone "⚖️ Imposta peso" qui sopra'); return; }
 
   const months = parseInt(document.getElementById('pred-period-select').value);
   const summary = computeFitnessSummary(months);
@@ -2951,7 +3179,7 @@ function runPrediction() {
 
   if (!segments || !segments.length) { toast('Dati insufficienti per la simulazione'); return; }
 
-  const predictedS = predictClimbTime(segments, targetPower, userWeightKg);
+  const predictedS = predictClimbTime(segments, targetPower, userWeightKg, bikeGearKg);
   const totalKm = segments.reduce((s, g) => s + g.km, 0);
   const avgSpeedKmh = predictedS > 0 ? (totalKm / (predictedS / 3600)) : 0;
 
@@ -3170,16 +3398,22 @@ let mapElevOffsetM = null; // offset di calibrazione quota (quota mappa - quota 
 // flusso manuale tramite activeClimb/climbLockedOnTrack ecc.) — i due
 // possono girare contemporaneamente (es. ascensione avviata in Salite e
 // poi si passa alla Mappa) senza interferire tra loro.
-const MAP_CLIMB_APPROACH_RADIUS_M = 2200; // ~2km di preavviso
-const MAP_CLIMB_GIVEUP_RADIUS_M   = 3000; // oltre questa distanza, annulla il rilevamento
+const MAP_CLIMB_APPROACH_RADIUS_M = 1000; // 1km di preavviso (non oltre)
+const MAP_CLIMB_GIVEUP_RADIUS_M   = 1300; // oltre questa distanza, annulla il rilevamento
 const MAP_CLIMB_LOCK_RADIUS_M     = 20;
 const MAP_CLIMB_MIDWAY_PERP_M     = 20;
+const MAP_CLIMB_MAX_ANGLE_DIFF    = 100;  // gradi: oltre questa differenza tra la direzione
+                                           // di marcia e quella della salita, si considera
+                                           // "verso sbagliato" (discesa) e non si aggancia
 let mapDetectedClimb   = null;   // oggetto salita attualmente rilevata/agganciata
 let mapClimbPhase      = 'none'; // 'none' | 'approaching' | 'active'
 let mapClimbLastMatchedIdx  = null;
 let mapClimbGpxStartOffsetM = 0;
 let mapClimbDistanceDone    = 0;
 let mapClimbCurrentSegIdx   = -1;
+let mapClimbApproachPrevDist = null; // per rilevare se ci si avvicina o allontana
+let mapClimbApproachAwayCount = 0;   // letture consecutive in allontanamento
+let mapClimbDismissedIds = new Set(); // salite chiuse manualmente (non ripropose finché si resta in zona)
 let mapClimbCheckCounter    = 0; // limita la frequenza del controllo "economico" su tutte le salite
 let mapElevCalibrating = false;
 
@@ -3205,7 +3439,7 @@ const ELEV_NOISE_THRESHOLD_M = 3; // soglia (m) per ignorare il rumore GPS sulla
 let trackTimer = null;
 let trackLastMoveTime = null; // timestamp dell'ultimo movimento rilevato (per auto-pausa)
 let trackAutoPaused = false;  // true se la pausa è stata attivata automaticamente (non manualmente)
-const AUTO_PAUSE_IDLE_MS = 10000; // 10 secondi senza movimento → pausa automatica
+const AUTO_PAUSE_IDLE_MS = 25000; // 25 secondi senza movimento → pausa automatica
 const AUTO_PAUSE_MOVE_THRESHOLD_M = 3; // sotto questa distanza tra fix, si considera "fermo"
 let tracks = loadTracks();
 let selectedTrackIds = new Set(); // tracce selezionate per l'unione
@@ -3274,6 +3508,7 @@ function stopMapGPS() {
   if (mapGpsWatchId !== null) { navigator.geolocation.clearWatch(mapGpsWatchId); mapGpsWatchId = null; }
   mapLastPos = null;
   resetMapClimbDetection(); // ripartirà da zero alla prossima apertura della scheda
+  mapClimbDismissedIds.clear();
 }
 
 function calcBearing(a, b) {
@@ -3434,6 +3669,7 @@ function checkNearbyClimbsForMap(coords) {
   let nearest = null, nearestDist = Infinity;
   for (const c of climbs) {
     if (!c.startCoords) continue;
+    if (mapClimbDismissedIds.has(c.addedAt)) continue;
     const d = haversineMeters(coords, { latitude: c.startCoords.lat, longitude: c.startCoords.lon });
     if (d < nearestDist) { nearestDist = d; nearest = c; }
   }
@@ -3442,6 +3678,8 @@ function checkNearbyClimbsForMap(coords) {
     mapClimbPhase = 'approaching';
     mapClimbLastMatchedIdx = null;
     mapClimbGpxStartOffsetM = 0;
+    mapClimbApproachPrevDist = nearestDist;
+    mapClimbApproachAwayCount = 0;
     showClimbApproachPopup(nearest, nearestDist);
   }
 }
@@ -3458,22 +3696,46 @@ function updateApproachingMapClimb(coords) {
     return;
   }
 
+  // Rileva se ci si sta avvicinando o allontanando: se la distanza cresce
+  // per letture consecutive, la salita non è più "in avvicinamento" (es.
+  // salita breve appena completata, o semplice transito nelle vicinanze
+  // senza mai davvero avvicinarsi) — annulla il rilevamento.
+  if (mapClimbApproachPrevDist != null) {
+    if (distToStart > mapClimbApproachPrevDist + 8) {
+      mapClimbApproachAwayCount++;
+    } else {
+      mapClimbApproachAwayCount = 0;
+    }
+  }
+  mapClimbApproachPrevDist = distToStart;
+  if (mapClimbApproachAwayCount >= 3) {
+    resetMapClimbDetection();
+    return;
+  }
+
   updateClimbApproachPopup(c.name, distToStart);
 
   // Test aggancio: entro il raggio dal punto di partenza, OPPURE molto
-  // vicini alla traccia GPX (permette di agganciare anche a metà salita)
+  // vicini alla traccia GPX (permette di agganciare anche a metà salita).
+  // In entrambi i casi, verifica anche che la direzione di marcia sia
+  // coerente con il verso di salita (non si aggancia se si sta scendendo
+  // la stessa strada nel verso opposto).
   let locked = false;
   if (distToStart <= MAP_CLIMB_LOCK_RADIUS_M) {
-    locked = true;
     if (c.gpxPoints) {
       const proj = projectOntoTrack(coords.latitude, coords.longitude, c.gpxPoints, null, null);
-      mapClimbGpxStartOffsetM = proj ? proj.distAlongTrack : 0;
-      mapClimbLastMatchedIdx  = proj ? proj.matchedIdx : null;
+      if (proj && isTravelDirectionUphill(c.gpxPoints, proj.matchedIdx)) {
+        locked = true;
+        mapClimbGpxStartOffsetM = proj.distAlongTrack;
+        mapClimbLastMatchedIdx  = proj.matchedIdx;
+      }
+    } else {
+      locked = true; // nessuna traccia: non possiamo verificare la direzione
     }
-    mapClimbDistanceDone = 0;
+    if (locked) mapClimbDistanceDone = 0;
   } else if (c.gpxPoints) {
     const proj = projectOntoTrack(coords.latitude, coords.longitude, c.gpxPoints, null, null);
-    if (proj && proj.perpDist <= MAP_CLIMB_MIDWAY_PERP_M) {
+    if (proj && proj.perpDist <= MAP_CLIMB_MIDWAY_PERP_M && isTravelDirectionUphill(c.gpxPoints, proj.matchedIdx)) {
       locked = true;
       const startProj = c.startCoords
         ? projectOntoTrack(c.startCoords.lat, c.startCoords.lon, c.gpxPoints, null, null)
@@ -3490,6 +3752,24 @@ function updateApproachingMapClimb(coords) {
     showActiveClimbOverlay(c);
     updateActiveClimbOverlayUI();
   }
+}
+
+// Confronta la direzione di marcia attuale (mapLastHeading, già calcolata
+// da onMapGPSUpdate) con la direzione della traccia nel punto abbinato.
+// Ritorna false se si sta viaggiando nel verso opposto (discesa) — evita
+// di agganciare la navigazione salita quando si percorre il tratto al
+// contrario.
+function isTravelDirectionUphill(trackPts, idx) {
+  const a = trackPts[idx];
+  const b = trackPts[Math.min(idx + 1, trackPts.length - 1)];
+  if (!a || !b || (a.lat === b.lat && a.lon === b.lon)) return true; // punto singolo: non verificabile, permetti
+  const trackBearing = calcBearing(
+    { latitude: a.lat, longitude: a.lon },
+    { latitude: b.lat, longitude: b.lon }
+  );
+  let diff = Math.abs(mapLastHeading - trackBearing) % 360;
+  if (diff > 180) diff = 360 - diff;
+  return diff <= MAP_CLIMB_MAX_ANGLE_DIFF;
 }
 
 function updateActiveMapClimbTracking(coords) {
@@ -3541,6 +3821,8 @@ function resetMapClimbDetection() {
   mapClimbGpxStartOffsetM = 0;
   mapClimbDistanceDone = 0;
   mapClimbCurrentSegIdx = -1;
+  mapClimbApproachPrevDist = null;
+  mapClimbApproachAwayCount = 0;
 }
 
 // ── UI: pop-up avvicinamento ────────────────────────────────────
@@ -3559,6 +3841,14 @@ function updateClimbApproachPopup(name, distM) {
 }
 function hideClimbApproachPopup() {
   document.getElementById('map-climb-approach').classList.remove('visible');
+}
+// Chiusura manuale: l'utente sta solo transitando vicino alla salita e non
+// intende salirla — nasconde il fumetto e annulla il rilevamento; questa
+// salita specifica non verrà riproposta finché non si esce dalla scheda
+// Mappa (o non ci si allontana e riavvicina in una sessione successiva)
+function dismissClimbApproachPopup() {
+  if (mapDetectedClimb) mapClimbDismissedIds.add(mapDetectedClimb.addedAt);
+  resetMapClimbDetection();
 }
 
 // ── UI: pop-up navigazione attiva ───────────────────────────────
