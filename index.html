@@ -134,6 +134,15 @@
   .lap-stats b { color: #fff; font-family: var(--mono); }
   .lap-zone-mini { display: flex; gap: 3px; height: 8px; border-radius: 4px; overflow: hidden; }
   .lap-zone-mini > div { transition: flex .3s; }
+  .lap-zone-labels {
+    display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 10px;
+  }
+  .lap-zone-label {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; color: #ccc; font-weight: 600;
+  }
+  .lap-zone-label b { color: #fff; font-family: var(--mono); font-size: 13px; }
+  .lap-zone-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 
   .lap-flash {
     position: fixed; inset: 0; z-index: 3000; pointer-events: none;
@@ -286,23 +295,6 @@
   .hr-circle.beat { animation: heartbeat .3s ease; }
 
   /* ── SALITE ── */
-  .climb-hr-bar {
-    display: flex; align-items: center; gap: 12px;
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 12px 16px; margin-bottom: 14px;
-  }
-  .climb-hr-circle {
-    width: 60px; height: 60px; border-radius: 50%;
-    background: #fff; border: 5px solid var(--muted);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    flex-shrink: 0; transition: border-color .4s;
-  }
-  .climb-hr-num { font-size: 28px; font-weight: 900; color: #111; font-family: var(--mono); line-height: 1; }
-  .climb-hr-unit { font-size: 11px; color: #444; font-weight: 700; letter-spacing: .06em; }
-  .climb-hr-info { flex: 1; }
-  .climb-hr-zone { font-size: 16px; font-weight: 800; }
-  .climb-hr-label { font-size: 14px; color: #ddd; font-weight: 600; }
-
   /* Salita library */
   .climb-lib-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
   .climb-lib-header h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
@@ -314,9 +306,7 @@
   .climb-card {
     background: var(--card); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px;
-    cursor: pointer; transition: border-color .2s;
   }
-  .climb-card:hover { border-color: var(--accent); }
   .climb-card-header { display: flex; justify-content: space-between; align-items: flex-start; }
   .climb-card-name { font-size: 19px; font-weight: 800; }
   .climb-card-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
@@ -359,84 +349,6 @@
   .upload-preview { font-size: 12px; color: var(--z2); margin-top: 6px; }
   .ai-status { font-size: 13px; color: var(--accent); text-align: center; padding: 8px 0; min-height: 24px; }
 
-  /* Active climb navigator */
-  .climb-nav-header {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px;
-    display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  }
-  .climb-nav-header-text { flex: 1; min-width: 0; }
-  .btn-start-ascent {
-    width: 120px; flex-shrink: 0; height: 48px; border-radius: 12px; border: none;
-    background: #ccff00; color: #0a1400; font-size: 13px; font-weight: 900;
-    letter-spacing: .02em; cursor: pointer; box-shadow: 0 0 14px rgba(204,255,0,.5);
-  }
-  .btn-start-ascent:active { background: #b8e600; }
-  .ascent-live-badge {
-    width: 120px; flex-shrink: 0; height: 48px; border-radius: 12px;
-    background: rgba(229,57,53,.15); border: 2px solid var(--z4);
-    color: var(--z4); font-size: 13px; font-weight: 800;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-  }
-  .ascent-live-dot {
-    width: 8px; height: 8px; border-radius: 50%; background: var(--z4);
-    animation: pulse 1.2s infinite;
-  }
-  .climb-nav-name { font-size: 21px; font-weight: 800; }
-  .climb-nav-sub  { font-size: 14px; color: #ccc; margin-top: 2px; font-weight: 600; }
-
-  /* Profile chart */
-  .climb-profile-wrap {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 14px; margin-bottom: 12px;
-    overflow: hidden;
-  }
-  #climb-svg { width: 100%; display: block; }
-
-  /* Current segment info */
-  .climb-seg-info {
-    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px;
-  }
-  .climb-seg-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 12px; text-align: center;
-  }
-  .climb-seg-card .csl { font-size: 13px; color: #ccc; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
-  .climb-seg-card .csv { font-size: 28px; font-weight: 900; font-family: var(--mono); }
-  .climb-seg-card .csu { font-size: 13px; color: #bbb; font-weight: 600; }
-
-  /* Segments list — fixed 3-row window */
-  .climb-segs-list {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--radius); overflow-y: auto; margin-bottom: 12px;
-    height: 156px; /* 3 righe da 52px */
-    scroll-behavior: smooth;
-    overscroll-behavior: contain;
-    scroll-behavior: smooth;
-  }
-  .climb-seg-row {
-    display: flex; align-items: center; padding: 14px 14px;
-    border-bottom: 1px solid var(--border); font-size: 15px; gap: 10px;
-    transition: background .3s; min-height: 54px;
-  }
-  .climb-seg-row:last-child { border-bottom: none; }
-  .climb-seg-row.current { background: rgba(79,195,247,.15); border-left: 4px solid var(--accent); padding-left: 10px; }
-  .climb-seg-row.done    { opacity: .35; }
-  .seg-idx  { width: 24px; font-size: 13px; color: #aaa; font-weight: 700; }
-  .seg-name { flex: 1; font-size: 15px; font-weight: 600; }
-  .seg-pct  { font-weight: 800; font-family: var(--mono); min-width: 46px; text-align: right; font-size: 15px; }
-  .seg-km   { color: #bbb; font-size: 13px; min-width: 52px; text-align: right; font-weight: 600; }
-  .seg-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-
-  .btn-stop-climb {
-    width: 100%; padding: 14px; border-radius: var(--radius); border: none;
-    background: var(--z4); color: #1a0a00; font-size: 14px; font-weight: 700; cursor: pointer;
-  }
-  .btn-start-climb {
-    width: 100%; padding: 14px; border-radius: var(--radius); border: none;
-    background: var(--z2); color: #0a1a04; font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 8px;
-  }
-
   /* Storico ascensioni */
   .climb-history-header {
     display: flex; justify-content: space-between; align-items: center;
@@ -469,15 +381,6 @@
     font-weight: 900; transition: background .2s;
   }
   .fs-btn:active { background: rgba(79,195,247,.35); }
-
-  /* GPS sync banner */
-  .climb-approach-banner {
-    display: none; background: var(--z3); color: #1a1400;
-    border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px;
-    font-size: 17px; font-weight: 800; text-align: center; letter-spacing: .02em;
-  }
-  .climb-approach-banner.visible { display: block; }
-  .climb-approach-banner.near { background: var(--z2); color: #0a1a04; }
 
   /* ── MAPPA ── */
   #view-map { padding: 0; }
@@ -1005,74 +908,7 @@
 <!-- ══════════ SALITE ══════════ -->
 <div id="view-climb" class="view">
 
-  <!-- Mini HR bar + FS btn -->
-  <div class="climb-hr-bar">
-    <div class="climb-hr-circle" id="climb-hr-circle">
-      <div class="climb-hr-num" id="climb-hr-num">—</div>
-      <div class="climb-hr-unit">bpm</div>
-    </div>
-    <div class="climb-hr-info">
-      <div class="climb-hr-zone" id="climb-hr-zone">— Zona —</div>
-      <div class="climb-hr-label">Frequenza cardiaca live</div>
-    </div>
-    <button class="fs-btn" onclick="toggleFullscreen()">⛶</button>
-  </div>
-
-  <!-- Navigator attivo (nascosto finché non si avvia una salita) -->
-  <div id="climb-navigator" style="display:none">
-    <div class="climb-nav-header">
-      <div class="climb-nav-header-text">
-        <div class="climb-nav-name" id="climb-nav-name">—</div>
-        <div class="climb-nav-sub" id="climb-nav-sub">—</div>
-      </div>
-      <button class="btn-start-ascent" id="btn-start-ascent" onclick="startAscent()">▶ Avvia<br>Ascensione</button>
-      <div class="ascent-live-badge" id="ascent-live-badge" style="display:none">
-        <span class="ascent-live-dot"></span> IN CORSO
-      </div>
-    </div>
-
-    <div class="climb-approach-banner" id="approach-banner">📍 Inizio tra — m</div>
-
-    <div class="climb-profile-wrap">
-      <svg id="climb-svg" viewBox="0 0 360 120" preserveAspectRatio="none"></svg>
-    </div>
-
-    <div class="climb-seg-info">
-      <div class="climb-seg-card">
-        <div class="csl">Pendenza</div>
-        <div class="csv" id="nav-grade">—</div>
-        <div class="csu">%</div>
-      </div>
-      <div class="climb-seg-card">
-        <div class="csl">Rimanenti</div>
-        <div class="csv" id="nav-remaining">—</div>
-        <div class="csu">m</div>
-      </div>
-      <div class="climb-seg-card">
-        <div class="csl">Completato</div>
-        <div class="csv" id="nav-pct">—</div>
-        <div class="csu">%</div>
-      </div>
-    </div>
-
-    <div class="climb-seg-info" style="grid-template-columns:1fr 1fr;margin-top:-4px">
-      <div class="climb-seg-card">
-        <div class="csl">Velocità</div>
-        <div class="csv" id="nav-speed">—</div>
-        <div class="csu">km/h</div>
-      </div>
-      <div class="climb-seg-card">
-        <div class="csl">Vel. Ascens.</div>
-        <div class="csv" id="nav-vam">—</div>
-        <div class="csu">m/h</div>
-      </div>
-    </div>
-
-    <div class="climb-segs-list" id="climb-segs-list"></div>
-    <button class="btn-stop-climb" id="btn-stop-climb" onclick="stopClimb()">✕ Chiudi dettaglio salita</button>
-  </div>
-
-  <!-- Libreria salite (visibile quando non in navigazione) -->
+  <!-- Libreria salite: archivio puro, la navigazione avviene ora in Mappa -->
   <div id="climb-library">
     <div class="climb-lib-header">
       <h2>Le mie salite</h2>
@@ -1833,10 +1669,14 @@ function openLapSheet(sessionId) {
   const el = document.getElementById('lap-detail-list');
   el.innerHTML = session.laps.map(l => {
     const total = l.zoneTicks.reduce((a,b) => a+b, 0) || 1;
+    const zonePcts = l.zoneTicks.map(t => Math.round(t / total * 100));
     const zoneBar = l.zoneTicks.map((t, i) => {
-      const pct = Math.round(t / total * 100);
+      const pct = zonePcts[i];
       return pct > 0 ? `<div style="flex:${pct};background:var(${ZONE_COLORS[i]})" title="Z${i+1}: ${pct}%"></div>` : '';
     }).join('');
+    const zoneLabels = zonePcts.map((p, i) =>
+      `<span class="lap-zone-label"><span class="lap-zone-dot" style="background:var(${ZONE_COLORS[i]})"></span>Z${i+1} <b>${p}%</b></span>`
+    ).join('');
     return `
     <div class="lap-card">
       <div class="lap-card-header">
@@ -1848,6 +1688,7 @@ function openLapSheet(sessionId) {
         <span>FC Max <b>${l.maxHR ?? '—'}</b></span>
       </div>
       <div class="lap-zone-mini">${zoneBar}</div>
+      <div class="lap-zone-labels">${zoneLabels}</div>
     </div>`;
   }).join('');
 
@@ -1940,10 +1781,6 @@ function toast(msg) {
 }
 
 function showView(id, btn) {
-  // Se si lascia la view salite senza terminare, spegni GPS
-  const wasClimb = document.getElementById('view-climb').classList.contains('active');
-  if (wasClimb && id !== 'climb' && gpsWatchId !== null && !activeClimb) stopGPS();
-
   // Se si lascia la view mappa, spegni il GPS della mappa (risparmio batteria)
   const wasMap = document.getElementById('view-map').classList.contains('active');
   if (wasMap && id !== 'map') stopMapGPS();
@@ -2042,6 +1879,20 @@ async function initClimbsStorage() {
       }
     }
     climbs = loaded.sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0));
+
+    // Migrazione automatica: salite salvate prima dell'introduzione della
+    // sincronizzazione GPS potrebbero non avere una coordinata di partenza
+    // pur avendo una traccia GPX. Senza startCoords, il rilevamento
+    // automatico in Mappa le ignorerebbe del tutto — le ripariamo qui,
+    // una volta sola al caricamento, usando il primo punto della traccia.
+    let repaired = false;
+    for (const c of climbs) {
+      if (!c.startCoords && c.gpxPoints && c.gpxPoints.length) {
+        c.startCoords = { lat: c.gpxPoints[0].lat, lon: c.gpxPoints[0].lon };
+        repaired = true;
+      }
+    }
+    if (repaired) saveClimbs();
   } catch (e) {
     console.error('Caricamento salite non riuscito:', e);
     climbs = [];
@@ -2058,21 +1909,7 @@ function saveAscents() {
 
 // ── SALITE STATE ───────────────────────────────────────────────
 let climbs = []; // popolato in modo asincrono da initClimbsStorage() all'avvio
-let activeClimb = null;
-let gpsWatchId = null;
-let currentSegIdx = -1;
-let climbDistanceDone = 0;
 let selectedXlsxData = null;
-let climbHrSamples = [];
-let climbSegmentSplits = []; // [{segIdx, elapsedS}] tempo di passaggio per ogni sezione
-let climbStartTime = null;
-let climbTotalDistM = 0;
-let climbTotalElevM = 0;
-let climbApproaching = false;   // true se siamo prima dell'inizio salita
-let climbApproachDist = 0;      // distanza (m) dal punto di partenza
-let climbGpxStartOffsetM = 0;   // offset reale (m) del vero inizio salita lungo la traccia GPX
-let climbLastMatchedIdx = null; // ultimo indice di traccia GPX abbinato (per ricerca localizzata)
-let climbLockedOnTrack = false; // true dopo aver agganciato la posizione reale sulla traccia
 let ascents = loadAscents();
 
 // ── ADD MODAL ──────────────────────────────────────────────────
@@ -2090,7 +1927,7 @@ function renderClimbList() {
     const avgGrade = (c.segments.reduce((s, seg) => s + seg.grade * seg.km, 0) /
                       c.segments.reduce((s, seg) => s + seg.km, 0)).toFixed(1);
     return `
-    <div class="climb-card" onclick="startClimb(${i})">
+    <div class="climb-card">
       <div class="climb-card-header">
         <div>
           <div class="climb-card-name">${c.name}</div>
@@ -2309,378 +2146,6 @@ function projectOntoTrack(lat, lon, trackPts, searchWindow, lastMatchedIdx) {
 }
 
 // ── NAVIGATOR ──────────────────────────────────────────────────
-function startClimb(idx) {
-  activeClimb = climbs[idx];
-  climbDistanceDone = 0;
-  currentSegIdx = 0;
-  climbHrSamples = [];
-  climbStartTime = null;      // non ancora avviata
-  climbTotalDistM = 0;
-  climbTotalElevM = 0;
-  climbApproaching = false;
-  climbApproachDist = 0;
-
-  // Migrazione automatica: salite salvate prima dell'introduzione della
-  // sincronizzazione GPS potrebbero non avere una coordinata di partenza
-  // pur avendo una traccia GPX. La ripariamo qui, al volo, usando il primo
-  // punto della traccia — evita di dover ricaricare manualmente la salita.
-  if (!activeClimb.startCoords && activeClimb.gpxPoints && activeClimb.gpxPoints.length) {
-    activeClimb.startCoords = { lat: activeClimb.gpxPoints[0].lat, lon: activeClimb.gpxPoints[0].lon };
-    const realIdx = climbs.findIndex(c => c.addedAt === activeClimb.addedAt);
-    if (realIdx !== -1) { climbs[realIdx] = activeClimb; saveClimbs(); }
-  }
-
-  document.getElementById('climb-library').style.display = 'none';
-  document.getElementById('climb-navigator').style.display = 'block';
-
-  const totalKm = activeClimb.segments.reduce((s, seg) => s + seg.km, 0);
-  document.getElementById('climb-nav-name').textContent = activeClimb.name;
-  document.getElementById('climb-nav-sub').textContent =
-    `${totalKm.toFixed(1)} km totali · ${activeClimb.segments.length} sezioni${activeClimb.startCoords ? ' · 📍 sync GPS attivo' : ' · ⚠️ nessun riferimento GPS'}`;
-
-  // Mostra il tasto "Avvia Ascensione", nascondi il badge "in corso"
-  document.getElementById('btn-start-ascent').style.display = '';
-  document.getElementById('ascent-live-badge').style.display = 'none';
-  document.getElementById('btn-stop-climb').textContent = '✕ Chiudi dettaglio salita';
-
-  drawProfile();
-  renderSegsList();
-  updateNavStats();
-  // GPS e registrazione NON partono automaticamente: solo anteprima statica
-}
-
-// Calcola l'offset reale (in metri lungo la traccia GPX) del vero inizio
-// della salita, proiettando le coordinate GPS di partenza (dal file Excel)
-// sulla traccia. Questo evita di assumere che la traccia GPX inizi
-// esattamente al km 0 della salita (spesso includes km di trasferimento).
-function computeGpxStartOffset(climb) {
-  if (!climb.gpxPoints) return 0;
-  if (climb.startCoords) {
-    const proj = projectOntoTrack(climb.startCoords.lat, climb.startCoords.lon, climb.gpxPoints, null, null);
-    if (proj) return proj.distAlongTrack;
-  }
-  // Fallback: nessuna coordinata di partenza — assumiamo che la traccia
-  // GPX inizi esattamente al km 0 della salita (comportamento precedente)
-  return 0;
-}
-
-function startAscent() {
-  if (!activeClimb) return;
-  climbStartTime  = Date.now();
-  climbHrSamples  = [];
-  climbSegmentSplits = [];
-  climbTotalDistM = 0;
-  climbTotalElevM = 0;
-  climbDistanceDone = 0;
-  climbApproaching  = false;
-  climbLastMatchedIdx = null;
-  climbGpxStartOffsetM = 0;
-  // NON agganciamo subito la traccia: prima verifichiamo con una semplice
-  // distanza in linea retta dal punto di partenza, per evitare falsi
-  // abbinamenti su tornanti mentre siamo ancora lontani (es. in fondovalle)
-  climbLockedOnTrack = !activeClimb.startCoords; // se non c'è un riferimento, salta la fase di avvicinamento
-
-  document.getElementById('btn-start-ascent').style.display = 'none';
-  document.getElementById('ascent-live-badge').style.display = 'flex';
-  document.getElementById('btn-stop-climb').textContent = '■ Termina navigazione';
-
-  startGPS();
-  startAutosave();
-  // Se la salita ha un punto di riferimento, fai una lettura immediata
-  // per capire dove ci troviamo rispetto all'inizio
-  if (activeClimb.startCoords && navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(pos => {
-      syncPositionWithClimbStart(pos.coords);
-    }, null, { enableHighAccuracy: true, timeout: 8000 });
-  }
-  toast('▶ Ascensione avviata');
-}
-
-function stopClimb() {
-  if (!activeClimb) return;
-
-  // Salva solo se la registrazione è stata avviata E la navigazione ha
-  // effettivamente raggiunto/agganciato la salita reale — non solo la
-  // fase di avvicinamento. Se c'è un riferimento GPS (startCoords) ma
-  // non si è mai agganciato, i dati sarebbero solo "rumore" prima
-  // dell'inizio vero e non vengono salvati.
-  const hasGpsRef  = !!activeClimb.startCoords;
-  const wasStarted = climbStartTime !== null && (!hasGpsRef || climbLockedOnTrack);
-
-  if (wasStarted) {
-    // Salva ascensione solo se era stata effettivamente avviata
-    const duration = Math.floor((Date.now() - climbStartTime) / 1000);
-    const avgHR = climbHrSamples.length
-      ? Math.round(climbHrSamples.reduce((a, b) => a + b, 0) / climbHrSamples.length)
-      : null;
-    const maxHR = climbHrSamples.length ? Math.max(...climbHrSamples) : null;
-    const avgSpeed = duration > 0 && climbTotalDistM > 0
-      ? Math.round((climbTotalDistM / 1000) / (duration / 3600) * 10) / 10
-      : null;
-    const avgVAM = duration > 0 && climbTotalElevM > 0
-      ? Math.round(climbTotalElevM / (duration / 3600))
-      : null;
-
-    const ascent = {
-      id:        Date.now(),
-      date:      new Date().toISOString(),
-      climbId:   activeClimb.addedAt,
-      climbName: activeClimb.name,
-      duration,
-      avgHR,
-      maxHR,
-      avgSpeed,
-      avgVAM,
-      segmentSplits: climbSegmentSplits.length ? [...climbSegmentSplits] : null,
-      weightAtTimeKg: userWeightKg || null, // peso al momento della registrazione, per coerenza storica
-      bikeGearAtTimeKg: bikeGearKg != null ? bikeGearKg : null,
-    };
-    ascents.unshift(ascent);
-    saveAscents();
-    toast('Ascensione salvata ✓');
-  } else if (climbStartTime !== null) {
-    toast('⚠️ Non salvata: mai raggiunto l\'inizio reale della salita');
-  }
-
-  stopAutosave();
-  clearClimbSnapshot();
-  activeClimb = null;
-  climbHrSamples = [];
-  climbStartTime = null;
-  climbTotalDistM = 0;
-  climbTotalElevM = 0;
-  climbApproaching = false;
-  climbApproachDist = 0;
-  climbLastMatchedIdx = null;
-  climbGpxStartOffsetM = 0;
-  climbLockedOnTrack = false;
-  stopGPS();
-  document.getElementById('climb-navigator').style.display = 'none';
-  document.getElementById('climb-library').style.display = 'block';
-  renderClimbList();
-  renderAscentList();
-}
-
-// ── GPS SYNC WITH CLIMB START ─────────────────────────────────
-// Fase 1 (avvicinamento): usa la distanza in linea retta dal punto di
-// partenza — semplice e senza ambiguità, non risente di tornanti.
-// In aggiunta, se si è molto vicini alla traccia (soglia stretta) anche
-// lontani dal punto di partenza, si aggancia comunque: permette di
-// avviare la navigazione a salita già iniziata.
-// Fase 2 (agganciato): tracciamento fine sulla traccia GPX.
-function syncPositionWithClimbStart(coords) {
-  if (!activeClimb) return;
-
-  if (!climbLockedOnTrack) {
-    if (!activeClimb.startCoords && !activeClimb.gpxPoints) { climbLockedOnTrack = true; return; }
-
-    // Test 1: distanza semplice dal punto di partenza letterale
-    let distToStart = Infinity;
-    if (activeClimb.startCoords) {
-      const sc = activeClimb.startCoords;
-      distToStart = haversineMeters(
-        { latitude: coords.latitude, longitude: coords.longitude },
-        { latitude: sc.lat, longitude: sc.lon }
-      );
-    }
-
-    // Test 2: aggancio "a metà salita" — molto vicini alla traccia GPX
-    // (soglia stretta apposta, per non confondersi con tornanti lontani)
-    let midwayProj = null;
-    if (activeClimb.gpxPoints) {
-      const proj = projectOntoTrack(coords.latitude, coords.longitude, activeClimb.gpxPoints, null, null);
-      if (proj && proj.perpDist <= CLIMB_MIDWAY_LOCK_PERP_M) midwayProj = proj;
-    }
-
-    if (distToStart <= CLIMB_START_LOCK_RADIUS_M) {
-      // Siamo al vero inizio: aggancia con offset dal punto di partenza
-      climbLockedOnTrack = true;
-      climbApproaching = false;
-      climbDistanceDone = 0;
-      if (activeClimb.gpxPoints) {
-        const proj = projectOntoTrack(coords.latitude, coords.longitude, activeClimb.gpxPoints, null, null);
-        climbGpxStartOffsetM = proj ? proj.distAlongTrack : 0;
-        climbLastMatchedIdx = proj ? proj.matchedIdx : null;
-      }
-      updateApproachBanner(false, 0);
-      toast("🚀 Sei all'inizio — navigazione agganciata!");
-    } else if (midwayProj) {
-      // Agganciato a metà salita: calcola l'offset di partenza dalla
-      // proiezione delle coordinate di start (se presenti), altrimenti
-      // usa il primo punto della traccia come riferimento km 0
-      climbLockedOnTrack = true;
-      climbApproaching = false;
-      if (activeClimb.startCoords) {
-        const startProj = projectOntoTrack(activeClimb.startCoords.lat, activeClimb.startCoords.lon, activeClimb.gpxPoints, null, null);
-        climbGpxStartOffsetM = startProj ? startProj.distAlongTrack : 0;
-      } else {
-        climbGpxStartOffsetM = 0;
-      }
-      climbLastMatchedIdx = midwayProj.matchedIdx;
-      climbDistanceDone = Math.max(0, midwayProj.distAlongTrack - climbGpxStartOffsetM);
-      updateApproachBanner(false, 0);
-      updateProgress();
-      toast(`🚀 Agganciato a metà salita — ${(climbDistanceDone/1000).toFixed(1)} km percorsi`);
-    } else {
-      climbApproaching = true;
-      climbApproachDist = distToStart;
-      updateApproachBanner(true, Math.round(distToStart));
-      toast(`📍 Inizio salita a ${Math.round(distToStart)} m in linea d'aria`);
-    }
-    drawProfile();
-    updateNavStats();
-    return;
-  }
-
-  // ── FASE 2: già agganciato, riproietta sulla traccia (es. dopo pausa) ──
-  if (activeClimb.gpxPoints) {
-    const proj = projectOntoTrack(coords.latitude, coords.longitude, activeClimb.gpxPoints, null, null);
-    if (proj && proj.perpDist < 100) {
-      climbLastMatchedIdx = proj.matchedIdx;
-      const realDist = proj.distAlongTrack - climbGpxStartOffsetM;
-      climbDistanceDone = Math.max(0, realDist);
-      updateProgress();
-      drawProfile();
-    }
-  }
-}
-
-function updateApproachBanner(visible, distM) {
-  const banner = document.getElementById('approach-banner');
-  if (!banner) return;
-  if (!visible) {
-    banner.classList.remove('visible', 'near');
-    return;
-  }
-  banner.classList.add('visible');
-  banner.classList.toggle('near', distM <= 100);
-  if (distM <= 0) {
-    banner.textContent = "🚀 Sei all'inizio della salita — Vai!";
-  } else {
-    banner.textContent = `📍 Inizio salita tra ${distM} m`;
-  }
-}
-
-// ── GPS ────────────────────────────────────────────────────────
-let lastGPSPos = null;
-
-function startGPS() {
-  if (!navigator.geolocation) { toast('GPS non disponibile'); return; }
-  lastGPSPos = null;
-  gpsWatchId = navigator.geolocation.watchPosition(onGPSUpdate, onGPSError, {
-    enableHighAccuracy: true, maximumAge: 2000, timeout: 10000
-  });
-}
-
-function stopGPS() {
-  if (gpsWatchId !== null) { navigator.geolocation.clearWatch(gpsWatchId); gpsWatchId = null; }
-  lastGPSPos = null;
-}
-
-function onGPSUpdate(pos) {
-  // Filtro accuratezza: ignora fix GPS troppo imprecisi (rumore che
-  // causa falsi "inizio raggiunto" o salti di posizione)
-  if (pos.coords.accuracy != null && pos.coords.accuracy > 30) {
-    lastGPSPos = pos; // aggiorna comunque il riferimento temporale
-    return;
-  }
-
-  // ── FASE 1: avvicinamento — delega alla stessa logica usata al primo
-  // fix (distanza dal punto di partenza + aggancio "a metà salita" se
-  // molto vicini alla traccia). Evita duplicazione e mantiene i due
-  // percorsi sempre coerenti tra loro.
-  if (activeClimb && !climbLockedOnTrack) {
-    if (!activeClimb.startCoords && !activeClimb.gpxPoints) {
-      climbLockedOnTrack = true;
-    } else {
-      syncPositionWithClimbStart(pos.coords);
-    }
-    lastGPSPos = pos;
-    return;
-  }
-
-  // ── FASE 2: agganciato — tracciamento fine sulla traccia GPX ──
-  if (activeClimb && activeClimb.gpxPoints) {
-    const proj = projectOntoTrack(pos.coords.latitude, pos.coords.longitude, activeClimb.gpxPoints, 80, climbLastMatchedIdx);
-    if (proj && proj.perpDist < 60) { // dentro 60m dalla traccia (ricerca localizzata: evita falsi abbinamenti)
-      climbLastMatchedIdx = proj.matchedIdx;
-      const realDist = proj.distAlongTrack - climbGpxStartOffsetM;
-
-      climbApproaching = false;
-      updateApproachBanner(false, 0);
-      if (lastGPSPos) {
-        const d = haversineMeters(lastGPSPos.coords, pos.coords);
-        if (d > 0 && d < 500) {
-          climbTotalDistM += d;
-          if (currentSegIdx >= 0) {
-            const seg = activeClimb.segments[currentSegIdx];
-            climbTotalElevM += d * seg.grade / 100;
-          }
-        }
-      }
-      climbDistanceDone = Math.max(0, realDist);
-      updateProgress();
-
-      // Speed display
-      const speedKmh = pos.coords.speed != null && pos.coords.speed >= 0
-        ? pos.coords.speed * 3.6
-        : lastGPSPos
-          ? haversineMeters(lastGPSPos.coords, pos.coords) / ((pos.timestamp - lastGPSPos.timestamp) / 1000) * 3.6
-          : null;
-      let vam = null;
-      if (speedKmh != null && activeClimb && currentSegIdx >= 0)
-        vam = Math.round(speedKmh * 10 * activeClimb.segments[currentSegIdx].grade);
-      if (activeClimb) {
-        document.getElementById('nav-speed').textContent = speedKmh != null ? speedKmh.toFixed(1) : '—';
-        document.getElementById('nav-vam').textContent   = vam != null && vam > 0 ? vam : '—';
-      }
-      lastGPSPos = pos;
-      return;
-    }
-  }
-
-  // ── Fallback: nessun GPX o fuori traccia — accumulo semplice ──
-  if (lastGPSPos) {
-    const d = haversineMeters(lastGPSPos.coords, pos.coords);
-    if (d > 1 && d < 500) {
-      climbDistanceDone += d;
-      climbTotalDistM   += d;
-      if (activeClimb && currentSegIdx >= 0) {
-        const seg = activeClimb.segments[currentSegIdx];
-        climbTotalElevM += d * seg.grade / 100;
-      }
-      updateProgress();
-    }
-
-    // Velocità corrente istantanea dal GPS (m/s → km/h)
-    const speedKmh = pos.coords.speed != null && pos.coords.speed >= 0
-      ? (pos.coords.speed * 3.6)
-      : (lastGPSPos
-          ? haversineMeters(lastGPSPos.coords, pos.coords) /
-            ((pos.timestamp - lastGPSPos.timestamp) / 1000) * 3.6
-          : null);
-
-    // VAM istantanea (m/h): velocità × pendenza corrente
-    let vam = null;
-    if (speedKmh != null && activeClimb && currentSegIdx >= 0) {
-      vam = Math.round(speedKmh * 10 * activeClimb.segments[currentSegIdx].grade);
-    }
-
-    // Aggiorna display live
-    if (activeClimb) {
-      document.getElementById('nav-speed').textContent =
-        speedKmh != null ? speedKmh.toFixed(1) : '—';
-      document.getElementById('nav-vam').textContent =
-        vam != null && vam > 0 ? vam : '—';
-    }
-  }
-  lastGPSPos = pos;
-}
-
-function onGPSError(e) {
-  toast('GPS: ' + e.message);
-}
-
 // ═══════════════════════════════════════════════════════════════
 // ── FISICA DEL CICLISMO — modulo per le Previsioni prestazioni ──
 // ═══════════════════════════════════════════════════════════════
@@ -2870,53 +2335,7 @@ function haversineMeters(a, b) {
   return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
 }
 
-function updateProgress() {
-  if (!activeClimb) return;
-  const totalM = activeClimb.segments.reduce((s, seg) => s + seg.km * 1000, 0);
-  const done = Math.min(climbDistanceDone, totalM);
-
-  const prevSegIdx = currentSegIdx;
-
-  // Trova segmento corrente
-  let cumM = 0;
-  for (let i = 0; i < activeClimb.segments.length; i++) {
-    cumM += activeClimb.segments[i].km * 1000;
-    if (done < cumM) { currentSegIdx = i; break; }
-    if (i === activeClimb.segments.length - 1) currentSegIdx = i;
-  }
-
-  // Split per sezione: quando si passa a una sezione nuova, registra il
-  // tempo trascorso dall'inizio dell'ascensione — usato dalla sezione
-  // Previsioni per stimare la potenza tenendo conto dei picchi di pendenza
-  if (currentSegIdx > prevSegIdx && climbStartTime) {
-    const elapsedS = Math.floor((Date.now() - climbStartTime) / 1000);
-    for (let i = prevSegIdx + 1; i <= currentSegIdx; i++) {
-      if (!climbSegmentSplits.some(s => s.segIdx === i)) {
-        climbSegmentSplits.push({ segIdx: i, elapsedS });
-      }
-    }
-  }
-
-  updateNavStats();
-  renderSegsList();
-  drawProfile();
-}
-
-function updateNavStats() {
-  if (!activeClimb) return;
-  const totalM = activeClimb.segments.reduce((s, seg) => s + seg.km * 1000, 0);
-  const done = Math.min(climbDistanceDone, totalM);
-  const remaining = Math.round(totalM - done);
-  const pct = Math.round(done / totalM * 100);
-  const grade = currentSegIdx >= 0 ? activeClimb.segments[currentSegIdx].grade : 0;
-
-  document.getElementById('nav-grade').textContent = grade.toFixed(1);
-  document.getElementById('nav-remaining').textContent = remaining >= 1000
-    ? (remaining/1000).toFixed(1) + ' km' : remaining;
-  document.getElementById('nav-pct').textContent = pct;
-}
-
-// ── PROFILE SVG ────────────────────────────────────────────────
+// Colore per pendenza (usato dal mini-profilo salita in Mappa)
 function gradeColor(g) {
   if (g < 3)  return '#4caf93';
   if (g < 6)  return '#8bc34a';
@@ -2925,114 +2344,18 @@ function gradeColor(g) {
   return '#e53935';
 }
 
-function drawProfile() {
-  if (!activeClimb) return;
-  const segs = activeClimb.segments;
-  const W = 360, H = 120, PAD = 6;
-  const totalKm = segs.reduce((s, g) => s + g.km, 0);
-  const totalM = totalKm * 1000;
-  const done = Math.min(climbDistanceDone, totalM);
-
-  // Build elevation profile
-  let points = [{x: 0, y: 0}];
-  let cumKm = 0;
-  segs.forEach(seg => {
-    cumKm += seg.km;
-    const rise = seg.km * 1000 * seg.grade / 100;
-    points.push({ x: cumKm / totalKm, y: points[points.length-1].y + rise });
-  });
-  const maxElev = Math.max(...points.map(p => p.y));
-  const toSVG = p => ({
-    x: PAD + p.x * (W - 2*PAD),
-    y: H - PAD - (p.y / (maxElev || 1)) * (H - 2*PAD - 16)
-  });
-
-  // Build path per segment
-  let svgContent = '';
-  let cumX = 0;
-  segs.forEach((seg, i) => {
-    const x0 = cumX / totalKm;
-    const x1 = (cumX + seg.km) / totalKm;
-    const p0 = toSVG({ x: x0, y: points[i].y });
-    const p1 = toSVG({ x: x1, y: points[i+1].y });
-    const color = gradeColor(seg.grade);
-    const opacity = i < currentSegIdx ? 0.3 : 1;
-    svgContent += `<polygon points="${p0.x},${p0.y} ${p1.x},${p1.y} ${p1.x},${H-PAD} ${p0.x},${H-PAD}"
-      fill="${color}" opacity="${opacity}" stroke="none"/>`;
-    cumX += seg.km;
-  });
-
-  // Cursor line
-  const cursorX = PAD + (done / totalM) * (W - 2*PAD);
-  // Find elevation at cursor
-  let cumM2 = 0, cursorElev = 0;
-  for (let i = 0; i < segs.length; i++) {
-    const segM = segs[i].km * 1000;
-    if (done <= cumM2 + segM) {
-      const frac = (done - cumM2) / segM;
-      cursorElev = points[i].y + frac * (segs[i].km * 1000 * segs[i].grade / 100);
-      break;
-    }
-    cumM2 += segM;
-    cursorElev = points[i+1]?.y || 0;
-  }
-  const cursorPt = toSVG({ x: done/totalM, y: cursorElev });
-  svgContent += `<line x1="${cursorX}" y1="${PAD}" x2="${cursorX}" y2="${H-PAD}" stroke="#fff" stroke-width="2" stroke-dasharray="3,2"/>`;
-  svgContent += `<circle cx="${cursorPt.x}" cy="${cursorPt.y}" r="5" fill="#fff" stroke="#0a0a0f" stroke-width="2"/>`;
-
-  // Axis line
-  svgContent += `<line x1="${PAD}" y1="${H-PAD}" x2="${W-PAD}" y2="${H-PAD}" stroke="var(--border)" stroke-width="1"/>`;
-
-  document.getElementById('climb-svg').innerHTML = svgContent;
-}
-
-// ── SEGMENTS LIST ──────────────────────────────────────────────
-function renderSegsList() {
-  const el = document.getElementById('climb-segs-list');
-  if (!activeClimb) { el.innerHTML = ''; return; }
-  el.innerHTML = activeClimb.segments.map((seg, i) => {
-    const cls = i === currentSegIdx ? 'current' : i < currentSegIdx ? 'done' : '';
-    const color = gradeColor(seg.grade);
-    const label = seg.label ? seg.label : `Sezione ${i+1}`;
-    return `<div class="climb-seg-row ${cls}">
-      <span class="seg-idx">${i+1}</span>
-      <div class="seg-dot" style="background:${color}"></div>
-      <span class="seg-name">${label}</span>
-      <span class="seg-pct" style="color:${color}">${seg.grade.toFixed(1)}%</span>
-      <span class="seg-km">${seg.km.toFixed(1)} km</span>
-    </div>`;
-  }).join('');
-
-  // Auto-scroll to current segment
-  const rows = el.querySelectorAll('.climb-seg-row');
-  if (rows[currentSegIdx]) rows[currentSegIdx].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-}
-
-// ── SYNC MINI HR IN CLIMB VIEW ──────────────────────────────────
+// ── SYNC MINI HR IN MAPPA + CAMPIONAMENTO ASCENSIONE ────────────
 function updateClimbHR(hr, zone) {
-  // Campiona BPM se navigazione attiva
-  if (activeClimb && hr) climbHrSamples.push(hr);
-
-  document.getElementById('climb-hr-num').textContent = hr || '—';
-  const circle = document.getElementById('climb-hr-circle');
-  const zoneEl = document.getElementById('climb-hr-zone');
-  if (zone >= 0) {
-    circle.style.borderColor = `var(${ZONE_COLORS[zone]})`;
-    zoneEl.textContent = ZONE_NAMES[zone];
-    zoneEl.style.color = `var(${ZONE_COLORS[zone]})`;
-  } else {
-    circle.style.borderColor = 'var(--muted)';
-    zoneEl.textContent = '— Zona —';
-    zoneEl.style.color = 'var(--muted)';
-  }
-
-  // Sincronizza anche il cerchio FC nella scheda Mappa
+  // Sincronizza il cerchio FC nella scheda Mappa
   const mapNum = document.getElementById('map-hr-num');
   const mapCircle = document.getElementById('map-hr-circle');
   if (mapNum) {
     mapNum.textContent = hr || '—';
     mapCircle.style.borderColor = zone >= 0 ? `var(${ZONE_COLORS[zone]})` : 'var(--muted)';
   }
+
+  // Campiona BPM se una navigazione salita è attiva in Mappa
+  if (mapClimbPhase === 'active' && hr) mapClimbHrSamples.push(hr);
 }
 
 // ── STORICO ASCENSIONI ─────────────────────────────────────────
@@ -3300,14 +2623,12 @@ document.addEventListener('fullscreenchange', () => {
 
 // ── AUTOSALVATAGGIO ────────────────────────────────────────────
 const AUTOSAVE_KEY_SESSION = 'hrm-autosave-session';
-const AUTOSAVE_KEY_CLIMB   = 'hrm-autosave-climb';
 let autosaveInterval = null;
 
 function startAutosave() {
   clearInterval(autosaveInterval);
   autosaveInterval = setInterval(() => {
     if (sessionActive) saveSessionSnapshot();
-    if (activeClimb)   saveClimbSnapshot();
   }, 10 * 60 * 1000); // ogni 10 minuti
 }
 
@@ -3331,52 +2652,25 @@ function saveSessionSnapshot() {
   localStorage.setItem(AUTOSAVE_KEY_SESSION, JSON.stringify(snap));
 }
 
-function saveClimbSnapshot() {
-  if (!activeClimb || !climbStartTime) return;
-  const elapsed = climbStartTime ? Math.floor((Date.now() - climbStartTime) / 1000) : 0;
-  const snap = {
-    date:       new Date(climbStartTime || Date.now()).toISOString(),
-    climbName:  activeClimb.name,
-    duration:   elapsed,
-    avgHR:      climbHrSamples.length ? Math.round(climbHrSamples.reduce((a,b)=>a+b,0)/climbHrSamples.length) : null,
-    maxHR:      climbHrSamples.length ? Math.max(...climbHrSamples) : null,
-    avgSpeed:   elapsed > 0 && climbTotalDistM > 0 ? Math.round((climbTotalDistM/1000)/(elapsed/3600)*10)/10 : null,
-    avgVAM:     elapsed > 0 && climbTotalElevM > 0 ? Math.round(climbTotalElevM/(elapsed/3600)) : null,
-    partial:    true,
-  };
-  localStorage.setItem(AUTOSAVE_KEY_CLIMB, JSON.stringify(snap));
-}
-
 function clearSessionSnapshot()  { localStorage.removeItem(AUTOSAVE_KEY_SESSION); }
-function clearClimbSnapshot()    { localStorage.removeItem(AUTOSAVE_KEY_CLIMB); }
 
 function checkAutosaveRecovery() {
-  const snap = localStorage.getItem(AUTOSAVE_KEY_SESSION) || localStorage.getItem(AUTOSAVE_KEY_CLIMB);
+  const snap = localStorage.getItem(AUTOSAVE_KEY_SESSION);
   if (!snap) return;
   const s = JSON.parse(snap);
-  const label = s.climbName ? `salita "${s.climbName}"` : 'sessione';
   const dur = s.duration ? formatTime(s.duration) : '?';
-  if (confirm(`Trovato un salvataggio automatico di una ${label} (durata: ${dur}) da una sessione interrotta. Vuoi recuperarla e salvarla nello storico?`)) {
-    if (s.climbName) {
-      ascents.unshift({ id: Date.now(), date: s.date, climbName: s.climbName, duration: s.duration, avgHR: s.avgHR, maxHR: s.maxHR, avgSpeed: s.avgSpeed, avgVAM: s.avgVAM });
-      saveAscents();
-      toast('Ascensione recuperata e salvata ✓');
-    } else {
-      sessions.unshift({ id: Date.now(), date: s.date, duration: s.duration, maxHR: s.maxHR, avgHR: s.avgHR, zonePcts: s.zonePcts, zoneTicks: s.zoneTicks });
-      saveSessionsToStorage();
-      toast('Sessione recuperata e salvata ✓');
-    }
+  if (confirm(`Trovato un salvataggio automatico di una sessione (durata: ${dur}) interrotta. Vuoi recuperarla e salvarla nello storico?`)) {
+    sessions.unshift({ id: Date.now(), date: s.date, duration: s.duration, maxHR: s.maxHR, avgHR: s.avgHR, zonePcts: s.zonePcts, zoneTicks: s.zoneTicks });
+    saveSessionsToStorage();
+    toast('Sessione recuperata e salvata ✓');
   }
   clearSessionSnapshot();
-  clearClimbSnapshot();
 }
 
-// Pop-up alla chiusura se sessione/salita attiva
+// Pop-up alla chiusura se una sessione è attiva
 window.addEventListener('beforeunload', e => {
-  if (sessionActive || activeClimb) {
-    // Salva snapshot immediato prima di chiudere
-    if (sessionActive) saveSessionSnapshot();
-    if (activeClimb)   saveClimbSnapshot();
+  if (sessionActive) {
+    saveSessionSnapshot();
     e.preventDefault();
     e.returnValue = '';
   }
@@ -3394,10 +2688,11 @@ let mapLastHeading = 0;   // ultima direzione nota (gradi, 0=nord), per il curso
 let mapElevOffsetM = null; // offset di calibrazione quota (quota mappa - quota GPS grezza)
 
 // ── RILEVAMENTO AUTOMATICO SALITE (scheda Mappa) ──────────────
-// Stato indipendente da quello della sezione Salite (che ha il proprio
-// flusso manuale tramite activeClimb/climbLockedOnTrack ecc.) — i due
-// possono girare contemporaneamente (es. ascensione avviata in Salite e
-// poi si passa alla Mappa) senza interferire tra loro.
+// Unico motore di navigazione salite dell'app: rileva automaticamente per
+// prossimità quando ci si avvicina a una salita salvata, e salva
+// l'ascensione nello storico al termine. La sezione Salite è ora un
+// archivio puro (libreria, storico, previsioni), senza logica di
+// navigazione propria.
 const MAP_CLIMB_APPROACH_RADIUS_M = 1000; // 1km di preavviso (non oltre)
 const MAP_CLIMB_GIVEUP_RADIUS_M   = 1300; // oltre questa distanza, annulla il rilevamento
 const MAP_CLIMB_LOCK_RADIUS_M     = 20;
@@ -3411,6 +2706,14 @@ let mapClimbLastMatchedIdx  = null;
 let mapClimbGpxStartOffsetM = 0;
 let mapClimbDistanceDone    = 0;
 let mapClimbCurrentSegIdx   = -1;
+// Dati completi dell'ascensione, catturati mentre mapClimbPhase === 'active'
+// (portati qui dal precedente flusso manuale di Salite, ora eliminato)
+let mapClimbStartTime      = null;
+let mapClimbHrSamples      = [];
+let mapClimbSegmentSplits  = []; // [{segIdx, elapsedS}]
+let mapClimbTotalDistM     = 0;
+let mapClimbTotalElevM     = 0;
+let mapClimbLastTrackPos   = null; // ultima posizione usata per calcolare i delta di distanza/dislivello
 let mapClimbApproachPrevDist = null; // per rilevare se ci si avvicina o allontana
 let mapClimbApproachAwayCount = 0;   // letture consecutive in allontanamento
 let mapClimbDismissedIds = new Set(); // salite chiuse manualmente (non ripropose finché si resta in zona)
@@ -3437,10 +2740,6 @@ let trackElevGainM = 0;      // dislivello positivo accumulato (filtrato a sogli
 let trackLastEle = null;     // ultima quota "stabile" usata come riferimento per il filtro
 const ELEV_NOISE_THRESHOLD_M = 3; // soglia (m) per ignorare il rumore GPS sulla quota
 let trackTimer = null;
-let trackLastMoveTime = null; // timestamp dell'ultimo movimento rilevato (per auto-pausa)
-let trackAutoPaused = false;  // true se la pausa è stata attivata automaticamente (non manualmente)
-const AUTO_PAUSE_IDLE_MS = 25000; // 25 secondi senza movimento → pausa automatica
-const AUTO_PAUSE_MOVE_THRESHOLD_M = 3; // sotto questa distanza tra fix, si considera "fermo"
 let tracks = loadTracks();
 let selectedTrackIds = new Set(); // tracce selezionate per l'unione
 
@@ -3601,7 +2900,6 @@ function onMapGPSUpdate(pos) {
   if (trackRecording && !trackPaused && accuracy != null && accuracy <= 30) {
     if (mapLastPos) {
       const d = haversineMeters(mapLastPos.coords, pos.coords);
-      if (d > AUTO_PAUSE_MOVE_THRESHOLD_M) trackLastMoveTime = Date.now();
       if (d > 1 && d < 300) {
         trackDistM += d;
         trackPoints.push({ lat, lon, ele: altitude || null, t: Date.now() });
@@ -3748,6 +3046,12 @@ function updateApproachingMapClimb(coords) {
 
   if (locked) {
     mapClimbPhase = 'active';
+    mapClimbStartTime = Date.now();
+    mapClimbHrSamples = [];
+    mapClimbSegmentSplits = [];
+    mapClimbTotalDistM = 0;
+    mapClimbTotalElevM = 0;
+    mapClimbLastTrackPos = coords;
     hideClimbApproachPopup();
     showActiveClimbOverlay(c);
     updateActiveClimbOverlayUI();
@@ -3777,6 +3081,7 @@ function updateActiveMapClimbTracking(coords) {
   if (!c) { resetMapClimbDetection(); return; }
 
   const totalM = c.segments.reduce((s, seg) => s + seg.km * 1000, 0);
+  const prevSegIdx = mapClimbCurrentSegIdx;
 
   if (c.gpxPoints) {
     const proj = projectOntoTrack(coords.latitude, coords.longitude, c.gpxPoints, 80, mapClimbLastMatchedIdx);
@@ -3803,13 +3108,74 @@ function updateActiveMapClimbTracking(coords) {
     if (mapClimbDistanceDone < cum) { mapClimbCurrentSegIdx = i; break; }
   }
 
+  // Accumula distanza/dislivello percorsi (per velocità media e VAM
+  // dell'ascensione) e registra lo split di tempo per sezione — stessa
+  // logica prima usata dal flusso manuale di Salite, ora consolidata qui
+  if (mapClimbLastTrackPos) {
+    const d = haversineMeters(mapClimbLastTrackPos, coords);
+    if (d > 0 && d < 300) {
+      mapClimbTotalDistM += d;
+      if (mapClimbCurrentSegIdx >= 0) {
+        mapClimbTotalElevM += d * c.segments[mapClimbCurrentSegIdx].grade / 100;
+      }
+    }
+  }
+  mapClimbLastTrackPos = coords;
+
+  if (mapClimbCurrentSegIdx > prevSegIdx && mapClimbStartTime) {
+    const elapsedS = Math.floor((Date.now() - mapClimbStartTime) / 1000);
+    for (let i = prevSegIdx + 1; i <= mapClimbCurrentSegIdx; i++) {
+      if (!mapClimbSegmentSplits.some(s => s.segIdx === i)) {
+        mapClimbSegmentSplits.push({ segIdx: i, elapsedS });
+      }
+    }
+  }
+
   updateActiveClimbOverlayUI();
 
-  // Completamento salita
+  // Completamento salita: dismissActiveClimbOverlay salva automaticamente
   if (mapClimbDistanceDone >= totalM - 15) {
     toast(`🏁 "${c.name}" completata!`);
     dismissActiveClimbOverlay();
   }
+}
+
+// Salva l'ascensione rilevata in Mappa nello storico (Salite → Storico
+// ascensioni), con la stessa struttura dati usata in precedenza dal
+// flusso manuale — così Storico e Previsioni funzionano invariati.
+function saveMapAscent(climb) {
+  if (!mapClimbStartTime) return;
+  const duration = Math.floor((Date.now() - mapClimbStartTime) / 1000);
+  if (duration < 5) return; // ascensione troppo breve, probabile falso positivo
+
+  const avgHR = mapClimbHrSamples.length
+    ? Math.round(mapClimbHrSamples.reduce((a, b) => a + b, 0) / mapClimbHrSamples.length)
+    : null;
+  const maxHR = mapClimbHrSamples.length ? Math.max(...mapClimbHrSamples) : null;
+  const avgSpeed = duration > 0 && mapClimbTotalDistM > 0
+    ? Math.round((mapClimbTotalDistM / 1000) / (duration / 3600) * 10) / 10
+    : null;
+  const avgVAM = duration > 0 && mapClimbTotalElevM > 0
+    ? Math.round(mapClimbTotalElevM / (duration / 3600))
+    : null;
+
+  const ascent = {
+    id:        Date.now(),
+    date:      new Date().toISOString(),
+    climbId:   climb.addedAt,
+    climbName: climb.name,
+    duration,
+    avgHR,
+    maxHR,
+    avgSpeed,
+    avgVAM,
+    segmentSplits: mapClimbSegmentSplits.length ? [...mapClimbSegmentSplits] : null,
+    weightAtTimeKg: userWeightKg || null,
+    bikeGearAtTimeKg: bikeGearKg != null ? bikeGearKg : null,
+  };
+  ascents.unshift(ascent);
+  saveAscents();
+  toast('Ascensione salvata nello storico ✓');
 }
 
 function resetMapClimbDetection() {
@@ -3823,6 +3189,12 @@ function resetMapClimbDetection() {
   mapClimbCurrentSegIdx = -1;
   mapClimbApproachPrevDist = null;
   mapClimbApproachAwayCount = 0;
+  mapClimbStartTime = null;
+  mapClimbHrSamples = [];
+  mapClimbSegmentSplits = [];
+  mapClimbTotalDistM = 0;
+  mapClimbTotalElevM = 0;
+  mapClimbLastTrackPos = null;
 }
 
 // ── UI: pop-up avvicinamento ────────────────────────────────────
@@ -3860,7 +3232,15 @@ function showActiveClimbOverlay(climb) {
 function hideActiveClimbOverlayUI() {
   document.getElementById('map-climb-overlay').classList.remove('visible');
 }
+// Chiude la navigazione salita attiva — sia per completamento naturale sia
+// per chiusura manuale (✕). Salva sempre l'ascensione nello storico se è
+// stata effettivamente agganciata (mapClimbStartTime impostato), anche se
+// non completata per intero, mirando il comportamento del precedente
+// flusso manuale di Salite.
 function dismissActiveClimbOverlay() {
+  if (mapClimbPhase === 'active' && mapClimbStartTime && mapDetectedClimb) {
+    saveMapAscent(mapDetectedClimb);
+  }
   hideActiveClimbOverlayUI();
   resetMapClimbDetection();
 }
@@ -3928,8 +3308,6 @@ function startTrackRecording() {
   trackStartTime  = Date.now();
   trackElevGainM  = 0;
   trackLastEle    = null;
-  trackLastMoveTime = Date.now();
-  trackAutoPaused = false;
 
   if (trackPolyline) { leafletMap.removeLayer(trackPolyline); }
   trackPolyline = L.polyline([], { color: '#4fc3f7', weight: 4 }).addTo(leafletMap);
@@ -3949,24 +3327,18 @@ function startTrackRecording() {
     const elapsed = Math.floor((Date.now() - trackStartTime - trackPausedMs) / 1000);
     document.getElementById('map-duration').textContent = formatTime(elapsed);
     updateTrackStats();
-
-    // Pausa automatica: nessun movimento rilevato da più di 10 secondi
-    if (trackLastMoveTime && (Date.now() - trackLastMoveTime > AUTO_PAUSE_IDLE_MS)) {
-      pauseTrackRecording(true);
-    }
   }, 1000);
 
   toast('▶ Registrazione traccia avviata');
 }
 
-function pauseTrackRecording(automatic) {
+function pauseTrackRecording() {
   if (!trackRecording || trackPaused) return;
   trackPaused   = true;
   trackPausedAt = Date.now();
-  trackAutoPaused = !!automatic;
   document.getElementById('map-btn-pause').style.display  = 'none';
   document.getElementById('map-btn-resume').style.display = 'block';
-  toast(automatic ? '⏸ Pausa automatica — nessun movimento rilevato' : '⏸ Traccia in pausa');
+  toast('⏸ Traccia in pausa');
 }
 
 function resumeTrackRecording() {
@@ -3974,8 +3346,6 @@ function resumeTrackRecording() {
   trackPausedMs += Date.now() - trackPausedAt;
   trackPaused    = false;
   trackPausedAt  = null;
-  trackAutoPaused = false;
-  trackLastMoveTime = Date.now();
   document.getElementById('map-btn-pause').style.display  = 'block';
   document.getElementById('map-btn-resume').style.display = 'none';
   toast('▶ Traccia ripresa');
