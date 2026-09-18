@@ -306,10 +306,11 @@
   .climb-card {
     background: var(--card); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px;
+    cursor: pointer; transition: border-color .2s;
   }
-  .climb-card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+  .climb-card:hover { border-color: var(--accent); }
+  .climb-card-header { display: flex; justify-content: space-between; align-items: center; }
   .climb-card-name { font-size: 19px; font-weight: 800; }
-  .climb-card-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
   .climb-card-del { background: none; border: 1px solid var(--border); color: var(--muted); padding: 4px 9px; border-radius: 8px; font-size: 11px; cursor: pointer; }
   .climb-empty { text-align: center; color: var(--muted); padding: 40px 0; font-size: 14px; }
 
@@ -371,6 +372,27 @@
   .ascent-stat .al { font-size: 11px; color: var(--muted); }
   .ascent-stat .av { font-size: 18px; font-weight: 700; font-family: var(--mono); }
   .ascent-stat .au { font-size: 11px; color: var(--muted); }
+
+  /* Dettaglio salita */
+  .climb-detail-name-row { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; }
+  .climb-detail-name-input {
+    flex: 1; padding: 11px 14px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text); font-size: 17px; font-weight: 800;
+  }
+  .climb-detail-stats {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px;
+  }
+  .climb-detail-stat {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 12px; text-align: center;
+  }
+  .climb-detail-stat .cdl { font-size: 11px; color: #ccc; text-transform: uppercase; letter-spacing: .03em; font-weight: 600; }
+  .climb-detail-stat .cdv { font-size: 20px; font-weight: 900; font-family: var(--mono); color: #fff; }
+  .climb-detail-profile-wrap {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px; margin-bottom: 8px; overflow: hidden;
+  }
+  #climb-detail-svg { width: 100%; height: 120px; display: block; }
 
   /* FULLSCREEN BTN */
   .fs-btn {
@@ -932,6 +954,30 @@
       <button class="btn-toggle-overlay-compact" onclick="exportAscentsCSV()">↓ Esporta CSV</button>
     </div>
     <div id="ascent-list"></div>
+  </div>
+</div>
+
+<!-- Sheet: Dettaglio salita -->
+<div class="map-sheet-overlay" id="climb-detail-sheet">
+  <div class="map-sheet">
+    <div class="tracks-sheet-header">
+      <h3 style="margin-bottom:0">Dettaglio salita</h3>
+      <button class="map-sheet-close-top" onclick="closeClimbDetail()">✕ Chiudi</button>
+    </div>
+
+    <div class="climb-detail-name-row">
+      <input type="text" id="climb-detail-name-input" class="climb-detail-name-input" placeholder="Nome salita">
+      <button class="track-rename-btn" onclick="saveClimbDetailName()">✓ Salva</button>
+    </div>
+
+    <div class="climb-detail-stats" id="climb-detail-stats"></div>
+
+    <div class="climb-detail-profile-wrap">
+      <svg id="climb-detail-svg" viewBox="0 0 360 120" preserveAspectRatio="none"></svg>
+    </div>
+
+    <h3 style="margin-top:20px">Storico ascensioni di questa salita</h3>
+    <div id="climb-detail-ascents"></div>
   </div>
 </div>
 
@@ -1909,6 +1955,7 @@ function saveAscents() {
 
 // ── SALITE STATE ───────────────────────────────────────────────
 let climbs = []; // popolato in modo asincrono da initClimbsStorage() all'avvio
+let currentDetailClimbId = null; // salita attualmente aperta nel pannello di dettaglio
 let selectedXlsxData = null;
 let ascents = loadAscents();
 
@@ -1921,28 +1968,118 @@ function renderClimbList() {
     el.innerHTML = '<div class="climb-empty">Nessuna salita salvata.<br>Aggiungi una salita con il tasto +</div>';
     return;
   }
-  el.innerHTML = climbs.map((c, i) => {
-    const totalKm = c.segments.reduce((s, seg) => s + seg.km, 0).toFixed(1);
-    const totalElev = c.segments.reduce((s, seg) => s + Math.max(0, (seg.altEnd - seg.altStart)), 0);
-    const avgGrade = (c.segments.reduce((s, seg) => s + seg.grade * seg.km, 0) /
-                      c.segments.reduce((s, seg) => s + seg.km, 0)).toFixed(1);
-    return `
-    <div class="climb-card">
+  const sorted = [...climbs].sort((a, b) =>
+    (a.name || '').localeCompare((b.name || ''), 'it', { sensitivity: 'base' })
+  );
+  el.innerHTML = sorted.map(c => `
+    <div class="climb-card" onclick="openClimbDetail(${c.addedAt})">
       <div class="climb-card-header">
-        <div>
-          <div class="climb-card-name">${c.name}</div>
-          <div class="climb-card-meta">${totalKm} km · +${Math.round(totalElev)} m · pendenza media ${avgGrade}% · ${c.segments.length} sezioni${c.startCoords ? ' · 📍' : ''}${c.gpxPoints ? ' · 🗺️ GPX' : ''}</div>
-        </div>
-        <button class="climb-card-del" onclick="event.stopPropagation();deleteClimb(${i})">✕</button>
+        <div class="climb-card-name">${c.name}</div>
+        <button class="climb-card-del" onclick="event.stopPropagation();deleteClimb(${c.addedAt})">✕</button>
       </div>
-    </div>`;
-  }).join('');
+    </div>`
+  ).join('');
 }
 
-function deleteClimb(i) {
-  climbs.splice(i, 1);
+function deleteClimb(id) {
+  climbs = climbs.filter(c => c.addedAt !== id);
   saveClimbs();
   renderClimbList();
+  if (currentDetailClimbId === id) closeClimbDetail();
+}
+
+// ── DETTAGLIO SALITA ─────────────────────────────────────────────
+function openClimbDetail(id) {
+  const climb = climbs.find(c => c.addedAt === id);
+  if (!climb) return;
+  currentDetailClimbId = id;
+
+  document.getElementById('climb-detail-name-input').value = climb.name;
+
+  const totalKm = climb.segments.reduce((s, seg) => s + seg.km, 0);
+  const totalElev = climb.segments.reduce((s, seg) => s + Math.max(0, seg.altEnd - seg.altStart), 0);
+  const avgGrade = totalKm > 0
+    ? climb.segments.reduce((s, seg) => s + seg.grade * seg.km, 0) / totalKm
+    : 0;
+
+  document.getElementById('climb-detail-stats').innerHTML = `
+    <div class="climb-detail-stat"><div class="cdl">Lunghezza</div><div class="cdv">${totalKm.toFixed(1)} km</div></div>
+    <div class="climb-detail-stat"><div class="cdl">Dislivello</div><div class="cdv">+${Math.round(totalElev)} m</div></div>
+    <div class="climb-detail-stat"><div class="cdl">Pendenza media</div><div class="cdv">${avgGrade.toFixed(1)}%</div></div>
+    <div class="climb-detail-stat"><div class="cdl">Sezioni</div><div class="cdv">${climb.segments.length}${climb.startCoords ? ' 📍' : ''}${climb.gpxPoints ? ' 🗺️' : ''}</div></div>
+  `;
+
+  drawClimbDetailProfile(climb);
+  renderClimbDetailAscents(id);
+
+  document.getElementById('climb-detail-sheet').classList.add('open');
+}
+
+function closeClimbDetail() {
+  document.getElementById('climb-detail-sheet').classList.remove('open');
+  currentDetailClimbId = null;
+}
+
+function saveClimbDetailName() {
+  const climb = climbs.find(c => c.addedAt === currentDetailClimbId);
+  if (!climb) return;
+  const newName = document.getElementById('climb-detail-name-input').value.trim();
+  if (!newName) { toast('Il nome non può essere vuoto'); return; }
+  climb.name = newName;
+  saveClimbs();
+  renderClimbList();
+  renderClimbDetailAscents(currentDetailClimbId); // aggiorna eventuali nomi mostrati nello storico locale
+  toast('Nome salvato ✓');
+}
+
+// Profilo altimetrico statico (nessun cursore live — è solo un riferimento
+// visivo nell'archivio, la navigazione avviene in Mappa)
+function drawClimbDetailProfile(climb) {
+  const segs = climb.segments;
+  const W = 360, H = 120, PAD = 6;
+  const totalKm = segs.reduce((s, g) => s + g.km, 0) || 1;
+
+  let points = [{ x: 0, y: 0 }];
+  segs.forEach(seg => {
+    const rise = seg.km * 1000 * seg.grade / 100;
+    points.push({ x: points.length, y: points[points.length-1].y + rise, seg });
+  });
+  const maxElev = Math.max(...points.map(p => p.y), 1);
+  const toSVG = (xFrac, y) => ({
+    x: PAD + xFrac * (W - 2*PAD),
+    y: H - PAD - (y / maxElev) * (H - 2*PAD - 16)
+  });
+
+  let svgContent = '';
+  let cumKm = 0;
+  segs.forEach((seg, i) => {
+    const x0 = cumKm / totalKm;
+    cumKm += seg.km;
+    const x1 = cumKm / totalKm;
+    const y0 = i === 0 ? 0 : segs.slice(0, i).reduce((s, sg) => s + sg.km * 1000 * sg.grade / 100, 0);
+    const y1 = y0 + seg.km * 1000 * seg.grade / 100;
+    const p0 = toSVG(x0, y0);
+    const p1 = toSVG(x1, y1);
+    const color = gradeColor(seg.grade);
+    svgContent += `<polygon points="${p0.x},${p0.y} ${p1.x},${p1.y} ${p1.x},${H-PAD} ${p0.x},${H-PAD}" fill="${color}"/>`;
+  });
+  svgContent += `<line x1="${PAD}" y1="${H-PAD}" x2="${W-PAD}" y2="${H-PAD}" stroke="var(--border)" stroke-width="1"/>`;
+
+  document.getElementById('climb-detail-svg').innerHTML = svgContent;
+}
+
+// Storico ascensioni filtrato sulla singola salita (per climbId, con
+// fallback per nome per le ascensioni registrate prima che esistesse climbId)
+function renderClimbDetailAscents(id) {
+  const climb = climbs.find(c => c.addedAt === id);
+  const el = document.getElementById('climb-detail-ascents');
+  if (!el || !climb) return;
+  const filtered = ascents.filter(a => a.climbId === id || (!a.climbId && a.climbName === climb.name));
+  if (!filtered.length) {
+    el.innerHTML = '<div class="climb-empty" style="padding:16px 0">Nessuna ascensione registrata per questa salita.</div>';
+    return;
+  }
+  el.innerHTML = filtered.map(buildAscentCardHTML).join('');
 }
 
 function openAddModal() {
@@ -2529,19 +2666,12 @@ function closeAscentHistorySheet() {
   document.getElementById('ascent-history-sheet').classList.remove('open');
 }
 
-function renderAscentList() {
-  const el = document.getElementById('ascent-list');
-  if (!el) return;
-  if (!ascents.length) {
-    el.innerHTML = '<div class="climb-empty" style="padding:20px 0">Nessuna ascensione registrata.</div>';
-    return;
-  }
-  el.innerHTML = ascents.map((a, i) => {
-    const d = new Date(a.date);
-    const dateStr = d.toLocaleDateString('it-IT', { day:'2-digit', month:'short', year:'numeric' });
-    const timeStr = d.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' });
-    const dur = a.duration ? formatTime(a.duration) : '—';
-    return `
+function buildAscentCardHTML(a) {
+  const d = new Date(a.date);
+  const dateStr = d.toLocaleDateString('it-IT', { day:'2-digit', month:'short', year:'numeric' });
+  const timeStr = d.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' });
+  const dur = a.duration ? formatTime(a.duration) : '—';
+  return `
     <div class="ascent-card">
       <div class="ascent-card-header">
         <div>
@@ -2575,13 +2705,23 @@ function renderAscentList() {
         </div>
       </div>
     </div>`;
-  }).join('');
+}
+
+function renderAscentList() {
+  const el = document.getElementById('ascent-list');
+  if (!el) return;
+  if (!ascents.length) {
+    el.innerHTML = '<div class="climb-empty" style="padding:20px 0">Nessuna ascensione registrata.</div>';
+    return;
+  }
+  el.innerHTML = ascents.map(buildAscentCardHTML).join('');
 }
 
 function deleteAscent(id) {
   ascents = ascents.filter(a => a.id !== id);
   saveAscents();
   renderAscentList();
+  if (currentDetailClimbId != null) renderClimbDetailAscents(currentDetailClimbId);
 }
 
 function exportAscentsCSV() {
