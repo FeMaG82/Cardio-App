@@ -2854,6 +2854,11 @@ let mapClimbSegmentSplits  = []; // [{segIdx, elapsedS}]
 let mapClimbTotalDistM     = 0;
 let mapClimbTotalElevM     = 0;
 let mapClimbLastTrackPos   = null; // ultima posizione usata per calcolare i delta di distanza/dislivello
+let mapClimbLastGoodUpdateTime = null; // timestamp dell'ultimo aggiornamento di posizione affidabile
+                                        // sulla traccia — usato per calcolare la durata reale,
+                                        // non l'istante in cui l'ascensione viene chiusa/salvata
+let mapClimbLostTrackCount = 0;    // letture consecutive fuori traccia (perpDist troppo grande)
+const MAP_CLIMB_LOST_TRACK_LIMIT = 5; // dopo N letture fuori traccia, valuta il completamento automatico
 let mapClimbApproachPrevDist = null; // per rilevare se ci si avvicina o allontana
 let mapClimbApproachAwayCount = 0;   // letture consecutive in allontanamento
 let mapClimbDismissedIds = new Set(); // salite chiuse manualmente (non ripropose finché si resta in zona)
@@ -3187,6 +3192,8 @@ function updateApproachingMapClimb(coords) {
   if (locked) {
     mapClimbPhase = 'active';
     mapClimbStartTime = Date.now();
+    mapClimbLastGoodUpdateTime = Date.now();
+    mapClimbLostTrackCount = 0;
     mapClimbHrSamples = [];
     mapClimbSegmentSplits = [];
     mapClimbTotalDistM = 0;
@@ -3222,22 +3229,34 @@ function updateActiveMapClimbTracking(coords) {
 
   const totalM = c.segments.reduce((s, seg) => s + seg.km * 1000, 0);
   const prevSegIdx = mapClimbCurrentSegIdx;
+  let trackedOk = false;
 
   if (c.gpxPoints) {
     const proj = projectOntoTrack(coords.latitude, coords.longitude, c.gpxPoints, 80, mapClimbLastMatchedIdx);
     if (proj && proj.perpDist < 60) {
       mapClimbLastMatchedIdx = proj.matchedIdx;
       mapClimbDistanceDone = Math.max(0, proj.distAlongTrack - mapClimbGpxStartOffsetM);
+      trackedOk = true;
     }
-    // Se ci si allontana troppo dalla traccia, non aggiorniamo (probabile
-    // deviazione temporanea o fine registrazione GPX) ma non annulliamo
-    // subito: la salita resta "attiva" finché non si supera la lunghezza
+    // Se ci si allontana troppo dalla traccia (perpDist >= 60), non
+    // aggiorniamo la distanza — ma la contiamo: se succede ripetutamente
+    // *dopo* essere arrivati vicino alla fine (tipico quando la strada
+    // reale continua oltre l'ultimo punto registrato nel GPX), consideriamo
+    // la salita comunque completata invece di restare bloccati in attesa
+    // di un aggancio che non arriverà più (vedi sotto).
   } else {
     // Nessuna traccia GPX: fallback ad accumulo semplice tra fix
     if (mapLastPos) {
       const d = haversineMeters(mapLastPos.coords, coords);
-      if (d > 0 && d < 300) mapClimbDistanceDone += d;
+      if (d > 0 && d < 300) { mapClimbDistanceDone += d; trackedOk = true; }
     }
+  }
+
+  if (trackedOk) {
+    mapClimbLostTrackCount = 0;
+    mapClimbLastGoodUpdateTime = Date.now();
+  } else {
+    mapClimbLostTrackCount++;
   }
 
   // Trova il segmento corrente
@@ -3263,7 +3282,7 @@ function updateActiveMapClimbTracking(coords) {
   mapClimbLastTrackPos = coords;
 
   if (mapClimbCurrentSegIdx > prevSegIdx && mapClimbStartTime) {
-    const elapsedS = Math.floor((Date.now() - mapClimbStartTime) / 1000);
+    const elapsedS = Math.floor(((mapClimbLastGoodUpdateTime || Date.now()) - mapClimbStartTime) / 1000);
     for (let i = prevSegIdx + 1; i <= mapClimbCurrentSegIdx; i++) {
       if (!mapClimbSegmentSplits.some(s => s.segIdx === i)) {
         mapClimbSegmentSplits.push({ segIdx: i, elapsedS });
@@ -3273,8 +3292,16 @@ function updateActiveMapClimbTracking(coords) {
 
   updateActiveClimbOverlayUI();
 
-  // Completamento salita: dismissActiveClimbOverlay salva automaticamente
-  if (mapClimbDistanceDone >= totalM - 15) {
+  // Completamento salita — due modi:
+  // 1) distanza percorsa arriva alla fine della salita (caso normale)
+  // 2) traccia persa ripetutamente essendo già molto vicini alla fine
+  //    (tipico quando la strada reale continua oltre il GPX registrato) —
+  //    evita che il fumetto resti bloccato indefinitamente a "pochi metri
+  //    dalla fine" come nel bug segnalato
+  const nearEnd = mapClimbDistanceDone >= totalM - 15;
+  const lostNearEnd = mapClimbLostTrackCount >= MAP_CLIMB_LOST_TRACK_LIMIT && mapClimbDistanceDone >= totalM * 0.9;
+
+  if (nearEnd || lostNearEnd) {
     toast(`🏁 "${c.name}" completata!`);
     dismissActiveClimbOverlay();
   }
@@ -3285,7 +3312,12 @@ function updateActiveMapClimbTracking(coords) {
 // flusso manuale — così Storico e Previsioni funzionano invariati.
 function saveMapAscent(climb) {
   if (!mapClimbStartTime) return;
-  const duration = Math.floor((Date.now() - mapClimbStartTime) / 1000);
+  // Usa l'ultimo aggiornamento di posizione affidabile come istante di
+  // fine, non il momento in cui l'ascensione viene effettivamente salvata
+  // (che può essere molto più tardi se il completamento automatico non è
+  // scattato subito e la chiusura è stata manuale)
+  const endTime = mapClimbLastGoodUpdateTime || Date.now();
+  const duration = Math.floor((endTime - mapClimbStartTime) / 1000);
   if (duration < 5) return; // ascensione troppo breve, probabile falso positivo
 
   const avgHR = mapClimbHrSamples.length
@@ -3335,6 +3367,8 @@ function resetMapClimbDetection() {
   mapClimbTotalDistM = 0;
   mapClimbTotalElevM = 0;
   mapClimbLastTrackPos = null;
+  mapClimbLastGoodUpdateTime = null;
+  mapClimbLostTrackCount = 0;
 }
 
 // ── UI: pop-up avvicinamento ────────────────────────────────────
