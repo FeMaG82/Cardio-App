@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0a0a0f">
 <meta name="mobile-web-app-capable" content="yes">
-<title>HRM · Polar H9</title>
+<title>HRM Â· Polar H9</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
@@ -37,7 +37,7 @@
     overflow-x: hidden;
   }
 
-  /* ── NAV ── */
+  /* ââ NAV ââ */
   nav {
     display: flex;
     background: var(--surface);
@@ -58,7 +58,7 @@
     border-radius: 8px 8px 0 0;
   }
 
-  /* Tasto accesso Zone in fondo al Monitor — stessa grafica fluo del nav */
+  /* Tasto accesso Zone in fondo al Monitor â stessa grafica fluo del nav */
   .zone-access-btn {
     display: block; width: 100%; margin-top: 16px;
     padding: 14px 0; background: rgba(224,64,251,.08);
@@ -68,11 +68,11 @@
   }
   .zone-access-btn:active { background: rgba(224,64,251,.18); }
 
-  /* ── VIEWS ── */
+  /* ââ VIEWS ââ */
   .view { display: none; padding: 20px 16px 100px; }
   .view.active { display: block; }
 
-  /* ── MONITOR VIEW ── */
+  /* ââ MONITOR VIEW ââ */
   .status-bar {
     display: flex; align-items: center; gap: 10px;
     margin-bottom: 20px; padding: 12px 16px;
@@ -95,7 +95,7 @@
   }
   #connect-btn:disabled { opacity: .4; cursor: not-allowed; }
 
-  /* BIG HR DISPLAY — 2 col layout, centered */
+  /* BIG HR DISPLAY â 2 col layout, centered */
   .hr-display {
     display: flex; align-items: center; justify-content: center; gap: 10px;
     padding: 8px 0 12px;
@@ -181,7 +181,7 @@
     background: var(--border); color: var(--muted);
     transition: all .4s;
   }
-  /* ZONE BAR — vertical on the right */
+  /* ZONE BAR â vertical on the right */
   .hr-right {
     width: 150px; display: flex; flex-direction: column; gap: 5px;
     align-self: stretch; justify-content: space-between; padding: 4px 0;
@@ -199,7 +199,7 @@
   .zone-pill-label { font-size: 16px; font-weight: 900; color: rgba(0,0,0,.75); display: block; }
 
   /* STATS GRID */
-  /* STAT ROWS inline — label: valore sulla stessa riga */
+  /* STAT ROWS inline â label: valore sulla stessa riga */
   .stats-grid { display: flex; flex-direction: column; gap: 0; margin-bottom: 0;
     background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; flex: 1; }
   .stat-card {
@@ -210,7 +210,7 @@
   .stat-card .label { font-size: 16px; color: #ddd; font-weight: 700; }
   .stat-card .value { font-size: 30px; font-weight: 900; font-family: var(--mono); color: #fff; }
 
-  /* SESSION CONTROLS — oval buttons alongside stats, fixed 150px */
+  /* SESSION CONTROLS â oval buttons alongside stats, fixed 150px */
   .session-controls { width: 150px; flex-shrink: 0; display: flex; flex-direction: column; gap: 6px; justify-content: center; align-items: center; }
   .btn-session {
     width: 130px; height: 58px; border-radius: 29px; border: none;
@@ -223,7 +223,7 @@
   #btn-resume { background: var(--z2); color: #0a1a04; display: none; }
   #btn-stop   { background: var(--z4); color: #1a0a00; }
 
-  /* ZONE TIME BARS — sotto i bottoni */
+  /* ZONE TIME BARS â sotto i bottoni */
   .zone-times { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px; }
   .zone-times h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: #aaa; margin-bottom: 12px; font-weight: 700; }
   .zone-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
@@ -233,7 +233,7 @@
   .zone-fill { height: 100%; border-radius: 4px; transition: width .6s ease; width: 0%; }
   .zone-pct { width: 38px; text-align: right; font-size: 13px; color: #bbb; font-family: var(--mono); font-weight: 700; }
 
-  /* ── HISTORY VIEW ── */
+  /* ââ HISTORY VIEW ââ */
   .history-empty { text-align: center; color: var(--muted); padding: 60px 0; font-size: 14px; }
   .session-card {
     background: var(--card); border: 1px solid var(--border);
@@ -249,7 +249,7 @@
   .mini-zone-bar { flex: 1; border-radius: 2px 2px 0 0; min-height: 4px; transition: height .5s; }
   .del-btn { background: none; border: 1px solid var(--border); color: var(--muted); padding: 5px 10px; border-radius: 8px; font-size: 12px; cursor: pointer; }
 
-  /* ── SETTINGS VIEW ── */
+  /* ââ SETTINGS VIEW ââ */
   .settings-section { margin-bottom: 28px; }
   .settings-section h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 14px; }
   .zone-settings-card {
@@ -278,7 +278,7 @@
   }
   .settings-note { font-size: 12px; color: var(--muted); margin-top: 8px; text-align: center; }
 
-  /* ── UTILS ── */
+  /* ââ UTILS ââ */
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
   .toast {
     position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
@@ -294,7 +294,7 @@
   @keyframes heartbeat { 0%,100%{transform:scale(1)} 15%{transform:scale(1.06)} 30%{transform:scale(1)} }
   .hr-circle.beat { animation: heartbeat .3s ease; }
 
-  /* ── SALITE ── */
+  /* ââ SALITE ââ */
   /* Salita library */
   .climb-lib-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
   .climb-lib-header h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
@@ -404,7 +404,7 @@
   }
   .fs-btn:active { background: rgba(79,195,247,.35); }
 
-  /* ── MAPPA ── */
+  /* ââ MAPPA ââ */
   #view-map { padding: 0; }
   .map-wrap { position: relative; height: calc(100dvh - 54px); width: 100%; }
   #leaflet-map { position: absolute; inset: 0; z-index: 1; background: #1a1a26; }
@@ -706,6 +706,37 @@
     padding: 10px 12px; margin-bottom: 8px; font-size: 12px; color: #ccc;
     display: flex; justify-content: space-between; align-items: center;
   }
+
+  /* ââ CORREZIONE ALTIMETRIA (inclinometro) ââ */
+  .map-menu-btn.on { background: rgba(79,195,247,.15); border-color: var(--accent); color: var(--accent); }
+  .corr-card {
+    background: var(--card); border: 1px solid var(--accent); border-radius: 12px;
+    padding: 14px 16px; margin-bottom: 14px;
+  }
+  .corr-title { font-size: 14px; font-weight: 800; color: var(--accent); margin-bottom: 4px; }
+  .corr-sub { font-size: 12px; color: #999; margin-bottom: 10px; }
+  .corr-svg { width: 100%; height: 110px; display: block; margin-bottom: 10px; }
+  .corr-stats { display: flex; gap: 10px; margin-bottom: 12px; }
+  .corr-stats > div { flex: 1; text-align: center; font-size: 11px; color: #aaa; text-transform: uppercase; }
+  .corr-stats b { display: block; font-size: 15px; color: #fff; font-family: var(--mono); margin-top: 2px; }
+  .corr-stats b.warn { color: var(--z4); }
+  .corr-btns { display: flex; gap: 8px; }
+  .corr-accept, .corr-reject {
+    flex: 1; padding: 12px; border-radius: 11px; border: none;
+    font-size: 13px; font-weight: 800; cursor: pointer;
+  }
+  .corr-accept { background: var(--z2); color: #0a1a04; }
+  .corr-reject { background: var(--card); border: 1px solid var(--border); color: #ccc; }
+  .corr-note {
+    background: rgba(79,195,247,.06); border: 1px solid rgba(79,195,247,.25);
+    border-radius: 10px; padding: 10px 12px; font-size: 12px; color: #bbb;
+    margin-bottom: 14px; display: flex; align-items: center;
+    justify-content: space-between; gap: 8px; flex-wrap: wrap;
+  }
+  .corr-restore {
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    padding: 6px 10px; border-radius: 8px; font-size: 11px; cursor: pointer;
+  }
 </style>
 </head>
 <body>
@@ -719,7 +750,7 @@
   <button onclick="showView('map',this)">Mappa</button>
 </nav>
 
-<!-- ══════════ MONITOR ══════════ -->
+<!-- ââââââââââ MONITOR ââââââââââ -->
 <div id="view-monitor" class="view active">
 
   <!-- Status bar + FS btn -->
@@ -727,7 +758,7 @@
     <div class="status-dot" id="status-dot"></div>
     <span id="status-text">Non connesso</span>
     <button id="connect-btn" onclick="connectBLE()">Connetti</button>
-    <button class="fs-btn" id="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
+    <button class="fs-btn" id="fullscreen-btn" onclick="toggleFullscreen()">â¶</button>
   </div>
 
   <!-- HR circle (left) + zone pills (right) + session buttons (far right) -->
@@ -738,12 +769,12 @@
       <div class="hr-label">Frequenza Cardiaca</div>
       <div class="hr-circle-wrap">
         <div class="hr-circle" id="hr-circle" onclick="recordLap()">
-          <div class="hr-value" id="hr-value">—</div>
+          <div class="hr-value" id="hr-value">â</div>
           <div class="hr-unit">bpm</div>
         </div>
         <div class="lap-badge" id="lap-badge">1</div>
       </div>
-      <div class="zone-badge" id="zone-badge">— Zona —</div>
+      <div class="zone-badge" id="zone-badge">â Zona â</div>
     </div>
 
     <!-- Middle: vertical zone pills -->
@@ -764,11 +795,11 @@
     <div class="stats-grid">
       <div class="stat-card">
         <div class="label">FC Media</div>
-        <div class="value" id="avg-hr">—</div>
+        <div class="value" id="avg-hr">â</div>
       </div>
       <div class="stat-card">
         <div class="label">FC Massima</div>
-        <div class="value" id="max-hr">—</div>
+        <div class="value" id="max-hr">â</div>
       </div>
       <div class="stat-card">
         <div class="label">Durata</div>
@@ -780,10 +811,10 @@
       </div>
     </div>
     <div class="session-controls">
-      <button class="btn-session" id="btn-start"  onclick="startSession()">▶ Avvia<br>Sessione</button>
-      <button class="btn-session" id="btn-pause"  onclick="pauseSession()"  disabled>⏸ Pausa</button>
-      <button class="btn-session" id="btn-resume" onclick="resumeSession()">▶ Riprendi</button>
-      <button class="btn-session" id="btn-stop"   onclick="stopSession()"   disabled>■ Termina</button>
+      <button class="btn-session" id="btn-start"  onclick="startSession()">â¶ Avvia<br>Sessione</button>
+      <button class="btn-session" id="btn-pause"  onclick="pauseSession()"  disabled>â¸ Pausa</button>
+      <button class="btn-session" id="btn-resume" onclick="resumeSession()">â¶ Riprendi</button>
+      <button class="btn-session" id="btn-stop"   onclick="stopSession()"   disabled>â  Termina</button>
     </div>
   </div>
 
@@ -831,12 +862,12 @@
 
 </div>
 
-<!-- ══════════ HISTORY ══════════ -->
+<!-- ââââââââââ HISTORY ââââââââââ -->
 <div id="view-history" class="view">
   <div id="history-list"></div>
 </div>
 
-<!-- ══════════ SETTINGS ══════════ -->
+<!-- ââââââââââ SETTINGS ââââââââââ -->
 <div id="view-settings" class="view">
   <div class="settings-section">
     <h2>Dati Fisici</h2>
@@ -867,50 +898,50 @@
     <div class="zone-settings-card">
       <div class="zone-setting-row">
         <div class="zone-color-dot" style="background:var(--z1)"></div>
-        <label>Zona 1 — Recupero</label>
+        <label>Zona 1 â Recupero</label>
         <div class="zone-inputs">
           <input type="number" id="z1-min" min="30" max="220" placeholder="min">
-          <span>→</span>
+          <span>â</span>
           <input type="number" id="z1-max" min="30" max="220" placeholder="max">
           <span style="font-size:11px;color:var(--muted)">bpm</span>
         </div>
       </div>
       <div class="zone-setting-row">
         <div class="zone-color-dot" style="background:var(--z2)"></div>
-        <label>Zona 2 — Aerobico</label>
+        <label>Zona 2 â Aerobico</label>
         <div class="zone-inputs">
           <input type="number" id="z2-min" min="30" max="220" placeholder="min">
-          <span>→</span>
+          <span>â</span>
           <input type="number" id="z2-max" min="30" max="220" placeholder="max">
           <span style="font-size:11px;color:var(--muted)">bpm</span>
         </div>
       </div>
       <div class="zone-setting-row">
         <div class="zone-color-dot" style="background:var(--z3)"></div>
-        <label>Zona 3 — Tempo</label>
+        <label>Zona 3 â Tempo</label>
         <div class="zone-inputs">
           <input type="number" id="z3-min" min="30" max="220" placeholder="min">
-          <span>→</span>
+          <span>â</span>
           <input type="number" id="z3-max" min="30" max="220" placeholder="max">
           <span style="font-size:11px;color:var(--muted)">bpm</span>
         </div>
       </div>
       <div class="zone-setting-row">
         <div class="zone-color-dot" style="background:var(--z4)"></div>
-        <label>Zona 4 — Soglia</label>
+        <label>Zona 4 â Soglia</label>
         <div class="zone-inputs">
           <input type="number" id="z4-min" min="30" max="220" placeholder="min">
-          <span>→</span>
+          <span>â</span>
           <input type="number" id="z4-max" min="30" max="220" placeholder="max">
           <span style="font-size:11px;color:var(--muted)">bpm</span>
         </div>
       </div>
       <div class="zone-setting-row">
         <div class="zone-color-dot" style="background:var(--z5)"></div>
-        <label>Zona 5 — VO2max</label>
+        <label>Zona 5 â VO2max</label>
         <div class="zone-inputs">
           <input type="number" id="z5-min" min="30" max="220" placeholder="min">
-          <span>→</span>
+          <span>â</span>
           <input type="number" id="z5-max" min="30" max="220" placeholder="max">
           <span style="font-size:11px;color:var(--muted)">bpm</span>
         </div>
@@ -927,7 +958,7 @@
   </div>
 </div>
 
-<!-- ══════════ SALITE ══════════ -->
+<!-- ââââââââââ SALITE ââââââââââ -->
 <div id="view-climb" class="view">
 
   <!-- Libreria salite: archivio puro, la navigazione avviene ora in Mappa -->
@@ -938,8 +969,8 @@
     </div>
     <div id="climb-list"></div>
 
-    <button class="climb-history-access-btn" onclick="openAscentHistorySheet()">📜 Storico ascensioni</button>
-    <button class="climb-history-access-btn" style="margin-top:8px;background:rgba(139,195,74,.08);border-color:rgba(139,195,74,.3);color:var(--z2)" onclick="openPredictionsSheet()">📈 Previsioni prestazioni</button>
+    <button class="climb-history-access-btn" onclick="openAscentHistorySheet()">ð Storico ascensioni</button>
+    <button class="climb-history-access-btn" style="margin-top:8px;background:rgba(139,195,74,.08);border-color:rgba(139,195,74,.3);color:var(--z2)" onclick="openPredictionsSheet()">ð Previsioni prestazioni</button>
   </div>
 </div>
 
@@ -948,10 +979,10 @@
   <div class="map-sheet">
     <div class="tracks-sheet-header">
       <h3 style="margin-bottom:0">Storico ascensioni</h3>
-      <button class="map-sheet-close-top" onclick="closeAscentHistorySheet()">✕ Chiudi</button>
+      <button class="map-sheet-close-top" onclick="closeAscentHistorySheet()">â Chiudi</button>
     </div>
     <div class="offline-top-row">
-      <button class="btn-toggle-overlay-compact" onclick="exportAscentsCSV()">↓ Esporta CSV</button>
+      <button class="btn-toggle-overlay-compact" onclick="exportAscentsCSV()">â Esporta CSV</button>
     </div>
     <div id="ascent-list"></div>
   </div>
@@ -962,12 +993,12 @@
   <div class="map-sheet">
     <div class="tracks-sheet-header">
       <h3 style="margin-bottom:0">Dettaglio salita</h3>
-      <button class="map-sheet-close-top" onclick="closeClimbDetail()">✕ Chiudi</button>
+      <button class="map-sheet-close-top" onclick="closeClimbDetail()">â Chiudi</button>
     </div>
 
     <div class="climb-detail-name-row">
       <input type="text" id="climb-detail-name-input" class="climb-detail-name-input" placeholder="Nome salita">
-      <button class="track-rename-btn" onclick="saveClimbDetailName()">✓ Salva</button>
+      <button class="track-rename-btn" onclick="saveClimbDetailName()">â Salva</button>
     </div>
 
     <div class="climb-detail-stats" id="climb-detail-stats"></div>
@@ -975,6 +1006,8 @@
     <div class="climb-detail-profile-wrap">
       <svg id="climb-detail-svg" viewBox="0 0 360 120" preserveAspectRatio="none"></svg>
     </div>
+
+    <div id="climb-correction-slot"></div>
 
     <h3 style="margin-top:20px">Storico ascensioni di questa salita</h3>
     <div id="climb-detail-ascents"></div>
@@ -986,7 +1019,7 @@
   <div class="map-sheet">
     <div class="tracks-sheet-header">
       <h3 style="margin-bottom:0">Dettaglio Lap</h3>
-      <button class="map-sheet-close-top" onclick="closeLapSheet()">✕ Chiudi</button>
+      <button class="map-sheet-close-top" onclick="closeLapSheet()">â Chiudi</button>
     </div>
     <div id="lap-detail-list"></div>
   </div>
@@ -997,12 +1030,12 @@
   <div class="map-sheet">
     <div class="tracks-sheet-header">
       <h3 style="margin-bottom:0">Previsioni prestazioni</h3>
-      <button class="map-sheet-close-top" onclick="closePredictionsSheet()">✕ Chiudi</button>
+      <button class="map-sheet-close-top" onclick="closePredictionsSheet()">â Chiudi</button>
     </div>
-    <p class="hint">Stima basata su un modello fisico (gravità, resistenza aerodinamica e di rotolamento) applicato allo storico delle tue ascensioni. È una stima, non una misura di laboratorio.</p>
+    <p class="hint">Stima basata su un modello fisico (gravitÃ , resistenza aerodinamica e di rotolamento) applicato allo storico delle tue ascensioni. Ã una stima, non una misura di laboratorio.</p>
 
     <div class="offline-top-row">
-      <button class="btn-toggle-overlay-compact" onclick="goToWeightSettings()">⚖️ Imposta peso corporeo e bici</button>
+      <button class="btn-toggle-overlay-compact" onclick="goToWeightSettings()">âï¸ Imposta peso corporeo e bici</button>
     </div>
 
     <div class="pred-period-row">
@@ -1028,7 +1061,7 @@
     </div>
 
     <div id="pred-mode-gpx" class="pred-mode-panel" style="display:none">
-      <button class="btn-import-gpx" onclick="document.getElementById('pred-gpx-input').click()">📂 Carica file GPX</button>
+      <button class="btn-import-gpx" onclick="document.getElementById('pred-gpx-input').click()">ð Carica file GPX</button>
       <input type="file" id="pred-gpx-input" accept=".gpx" style="display:none" onchange="onPredGpxSelected(event)">
       <div id="pred-gpx-status" style="font-size:12px;color:#aaa;text-align:center"></div>
     </div>
@@ -1040,57 +1073,58 @@
         <div class="pred-manual-field"><label>Pend. massima (%)</label><input type="number" id="pred-m-maxgrade" step="0.1" placeholder="es. 12"></div>
         <div class="pred-manual-field"><label>Altitudine media (m)</label><input type="number" id="pred-m-alt" step="10" placeholder="es. 800"></div>
       </div>
-      <p class="hint" style="margin-top:6px">La pendenza massima è informativa (senza dati di sezione, il calcolo usa la pendenza media sull'intera lunghezza).</p>
+      <p class="hint" style="margin-top:6px">La pendenza massima Ã¨ informativa (senza dati di sezione, il calcolo usa la pendenza media sull'intera lunghezza).</p>
     </div>
 
-    <button class="btn-run-prediction" onclick="runPrediction()">▶ Calcola tempo previsto</button>
+    <button class="btn-run-prediction" onclick="runPrediction()">â¶ Calcola tempo previsto</button>
     <div id="prediction-result"></div>
   </div>
 </div>
 
-<!-- ══════════ MAPPA ══════════ -->
+<!-- ââââââââââ MAPPA ââââââââââ -->
 <div id="view-map" class="view">
   <div class="map-wrap">
     <div id="leaflet-map"></div>
 
     <!-- Cerchio FC live -->
     <div class="map-hr-overlay" id="map-hr-circle">
-      <div class="map-hr-num" id="map-hr-num">—</div>
+      <div class="map-hr-num" id="map-hr-num">â</div>
       <div class="map-hr-unit">bpm</div>
     </div>
 
     <!-- Top bar: menu tracce + offline -->
     <div class="map-topbar">
-      <button class="map-menu-btn" onclick="openTracksSheet()">🗂️ Tracce</button>
-      <button class="map-menu-btn" onclick="openOfflineSheet()">⬇️ Offline</button>
+      <button class="map-menu-btn" id="map-incline-btn" onclick="toggleInclinometer()">ð Pendenza</button>
+      <button class="map-menu-btn" onclick="openTracksSheet()">ðï¸ Tracce</button>
+      <button class="map-menu-btn" onclick="openOfflineSheet()">â¬ï¸ Offline</button>
     </div>
 
-    <button class="fs-btn map-fs-btn" onclick="toggleFullscreen()">⛶</button>
-    <button class="map-locate-btn active" id="map-locate-btn" onclick="toggleFollowMode()">◉</button>
+    <button class="fs-btn map-fs-btn" onclick="toggleFullscreen()">â¶</button>
+    <button class="map-locate-btn active" id="map-locate-btn" onclick="toggleFollowMode()">â</button>
 
     <!-- Pop-up 1: avvicinamento a una salita salvata -->
     <div class="map-climb-approach" id="map-climb-approach">
       <div class="mca-text">
-        <div class="mca-name" id="mca-name">—</div>
-        <div class="mca-dist" id="mca-dist">—</div>
+        <div class="mca-name" id="mca-name">â</div>
+        <div class="mca-dist" id="mca-dist">â</div>
       </div>
-      <button class="mca-close" onclick="dismissClimbApproachPopup()">✕</button>
+      <button class="mca-close" onclick="dismissClimbApproachPopup()">â</button>
     </div>
 
     <!-- Pop-up 2: navigazione attiva sulla salita -->
     <div class="map-climb-overlay" id="map-climb-overlay">
       <div class="mco-header">
-        <div class="mco-name" id="mco-name">—</div>
-        <button class="mco-close" onclick="dismissActiveClimbOverlay()">✕</button>
+        <div class="mco-name" id="mco-name">â</div>
+        <button class="mco-close" onclick="dismissActiveClimbOverlay()">â</button>
       </div>
       <svg id="map-climb-svg" class="mco-svg" viewBox="0 0 360 90" preserveAspectRatio="none"></svg>
       <div class="mco-stats">
         <div class="mco-stat">
-          <div class="mco-val" id="mco-grade">—</div>
+          <div class="mco-val" id="mco-grade">â</div>
           <div class="mco-unit">% pendenza</div>
         </div>
         <div class="mco-stat">
-          <div class="mco-val" id="mco-remaining">—</div>
+          <div class="mco-val" id="mco-remaining">â</div>
           <div class="mco-unit">rimanenti</div>
         </div>
       </div>
@@ -1099,23 +1133,23 @@
     <!-- Banner: navigazione traccia registrata caricata -->
     <div class="map-track-nav-banner" id="map-track-nav-banner">
       <span id="track-nav-label">Navigazione traccia</span>
-      <button class="mco-close" onclick="stopTrackNavigation()">✕</button>
+      <button class="mco-close" onclick="stopTrackNavigation()">â</button>
     </div>
 
     <!-- Pannello registrazione in basso -->
     <div class="map-record-panel">
       <div class="map-stats-row">
         <div class="map-stat-card">
-          <div class="msl">Velocità</div>
-          <div class="msv-row"><span class="msv" id="map-speed">—</span><span class="msu">km/h</span></div>
+          <div class="msl">VelocitÃ </div>
+          <div class="msv-row"><span class="msv" id="map-speed">â</span><span class="msu">km/h</span></div>
         </div>
         <div class="map-stat-card">
           <div class="msl">Vel. Media</div>
-          <div class="msv-row"><span class="msv" id="map-avg-speed">—</span><span class="msu">km/h</span></div>
+          <div class="msv-row"><span class="msv" id="map-avg-speed">â</span><span class="msu">km/h</span></div>
         </div>
         <div class="map-stat-card">
           <div class="msl">Quota</div>
-          <div class="msv-row"><span class="msv" id="map-altitude">—</span><span class="msu">mslm</span></div>
+          <div class="msv-row"><span class="msv" id="map-altitude">â</span><span class="msu">mslm</span></div>
         </div>
         <div class="map-stat-card">
           <div class="msl">Percorsi</div>
@@ -1131,10 +1165,10 @@
         </div>
       </div>
       <div class="map-record-btns">
-        <button class="map-rec-btn" id="map-btn-start"  onclick="startTrackRecording()">▶ Avvia</button>
-        <button class="map-rec-btn" id="map-btn-pause"  onclick="pauseTrackRecording()" disabled>⏸ Pausa</button>
-        <button class="map-rec-btn" id="map-btn-resume" onclick="resumeTrackRecording()">▶ Riprendi</button>
-        <button class="map-rec-btn" id="map-btn-stop"   onclick="stopTrackRecording()" disabled>■ Termina</button>
+        <button class="map-rec-btn" id="map-btn-start"  onclick="startTrackRecording()">â¶ Avvia</button>
+        <button class="map-rec-btn" id="map-btn-pause"  onclick="pauseTrackRecording()" disabled>â¸ Pausa</button>
+        <button class="map-rec-btn" id="map-btn-resume" onclick="resumeTrackRecording()">â¶ Riprendi</button>
+        <button class="map-rec-btn" id="map-btn-stop"   onclick="stopTrackRecording()" disabled>â  Termina</button>
       </div>
     </div>
   </div>
@@ -1145,16 +1179,16 @@
   <div class="map-sheet">
     <div class="tracks-sheet-header">
       <h3 style="margin-bottom:0">Le mie tracce</h3>
-      <button class="map-sheet-close-top" onclick="closeTracksSheet()">✕ Chiudi</button>
+      <button class="map-sheet-close-top" onclick="closeTracksSheet()">â Chiudi</button>
     </div>
-    <p class="hint">Tracce GPS registrate, scaricabili in formato GPX. Seleziona due o più tracce per unirle in una sola.</p>
+    <p class="hint">Tracce GPS registrate, scaricabili in formato GPX. Seleziona due o piÃ¹ tracce per unirle in una sola.</p>
 
-    <button class="btn-import-gpx" onclick="document.getElementById('track-gpx-input').click()">📂 Carica GPX dal telefono</button>
+    <button class="btn-import-gpx" onclick="document.getElementById('track-gpx-input').click()">ð Carica GPX dal telefono</button>
     <input type="file" id="track-gpx-input" accept=".gpx" style="display:none" onchange="onTrackGpxImport(event)">
 
     <div class="merge-action-bar">
       <span id="merge-selection-count">Nessuna traccia selezionata</span>
-      <button class="btn-merge" id="btn-merge-tracks" onclick="mergeSelectedTracks()" disabled>🔗 Unisci</button>
+      <button class="btn-merge" id="btn-merge-tracks" onclick="mergeSelectedTracks()" disabled>ð Unisci</button>
     </div>
     <div id="tracks-list"></div>
   </div>
@@ -1166,8 +1200,8 @@
     <h3>Mappa offline</h3>
 
     <div class="offline-top-row">
-      <button class="btn-toggle-overlay-compact" id="btn-toggle-offline-overlay" onclick="toggleOfflineAreasOverlay()">👁️ Mostra aree scaricate</button>
-      <button class="map-sheet-close-top" onclick="closeOfflineSheet()">✕ Chiudi</button>
+      <button class="btn-toggle-overlay-compact" id="btn-toggle-offline-overlay" onclick="toggleOfflineAreasOverlay()">ðï¸ Mostra aree scaricate</button>
+      <button class="map-sheet-close-top" onclick="closeOfflineSheet()">â Chiudi</button>
     </div>
 
     <p class="hint">Scarica i tile della zona visibile sulla mappa (stile topografico OpenTopoMap) per usarla senza connessione. Limite: 180 tile per sessione di download, con una piccola pausa tra le richieste per rispettare le policy di utilizzo.</p>
@@ -1175,21 +1209,21 @@
     <div class="offline-zoom-row">
       <label>Livello zoom</label>
       <select id="offline-zoom-select" onchange="updateOfflineEstimate()">
-        <option value="14">14 · vista larga</option>
-        <option value="15">15 · dettaglio medio</option>
-        <option value="16" selected>16 · dettaglio bici (consigliato)</option>
-        <option value="17">17 · dettaglio fine</option>
+        <option value="14">14 Â· vista larga</option>
+        <option value="15">15 Â· dettaglio medio</option>
+        <option value="16" selected>16 Â· dettaglio bici (consigliato)</option>
+        <option value="17">17 Â· dettaglio fine</option>
       </select>
     </div>
 
-    <div class="offline-estimate" id="offline-estimate">Sposta/inquadra la mappa per stimare i tile necessari…</div>
+    <div class="offline-estimate" id="offline-estimate">Sposta/inquadra la mappa per stimare i tile necessariâ¦</div>
 
     <div class="offline-progress-wrap" id="offline-progress-wrap">
       <div class="offline-progress-track"><div class="offline-progress-fill" id="offline-progress-fill"></div></div>
       <div class="offline-progress-label" id="offline-progress-label">0 / 0 tile</div>
     </div>
 
-    <button class="btn-offline-dl" id="btn-offline-download" onclick="startOfflineDownload()">⬇️ Scarica quest'area</button>
+    <button class="btn-offline-dl" id="btn-offline-download" onclick="startOfflineDownload()">â¬ï¸ Scarica quest'area</button>
 
     <h3 style="margin-top:22px">Aree scaricate</h3>
     <div id="offline-packs-list"></div>
@@ -1201,19 +1235,19 @@
 <div class="modal-overlay" id="add-modal">
   <div class="modal-sheet">
     <h3>Aggiungi salita</h3>
-    <p>Carica il file Excel con il profilo della salita. Colonne: N. Sezione · Alt. Iniziale · Alt. Finale · Lunghezza (mt) · Landmark · GPS Inizio (opz., formato lat,lon es. 44.123,8.456).</p>
+    <p>Carica il file Excel con il profilo della salita. Colonne: N. Sezione Â· Alt. Iniziale Â· Alt. Finale Â· Lunghezza (mt) Â· Landmark Â· GPS Inizio (opz., formato lat,lon es. 44.123,8.456).</p>
 
     <input class="modal-input" id="climb-name-input" type="text" placeholder="Nome salita (es. Passo del Sempione)">
 
     <div class="upload-area" id="upload-area" onclick="document.getElementById('xlsx-input').click()">
-      <div class="icon">📊</div>
+      <div class="icon">ð</div>
       <p>Tocca per selezionare il file Excel (.xlsx)</p>
       <div class="upload-preview" id="upload-preview"></div>
     </div>
     <input type="file" id="xlsx-input" accept=".xlsx,.xls" style="display:none" onchange="onXlsxSelected(event)">
 
     <div class="upload-area" id="gpx-area" onclick="document.getElementById('gpx-input').click()" style="margin-top:10px">
-      <div class="icon">🗺️</div>
+      <div class="icon">ðºï¸</div>
       <p>Tocca per selezionare la traccia GPX (opzionale ma consigliato)</p>
       <div class="upload-preview" id="gpx-preview"></div>
     </div>
@@ -1223,7 +1257,7 @@
 
     <div class="modal-btn-row">
       <button class="modal-btn cancel" onclick="closeAddModal()">Annulla</button>
-      <button class="modal-btn primary" id="btn-parse" onclick="parseXlsx()" disabled>Importa →</button>
+      <button class="modal-btn primary" id="btn-parse" onclick="parseXlsx()" disabled>Importa â</button>
     </div>
   </div>
 </div>
@@ -1231,13 +1265,13 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ── STATE ──────────────────────────────────────────────────────
+// ââ STATE ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 // Raggio (m) entro cui, dal punto di partenza letterale, si considera
 // "raggiunto l'inizio" e si aggancia la traccia
 const CLIMB_START_LOCK_RADIUS_M = 20;
 // Soglia (m) di distanza perpendicolare dalla traccia GPX per agganciarsi
 // DIRETTAMENTE anche se lontani dal punto di partenza (utile per avviare
-// la navigazione a salita già iniziata). Volutamente stretta per evitare
+// la navigazione a salita giÃ  iniziata). Volutamente stretta per evitare
 // falsi abbinamenti su tornanti/tratti paralleli.
 const CLIMB_MIDWAY_LOCK_PERP_M = 20;
 
@@ -1264,7 +1298,7 @@ let sessionPaused = false;
 let sessionPausedAt = null;
 let sessionPausedMs = 0;      // total ms paused
 
-// ── LAP ──────────────────────────────────────────────────────────
+// ââ LAP ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 let laps = [];                 // lap completati della sessione in corso
 let lapCount = 1;              // numero del lap corrente (in corso)
 let lapStartElapsedS = 0;      // secondi di sessione trascorsi all'inizio del lap corrente
@@ -1283,7 +1317,7 @@ let sessions = loadSessions();
 // GPX state
 let selectedGpxPoints = null; // [{lat,lon,dist}] cumulative distance along track
 
-// ── STORAGE ────────────────────────────────────────────────────
+// ââ STORAGE ââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function loadZones() {
   try {
     const saved = localStorage.getItem('hrm-zones');
@@ -1303,7 +1337,7 @@ function saveSessionsToStorage() {
   localStorage.setItem('hrm-sessions', JSON.stringify(sessions));
 }
 
-// ── BLE ────────────────────────────────────────────────────────
+// ââ BLE ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const HR_SERVICE     = 0x180D;
 const HR_MEASUREMENT = 0x2A37;
 
@@ -1326,7 +1360,7 @@ async function connectBLE() {
     autoReconnect = true;
     reconnectAttempt = 0;
     setStatus('connected');
-    toast('Polar H9 connesso ✓');
+    toast('Polar H9 connesso â');
   } catch (e) {
     setStatus('disconnected');
     if (e.name !== 'NotFoundError') toast('Connessione fallita: ' + e.message);
@@ -1354,18 +1388,18 @@ function onDisconnected() {
   const delay = RECONNECT_DELAYS[Math.min(reconnectAttempt, RECONNECT_DELAYS.length - 1)];
   reconnectAttempt++;
   const secs = Math.round(delay / 1000);
-  setStatus('reconnecting', `Disconnesso — riconnessione in ${secs}s (tentativo ${reconnectAttempt})…`);
+  setStatus('reconnecting', `Disconnesso â riconnessione in ${secs}s (tentativo ${reconnectAttempt})â¦`);
   clearTimeout(reconnectTimeout);
   reconnectTimeout = setTimeout(async () => {
     if (!autoReconnect) return;
     try {
-      setStatus('reconnecting', `Riconnessione in corso… (tentativo ${reconnectAttempt})`);
+      setStatus('reconnecting', `Riconnessione in corsoâ¦ (tentativo ${reconnectAttempt})`);
       await gattConnect();
       reconnectAttempt = 0;
       setStatus('connected');
-      toast('Riconnesso automaticamente ✓');
+      toast('Riconnesso automaticamente â');
     } catch (e) {
-      // onDisconnected verrà richiamato di nuovo dal browser, o ritentiamo
+      // onDisconnected verrÃ  richiamato di nuovo dal browser, o ritentiamo
       if (autoReconnect) onDisconnected();
     }
   }, delay);
@@ -1402,12 +1436,12 @@ function setStatus(state, customText) {
     connected = true;
   } else if (state === 'connecting') {
     dot.classList.add('connecting');
-    text.textContent = customText || 'Connessione in corso…';
-    btn.textContent = '…';
+    text.textContent = customText || 'Connessione in corsoâ¦';
+    btn.textContent = 'â¦';
     btn.disabled = true;
   } else if (state === 'reconnecting') {
     dot.classList.add('connecting');
-    text.textContent = customText || 'Riconnessione…';
+    text.textContent = customText || 'Riconnessioneâ¦';
     btn.textContent = 'Annulla';
     btn.onclick = cancelAutoReconnect;
     btn.disabled = false;
@@ -1421,7 +1455,7 @@ function setStatus(state, customText) {
   }
 }
 
-// ── HR LOGIC ───────────────────────────────────────────────────
+// ââ HR LOGIC âââââââââââââââââââââââââââââââââââââââââââââââââââ
 function updateHR(hr) {
   currentHR = hr;
   const el = document.getElementById('hr-value');
@@ -1460,7 +1494,7 @@ function getZone(hr) {
 }
 
 const ZONE_COLORS = ['--z1','--z2','--z3','--z4','--z5'];
-const ZONE_NAMES  = ['Z1 Recupero','Z2 Aerobico','Z3 Tempo','Z4 Soglia','Z5 VO₂max'];
+const ZONE_NAMES  = ['Z1 Recupero','Z2 Aerobico','Z3 Tempo','Z4 Soglia','Z5 VOâmax'];
 
 function updateZoneUI(z, hr) {
   // Circle border color
@@ -1474,7 +1508,7 @@ function updateZoneUI(z, hr) {
     badge.style.background = `var(${ZONE_COLORS[z]})`;
     badge.style.color = '#0a0a0f';
   } else {
-    badge.textContent = '— fuori zona —';
+    badge.textContent = 'â fuori zona â';
     badge.style.background = 'var(--border)';
     badge.style.color = 'var(--muted)';
   }
@@ -1501,7 +1535,7 @@ function updateZoneBars() {
   }
 }
 
-// ── LAP ────────────────────────────────────────────────────────
+// ââ LAP ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function recordLap() {
   if (!sessionActive || sessionPaused) return; // attivo solo a sessione avviata e non in pausa
   const now = Date.now();
@@ -1512,7 +1546,7 @@ function recordLap() {
   lapCount++;
   document.getElementById('lap-badge').textContent = lapCount;
   triggerLapFeedback();
-  toast(`🏁 Lap ${lapCount - 1} registrato`);
+  toast(`ð Lap ${lapCount - 1} registrato`);
 }
 
 // Chiude il lap corrente e lo salva in laps[], poi resetta gli accumulatori
@@ -1550,7 +1584,7 @@ function triggerLapFeedback() {
   badge.classList.add('pulse');
 }
 
-// ── SESSION ────────────────────────────────────────────────────
+// ââ SESSION ââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function startSession() {
   if (!connected) { toast('Connetti prima il cardiofrequenzimetro'); return; }
   sessionActive   = true;
@@ -1576,8 +1610,8 @@ function startSession() {
   document.getElementById('btn-pause').style.display  = '';
   document.getElementById('btn-resume').style.display = 'none';
   document.getElementById('btn-stop').disabled   = false;
-  document.getElementById('avg-hr').textContent  = '—';
-  document.getElementById('max-hr').textContent  = '—';
+  document.getElementById('avg-hr').textContent  = 'â';
+  document.getElementById('max-hr').textContent  = 'â';
   document.getElementById('samples').textContent = '0';
   updateZoneBars();
 
@@ -1606,7 +1640,7 @@ function pauseSession() {
   sessionPausedAt = Date.now();
   document.getElementById('btn-pause').style.display  = 'none';
   document.getElementById('btn-resume').style.display = 'block';
-  toast('⏸ Sessione in pausa');
+  toast('â¸ Sessione in pausa');
 }
 
 function resumeSession() {
@@ -1616,7 +1650,7 @@ function resumeSession() {
   sessionPausedAt  = null;
   document.getElementById('btn-pause').style.display  = '';
   document.getElementById('btn-resume').style.display = 'none';
-  toast('▶ Sessione ripresa');
+  toast('â¶ Sessione ripresa');
 }
 
 function stopSession() {
@@ -1661,10 +1695,10 @@ function stopSession() {
   sessions.unshift(session);
   saveSessionsToStorage();
   renderHistory();
-  toast('Sessione salvata ✓');
+  toast('Sessione salvata â');
 }
 
-// ── HISTORY ────────────────────────────────────────────────────
+// ââ HISTORY ââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function renderHistory() {
   const list = document.getElementById('history-list');
   if (sessions.length === 0) {
@@ -1686,7 +1720,7 @@ function renderHistory() {
           <div class="session-date">${dateStr}</div>
           <div class="session-duration">${formatTime(s.duration)}</div>
         </div>
-        <button class="del-btn" onclick="deleteSession(${s.id})">✕</button>
+        <button class="del-btn" onclick="deleteSession(${s.id})">â</button>
       </div>
       <div class="session-stats">
         <div class="session-stat">
@@ -1702,12 +1736,12 @@ function renderHistory() {
         <div class="mini-zones">${bars}</div>
         <div style="font-size:11px;color:var(--muted);padding-bottom:2px">${s.zonePcts.map((p,i)=>`Z${i+1}:${p}%`).join(' ')}</div>
       </div>
-      ${s.laps && s.laps.length > 1 ? `<button class="track-btn nav" style="width:100%;margin-top:10px" onclick="openLapSheet(${s.id})">🏁 Vedi Lap (${s.laps.length})</button>` : ''}
+      ${s.laps && s.laps.length > 1 ? `<button class="track-btn nav" style="width:100%;margin-top:10px" onclick="openLapSheet(${s.id})">ð Vedi Lap (${s.laps.length})</button>` : ''}
     </div>`;
   }).join('');
 }
 
-// ── DETTAGLIO LAP ────────────────────────────────────────────────
+// ââ DETTAGLIO LAP ââââââââââââââââââââââââââââââââââââââââââââââââ
 function openLapSheet(sessionId) {
   const session = sessions.find(s => s.id === sessionId);
   if (!session || !session.laps || !session.laps.length) return;
@@ -1730,8 +1764,8 @@ function openLapSheet(sessionId) {
         <span class="lap-duration">${formatTime(l.durationS)}</span>
       </div>
       <div class="lap-stats">
-        <span>FC Media <b>${l.avgHR ?? '—'}</b></span>
-        <span>FC Max <b>${l.maxHR ?? '—'}</b></span>
+        <span>FC Media <b>${l.avgHR ?? 'â'}</b></span>
+        <span>FC Max <b>${l.maxHR ?? 'â'}</b></span>
       </div>
       <div class="lap-zone-mini">${zoneBar}</div>
       <div class="lap-zone-labels">${zoneLabels}</div>
@@ -1758,12 +1792,12 @@ function clearHistory() {
   toast('Cronologia cancellata');
 }
 
-// ── SETTINGS ───────────────────────────────────────────────────
-// ── PESO CORPOREO E BICI+ATTREZZATURA (per calcolo potenza) ─────
+// ââ SETTINGS âââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ââ PESO CORPOREO E BICI+ATTREZZATURA (per calcolo potenza) âââââ
 // Due valori separati e indipendenti: il peso corporeo (usato anche come
 // riferimento per i W/kg, metrica standard nel ciclismo) e il peso di
 // bici+attrezzatura (variabile: cambia con la bici usata, zaini, bagagli
-// per cicloturismo ecc.) — entrambi modificabili in qualsiasi momento.
+// per cicloturismo ecc.) â entrambi modificabili in qualsiasi momento.
 function loadUserWeight() {
   const v = localStorage.getItem('hrm-user-weight-kg');
   return v ? parseFloat(v) : null;
@@ -1781,7 +1815,7 @@ function saveWeight() {
   localStorage.setItem('hrm-bike-gear-kg', bikeVal);
   userWeightKg = bodyVal;
   bikeGearKg = bikeVal;
-  toast('Peso salvato ✓');
+  toast('Peso salvato â');
 }
 
 function loadZoneInputs() {
@@ -1805,10 +1839,10 @@ function saveZones() {
   }
   zones = newZones;
   saveZonesToStorage(zones);
-  toast('Zone salvate ✓');
+  toast('Zone salvate â');
 }
 
-// ── UTILS ──────────────────────────────────────────────────────
+// ââ UTILS ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function formatTime(secs) {
   const h = Math.floor(secs / 3600);
   const m = Math.floor((secs % 3600) / 60);
@@ -1841,7 +1875,7 @@ function showView(id, btn) {
   if (id === 'map') initMapView();
 }
 
-// ── SALITE STORAGE (IndexedDB — nessun limite pratico di spazio) ──
+// ââ SALITE STORAGE (IndexedDB â nessun limite pratico di spazio) ââ
 // Le salite (con relative tracce GPX, potenzialmente centinaia di KB
 // ciascuna) sono spostate da localStorage (limite tipico 5-10MB totali) a
 // IndexedDB, che su Android Chrome tipicamente concede centinaia di MB.
@@ -1896,8 +1930,8 @@ async function idbPutClimb(climb) {
 }
 
 // Scrive l'intero array `climbs` in IndexedDB (clear + rewrite). Semplice e
-// robusto; il costo è trascurabile rispetto alla frequenza con cui si
-// aggiungono/rimuovono salite (non è un'operazione ad alta frequenza).
+// robusto; il costo Ã¨ trascurabile rispetto alla frequenza con cui si
+// aggiungono/rimuovono salite (non Ã¨ un'operazione ad alta frequenza).
 async function saveClimbs() {
   try {
     await idbClearClimbs();
@@ -1905,7 +1939,7 @@ async function saveClimbs() {
   } catch (e) { console.error('Salvataggio salite non riuscito:', e); }
 }
 
-// Carica le salite da IndexedDB all'avvio; se IndexedDB è vuoto ma esiste
+// Carica le salite da IndexedDB all'avvio; se IndexedDB Ã¨ vuoto ma esiste
 // ancora un vecchio salvataggio in localStorage (da versioni precedenti
 // dell'app), lo migra automaticamente una tantum.
 async function initClimbsStorage() {
@@ -1929,7 +1963,7 @@ async function initClimbsStorage() {
     // Migrazione automatica: salite salvate prima dell'introduzione della
     // sincronizzazione GPS potrebbero non avere una coordinata di partenza
     // pur avendo una traccia GPX. Senza startCoords, il rilevamento
-    // automatico in Mappa le ignorerebbe del tutto — le ripariamo qui,
+    // automatico in Mappa le ignorerebbe del tutto â le ripariamo qui,
     // una volta sola al caricamento, usando il primo punto della traccia.
     let repaired = false;
     for (const c of climbs) {
@@ -1953,14 +1987,14 @@ function saveAscents() {
   localStorage.setItem('hrm-ascents', JSON.stringify(ascents));
 }
 
-// ── SALITE STATE ───────────────────────────────────────────────
+// ââ SALITE STATE âââââââââââââââââââââââââââââââââââââââââââââââ
 let climbs = []; // popolato in modo asincrono da initClimbsStorage() all'avvio
 let currentDetailClimbId = null; // salita attualmente aperta nel pannello di dettaglio
 let selectedXlsxData = null;
 let ascents = loadAscents();
 
-// ── ADD MODAL ──────────────────────────────────────────────────
-// ── CLIMB LIBRARY UI ───────────────────────────────────────────
+// ââ ADD MODAL ââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ââ CLIMB LIBRARY UI âââââââââââââââââââââââââââââââââââââââââââ
 function renderClimbList() {
   const el = document.getElementById('climb-list');
   if (!el) return;
@@ -1975,7 +2009,7 @@ function renderClimbList() {
     <div class="climb-card" onclick="openClimbDetail(${c.addedAt})">
       <div class="climb-card-header">
         <div class="climb-card-name">${c.name}</div>
-        <button class="climb-card-del" onclick="event.stopPropagation();deleteClimb(${c.addedAt})">✕</button>
+        <button class="climb-card-del" onclick="event.stopPropagation();deleteClimb(${c.addedAt})">â</button>
       </div>
     </div>`
   ).join('');
@@ -1988,7 +2022,7 @@ function deleteClimb(id) {
   if (currentDetailClimbId === id) closeClimbDetail();
 }
 
-// ── DETTAGLIO SALITA ─────────────────────────────────────────────
+// ââ DETTAGLIO SALITA âââââââââââââââââââââââââââââââââââââââââââââ
 function openClimbDetail(id) {
   const climb = climbs.find(c => c.addedAt === id);
   if (!climb) return;
@@ -2006,11 +2040,12 @@ function openClimbDetail(id) {
     <div class="climb-detail-stat"><div class="cdl">Lunghezza</div><div class="cdv">${totalKm.toFixed(1)} km</div></div>
     <div class="climb-detail-stat"><div class="cdl">Dislivello</div><div class="cdv">+${Math.round(totalElev)} m</div></div>
     <div class="climb-detail-stat"><div class="cdl">Pendenza media</div><div class="cdv">${avgGrade.toFixed(1)}%</div></div>
-    <div class="climb-detail-stat"><div class="cdl">Sezioni</div><div class="cdv">${climb.segments.length}${climb.startCoords ? ' 📍' : ''}${climb.gpxPoints ? ' 🗺️' : ''}</div></div>
+    <div class="climb-detail-stat"><div class="cdl">Sezioni</div><div class="cdv">${climb.segments.length}${climb.startCoords ? ' ð' : ''}${climb.gpxPoints ? ' ðºï¸' : ''}</div></div>
   `;
 
   drawClimbDetailProfile(climb);
   renderClimbDetailAscents(id);
+  renderPendingCorrection(id); // eventuale proposta di correzione altimetria
 
   document.getElementById('climb-detail-sheet').classList.add('open');
 }
@@ -2024,15 +2059,15 @@ function saveClimbDetailName() {
   const climb = climbs.find(c => c.addedAt === currentDetailClimbId);
   if (!climb) return;
   const newName = document.getElementById('climb-detail-name-input').value.trim();
-  if (!newName) { toast('Il nome non può essere vuoto'); return; }
+  if (!newName) { toast('Il nome non puÃ² essere vuoto'); return; }
   climb.name = newName;
   saveClimbs();
   renderClimbList();
   renderClimbDetailAscents(currentDetailClimbId); // aggiorna eventuali nomi mostrati nello storico locale
-  toast('Nome salvato ✓');
+  toast('Nome salvato â');
 }
 
-// Profilo altimetrico statico (nessun cursore live — è solo un riferimento
+// Profilo altimetrico statico (nessun cursore live â Ã¨ solo un riferimento
 // visivo nell'archivio, la navigazione avviene in Mappa)
 function drawClimbDetailProfile(climb) {
   const segs = climb.segments;
@@ -2096,11 +2131,11 @@ function closeAddModal() {
   document.getElementById('add-modal').classList.remove('open');
 }
 
-// ── XLSX PARSING (client-side, nessuna API) ────────────────────
+// ââ XLSX PARSING (client-side, nessuna API) ââââââââââââââââââââ
 function onXlsxSelected(event) {
   const file = event.target.files[0];
   if (!file) return;
-  document.getElementById('upload-preview').textContent = '⏳ Lettura file…';
+  document.getElementById('upload-preview').textContent = 'â³ Lettura fileâ¦';
   document.getElementById('btn-parse').disabled = true;
 
   const reader = new FileReader();
@@ -2111,15 +2146,15 @@ function onXlsxSelected(event) {
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
       if (!rows.length) {
-        document.getElementById('ai-status').textContent = '⚠️ File vuoto o formato non riconosciuto.';
+        document.getElementById('ai-status').textContent = 'â ï¸ File vuoto o formato non riconosciuto.';
         return;
       }
       selectedXlsxData = rows;
-      document.getElementById('upload-preview').textContent = '✓ ' + file.name + ' — ' + rows.length + ' sezioni trovate';
+      document.getElementById('upload-preview').textContent = 'â ' + file.name + ' â ' + rows.length + ' sezioni trovate';
       document.getElementById('btn-parse').disabled = false;
       document.getElementById('ai-status').textContent = '';
     } catch (err) {
-      document.getElementById('ai-status').textContent = '⚠️ Errore lettura file: ' + err.message;
+      document.getElementById('ai-status').textContent = 'â ï¸ Errore lettura file: ' + err.message;
     }
   };
   reader.readAsArrayBuffer(file);
@@ -2167,7 +2202,7 @@ function parseXlsx() {
     }
 
     if (!segments.length) {
-      statusEl.textContent = '⚠️ Nessuna sezione valida trovata. Controlla il formato del file.';
+      statusEl.textContent = 'â ï¸ Nessuna sezione valida trovata. Controlla il formato del file.';
       return;
     }
 
@@ -2180,9 +2215,9 @@ function parseXlsx() {
         startCoords = { lat: parts[0], lon: parts[1] };
       }
     }
-    // Se non è stata fornita una coordinata di partenza esplicita, usa il
+    // Se non Ã¨ stata fornita una coordinata di partenza esplicita, usa il
     // primo punto della traccia GPX come riferimento di inizio salita
-    // (presuppone che il GPX sia calibrato per iniziare esattamente lì)
+    // (presuppone che il GPX sia calibrato per iniziare esattamente lÃ¬)
     if (!startCoords && selectedGpxPoints && selectedGpxPoints.length) {
       startCoords = { lat: selectedGpxPoints[0].lat, lon: selectedGpxPoints[0].lon };
     }
@@ -2191,13 +2226,13 @@ function parseXlsx() {
     renderClimbList();
     closeAddModal();
     const totalKm = segments.reduce((s, g) => s + g.km, 0).toFixed(1);
-    toast('"' + name + '" aggiunta — ' + segments.length + ' sezioni · ' + totalKm + ' km');
+    toast('"' + name + '" aggiunta â ' + segments.length + ' sezioni Â· ' + totalKm + ' km');
 
   } catch (err) {
-    statusEl.textContent = '⚠️ Errore nel parsing: ' + err.message;
+    statusEl.textContent = 'â ï¸ Errore nel parsing: ' + err.message;
   }
 }
-// ── GPX PARSING & POSITION TRACKING ───────────────────────────
+// ââ GPX PARSING & POSITION TRACKING âââââââââââââââââââââââââââ
 function onGpxSelected(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -2205,10 +2240,10 @@ function onGpxSelected(event) {
   reader.onload = e => {
     try {
       const pts = parseGPX(e.target.result);
-      if (pts.length < 2) { document.getElementById('gpx-preview').textContent = '⚠️ File GPX non valido'; return; }
+      if (pts.length < 2) { document.getElementById('gpx-preview').textContent = 'â ï¸ File GPX non valido'; return; }
       selectedGpxPoints = pts;
-      document.getElementById('gpx-preview').textContent = `✓ ${file.name} — ${pts.length} punti, ${(pts[pts.length-1].dist/1000).toFixed(1)} km`;
-    } catch { document.getElementById('gpx-preview').textContent = '⚠️ Errore lettura GPX'; }
+      document.getElementById('gpx-preview').textContent = `â ${file.name} â ${pts.length} punti, ${(pts[pts.length-1].dist/1000).toFixed(1)} km`;
+    } catch { document.getElementById('gpx-preview').textContent = 'â ï¸ Errore lettura GPX'; }
   };
   reader.readAsText(file);
 }
@@ -2233,19 +2268,19 @@ function parseGPX(xml) {
   return pts;
 }
 
-// Project a GPS position onto the GPX track → returns meters along track
-// Funzione "pura": non dipende né modifica variabili globali condivise.
+// Project a GPS position onto the GPX track â returns meters along track
+// Funzione "pura": non dipende nÃ© modifica variabili globali condivise.
 // Il chiamante gestisce il proprio "ultimo indice abbinato" passandolo in
 // lastMatchedIdx e salvando quello restituito in result.matchedIdx.
-// Questo permette a più flussi indipendenti (es. Salite e Mappa) di usarla
+// Questo permette a piÃ¹ flussi indipendenti (es. Salite e Mappa) di usarla
 // contemporaneamente senza interferire l'uno con lo stato dell'altro.
 function projectOntoTrack(lat, lon, trackPts, searchWindow, lastMatchedIdx) {
   if (!trackPts || trackPts.length < 2) return null;
 
   // Ricerca localizzata: se abbiamo un ultimo indice abbinato, limita la
   // ricerca a una finestra vicina per evitare falsi abbinamenti su
-  // tornanti/tratti che si sovrappongono geometricamente più avanti/indietro
-  // sulla traccia. Se non c'è un indice precedente (prima lettura), cerca
+  // tornanti/tratti che si sovrappongono geometricamente piÃ¹ avanti/indietro
+  // sulla traccia. Se non c'Ã¨ un indice precedente (prima lettura), cerca
   // su tutta la traccia.
   let startI = 0, endI = trackPts.length - 1;
   if (searchWindow && lastMatchedIdx != null) {
@@ -2282,31 +2317,31 @@ function projectOntoTrack(lat, lon, trackPts, searchWindow, lastMatchedIdx) {
   return { distAlongTrack: bestAlongTrack, perpDist: bestDist, matchedIdx: bestIdx };
 }
 
-// ── NAVIGATOR ──────────────────────────────────────────────────
-// ═══════════════════════════════════════════════════════════════
-// ── FISICA DEL CICLISMO — modulo per le Previsioni prestazioni ──
-// ═══════════════════════════════════════════════════════════════
+// ââ NAVIGATOR ââââââââââââââââââââââââââââââââââââââââââââââââââ
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ââ FISICA DEL CICLISMO â modulo per le Previsioni prestazioni ââ
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 // Formule standard usate dai calcolatori di potenza ciclistici
 // (es. Analytic Cycling, Martin et al. 1998). Valori di default per
-// CdA (area frontale × coeff. aerodinamico) e Crr (resistenza al
+// CdA (area frontale Ã coeff. aerodinamico) e Crr (resistenza al
 // rotolamento) sono stime tipiche per un ciclista in posizione da
-// salita su asfalto — non misure specifiche del singolo utente.
-const PHYS_G = 9.80665;          // accelerazione di gravità (m/s²)
-const PHYS_CDA = 0.32;           // m² — posizione in salita, mani su leve/tops
+// salita su asfalto â non misure specifiche del singolo utente.
+const PHYS_G = 9.80665;          // accelerazione di gravitÃ  (m/sÂ²)
+const PHYS_CDA = 0.32;           // mÂ² â posizione in salita, mani su leve/tops
 const PHYS_CRR = 0.005;          // resistenza al rotolamento, asfalto
 const PHYS_DRIVETRAIN_EFF = 0.975; // efficienza trasmissione (~97.5%)
-// Il peso di bici+attrezzatura è variabile e impostabile dall'utente
-// (vedi bikeGearKg, caricato dalle Impostazioni) — non è più una costante
-// fissa, perché cambia con la bici usata, zaini, bagagli ecc.
+// Il peso di bici+attrezzatura Ã¨ variabile e impostabile dall'utente
+// (vedi bikeGearKg, caricato dalle Impostazioni) â non Ã¨ piÃ¹ una costante
+// fissa, perchÃ© cambia con la bici usata, zaini, bagagli ecc.
 
-// Densità dell'aria in funzione della quota (formula barometrica
+// DensitÃ  dell'aria in funzione della quota (formula barometrica
 // semplificata, atmosfera standard)
 function airDensityAtAltitude(altM) {
   const alt = altM || 0;
   return 1.225 * Math.exp(-alt / 8434);
 }
 
-// Potenza (W) necessaria per mantenere velocità v (m/s) su pendenza
+// Potenza (W) necessaria per mantenere velocitÃ  v (m/s) su pendenza
 // gradeFraction (es. 0.08 per 8%), con massa totale massKg
 function powerAtSpeed(v, gradeFraction, massKg, rho) {
   const theta = Math.atan(gradeFraction);
@@ -2316,10 +2351,10 @@ function powerAtSpeed(v, gradeFraction, massKg, rho) {
   return (pGravity + pRolling + pAero) / PHYS_DRIVETRAIN_EFF;
 }
 
-// Inversa: trova la velocità (m/s) che richiede la potenza targetP,
-// per ricerca numerica (bisezione — la funzione è monotona crescente)
+// Inversa: trova la velocitÃ  (m/s) che richiede la potenza targetP,
+// per ricerca numerica (bisezione â la funzione Ã¨ monotona crescente)
 function speedForPower(targetP, gradeFraction, massKg, rho) {
-  let lo = 0.3, hi = 25; // range plausibile: 1 km/h → 90 km/h
+  let lo = 0.3, hi = 25; // range plausibile: 1 km/h â 90 km/h
   for (let i = 0; i < 40; i++) {
     const mid = (lo + hi) / 2;
     const p = powerAtSpeed(mid, gradeFraction, massKg, rho);
@@ -2331,8 +2366,8 @@ function speedForPower(targetP, gradeFraction, massKg, rho) {
 // Stima la potenza media (e W/kg) espressa in una ascensione storica.
 // Se sono disponibili gli split per sezione (ascensioni registrate dopo
 // l'introduzione di questa funzione), il calcolo pesa ogni sezione con
-// la sua pendenza reale — altrimenti ricade su una stima aggregata
-// sull'intera salita (pendenza media, velocità media).
+// la sua pendenza reale â altrimenti ricade su una stima aggregata
+// sull'intera salita (pendenza media, velocitÃ  media).
 function estimateAscentPower(ascent) {
   const weight = ascent.weightAtTimeKg || userWeightKg;
   if (!weight) return null;
@@ -2380,7 +2415,7 @@ function estimateAscentPower(ascent) {
 
 // Suddivide una traccia GPX (punti con lat/lon/ele) in "sezioni" di
 // lunghezza approssimativamente costante, calcolando la pendenza media
-// di ciascuna dai dati di quota — per analizzare salite non salvate
+// di ciascuna dai dati di quota â per analizzare salite non salvate
 // come oggetto strutturato in libreria.
 function deriveSegmentsFromGpxPoints(points, chunkM) {
   const withEle = points.filter(p => p.ele != null);
@@ -2421,7 +2456,7 @@ function predictClimbTime(segments, targetPowerW, weightKg, bikeKg) {
   return totalTime;
 }
 
-// ── ANALISI FORMA ATTUALE (periodo selezionabile) ───────────────
+// ââ ANALISI FORMA ATTUALE (periodo selezionabile) âââââââââââââââ
 function computeFitnessSummary(periodMonths) {
   const cutoff = new Date();
   cutoff.setMonth(cutoff.getMonth() - periodMonths);
@@ -2440,7 +2475,7 @@ function computeFitnessSummary(periodMonths) {
 
   const avgWPerKg = estimates.reduce((s, x) => s + x.est.wPerKg, 0) / estimates.length;
 
-  // Trend: confronta prima metà vs seconda metà cronologica
+  // Trend: confronta prima metÃ  vs seconda metÃ  cronologica
   const mid = Math.floor(estimates.length / 2);
   const firstHalf  = estimates.slice(0, mid || 1);
   const secondHalf = estimates.slice(mid);
@@ -2481,29 +2516,29 @@ function gradeColor(g) {
   return '#e53935';
 }
 
-// ── SYNC MINI HR IN MAPPA + CAMPIONAMENTO ASCENSIONE ────────────
+// ââ SYNC MINI HR IN MAPPA + CAMPIONAMENTO ASCENSIONE ââââââââââââ
 function updateClimbHR(hr, zone) {
   // Sincronizza il cerchio FC nella scheda Mappa
   const mapNum = document.getElementById('map-hr-num');
   const mapCircle = document.getElementById('map-hr-circle');
   if (mapNum) {
-    mapNum.textContent = hr || '—';
+    mapNum.textContent = hr || 'â';
     mapCircle.style.borderColor = zone >= 0 ? `var(${ZONE_COLORS[zone]})` : 'var(--muted)';
   }
 
-  // Campiona BPM se una navigazione salita è attiva in Mappa
+  // Campiona BPM se una navigazione salita Ã¨ attiva in Mappa
   if (mapClimbPhase === 'active' && hr) mapClimbHrSamples.push(hr);
 }
 
-// ── STORICO ASCENSIONI ─────────────────────────────────────────
-// ═══════════════════════════════════════════════════════════════
-// ── PREVISIONI PRESTAZIONI — UI ──────────────────────────────────
-// ═══════════════════════════════════════════════════════════════
+// ââ STORICO ASCENSIONI âââââââââââââââââââââââââââââââââââââââââ
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ââ PREVISIONI PRESTAZIONI â UI ââââââââââââââââââââââââââââââââââ
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 let predMode = 'saved'; // 'saved' | 'gpx' | 'manual'
 let predGpxSegments = null;
 
 // Scorciatoia: chiude il pannello Previsioni e apre direttamente le
-// Impostazioni (scheda Zone) sulla sezione peso — evita di dover cercare
+// Impostazioni (scheda Zone) sulla sezione peso â evita di dover cercare
 // il bottone "Zone" in fondo a Monitor.
 function goToWeightSettings() {
   closePredictionsSheet();
@@ -2541,7 +2576,7 @@ function renderFitnessSummary() {
   }
 
   const trendClass = summary.trend === 'miglioramento' ? 'up' : summary.trend === 'calo' ? 'down' : 'flat';
-  const trendIcon  = summary.trend === 'miglioramento' ? '↗' : summary.trend === 'calo' ? '↘' : '→';
+  const trendIcon  = summary.trend === 'miglioramento' ? 'â' : summary.trend === 'calo' ? 'â' : 'â';
   const trendLabel = summary.trend === 'miglioramento' ? 'In miglioramento' : summary.trend === 'calo' ? 'In calo' : 'Stabile';
 
   el.innerHTML = `
@@ -2583,23 +2618,23 @@ function onPredGpxSelected(event) {
   const file = event.target.files[0];
   if (!file) return;
   const statusEl = document.getElementById('pred-gpx-status');
-  statusEl.textContent = '⏳ Analisi in corso…';
+  statusEl.textContent = 'â³ Analisi in corsoâ¦';
   const reader = new FileReader();
   reader.onload = e => {
     try {
       const points = parseGPXForTrack(e.target.result);
       const segments = deriveSegmentsFromGpxPoints(points, 400);
       if (!segments || segments.length === 0) {
-        statusEl.textContent = '⚠️ Il file non contiene dati di quota utilizzabili';
+        statusEl.textContent = 'â ï¸ Il file non contiene dati di quota utilizzabili';
         predGpxSegments = null;
         return;
       }
       predGpxSegments = segments;
       const totalKm = segments.reduce((s, g) => s + g.km, 0);
       const totalElev = segments.reduce((s, g) => s + Math.max(0, g.altEnd - g.altStart), 0);
-      statusEl.textContent = `✓ ${file.name} — ${totalKm.toFixed(1)} km, +${Math.round(totalElev)} m, ${segments.length} sezioni`;
+      statusEl.textContent = `â ${file.name} â ${totalKm.toFixed(1)} km, +${Math.round(totalElev)} m, ${segments.length} sezioni`;
     } catch {
-      statusEl.textContent = '⚠️ Errore nella lettura del file';
+      statusEl.textContent = 'â ï¸ Errore nella lettura del file';
       predGpxSegments = null;
     }
   };
@@ -2607,7 +2642,7 @@ function onPredGpxSelected(event) {
 }
 
 function runPrediction() {
-  if (!userWeightKg) { toast('Imposta il tuo peso col bottone "⚖️ Imposta peso" qui sopra'); return; }
+  if (!userWeightKg) { toast('Imposta il tuo peso col bottone "âï¸ Imposta peso" qui sopra'); return; }
 
   const months = parseInt(document.getElementById('pred-period-select').value);
   const summary = computeFitnessSummary(months);
@@ -2646,14 +2681,14 @@ function runPrediction() {
   let compareHtml = '';
   if (realAscent) {
     const diff = predictedS - realAscent.duration;
-    const diffLabel = diff > 0 ? `+${formatTime(Math.round(diff))} più lento` : `${formatTime(Math.round(-diff))} più veloce`;
-    compareHtml = `<div class="pred-compare">Ultima ascensione reale di questa salita: <b>${formatTime(realAscent.duration)}</b> — previsione: ${diffLabel} rispetto a quella.</div>`;
+    const diffLabel = diff > 0 ? `+${formatTime(Math.round(diff))} piÃ¹ lento` : `${formatTime(Math.round(-diff))} piÃ¹ veloce`;
+    compareHtml = `<div class="pred-compare">Ultima ascensione reale di questa salita: <b>${formatTime(realAscent.duration)}</b> â previsione: ${diffLabel} rispetto a quella.</div>`;
   }
 
   document.getElementById('prediction-result').innerHTML = `
     <div class="prediction-result-card">
       <div class="pred-time">${formatTime(Math.round(predictedS))}</div>
-      <div class="pred-sub">${climbLabel} — ${totalKm.toFixed(1)} km, ${avgSpeedKmh.toFixed(1)} km/h medi, ${Math.round(targetPower)} W target (${summary.avgWPerKg.toFixed(2)} W/kg)</div>
+      <div class="pred-sub">${climbLabel} â ${totalKm.toFixed(1)} km, ${avgSpeedKmh.toFixed(1)} km/h medi, ${Math.round(targetPower)} W target (${summary.avgWPerKg.toFixed(2)} W/kg)</div>
       ${compareHtml}
     </div>`;
 }
@@ -2670,15 +2705,15 @@ function buildAscentCardHTML(a) {
   const d = new Date(a.date);
   const dateStr = d.toLocaleDateString('it-IT', { day:'2-digit', month:'short', year:'numeric' });
   const timeStr = d.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' });
-  const dur = a.duration ? formatTime(a.duration) : '—';
+  const dur = a.duration ? formatTime(a.duration) : 'â';
   return `
     <div class="ascent-card">
       <div class="ascent-card-header">
         <div>
           <div class="ascent-name">${a.climbName}</div>
-          <div class="ascent-date">${dateStr} · ${timeStr}</div>
+          <div class="ascent-date">${dateStr} Â· ${timeStr}</div>
         </div>
-        <button class="ascent-del" onclick="deleteAscent(${a.id})">✕</button>
+        <button class="ascent-del" onclick="deleteAscent(${a.id})">â</button>
       </div>
       <div class="ascent-stats">
         <div class="ascent-stat">
@@ -2687,21 +2722,21 @@ function buildAscentCardHTML(a) {
         </div>
         <div class="ascent-stat">
           <div class="al">FC Media</div>
-          <div class="av">${a.avgHR ?? '—'} <span class="au">bpm</span></div>
+          <div class="av">${a.avgHR ?? 'â'} <span class="au">bpm</span></div>
         </div>
         <div class="ascent-stat">
           <div class="al">FC Max</div>
-          <div class="av">${a.maxHR ?? '—'} <span class="au">bpm</span></div>
+          <div class="av">${a.maxHR ?? 'â'} <span class="au">bpm</span></div>
         </div>
       </div>
       <div class="ascent-stats" style="margin-top:8px">
         <div class="ascent-stat">
           <div class="al">Vel. Media</div>
-          <div class="av">${a.avgSpeed ?? '—'} <span class="au">km/h</span></div>
+          <div class="av">${a.avgSpeed ?? 'â'} <span class="au">km/h</span></div>
         </div>
         <div class="ascent-stat">
           <div class="al">VAM Media</div>
-          <div class="av">${a.avgVAM ?? '—'} <span class="au">m/h</span></div>
+          <div class="av">${a.avgVAM ?? 'â'} <span class="au">m/h</span></div>
         </div>
       </div>
     </div>`;
@@ -2742,26 +2777,26 @@ function exportAscentsCSV() {
   link.download = `ascensioni_${new Date().toISOString().slice(0,10)}.csv`;
   link.click();
   URL.revokeObjectURL(url);
-  toast('CSV scaricato ✓');
+  toast('CSV scaricato â');
 }
 
-// ── SCHERMO INTERO ─────────────────────────────────────────────
+// ââ SCHERMO INTERO âââââââââââââââââââââââââââââââââââââââââââââ
 function toggleFullscreen() {
   const btns = document.querySelectorAll('.fs-btn, #fullscreen-btn');
   if (!document.fullscreenElement) {
     document.documentElement.requestFullscreen().catch(() => {});
-    btns.forEach(b => { b.textContent = '✕'; b.title = 'Esci da schermo intero'; });
+    btns.forEach(b => { b.textContent = 'â'; b.title = 'Esci da schermo intero'; });
   } else {
     document.exitFullscreen();
-    btns.forEach(b => { b.textContent = '⛶'; b.title = 'Schermo intero'; });
+    btns.forEach(b => { b.textContent = 'â¶'; b.title = 'Schermo intero'; });
   }
 }
 document.addEventListener('fullscreenchange', () => {
-  const icon = document.fullscreenElement ? '✕' : '⛶';
+  const icon = document.fullscreenElement ? 'â' : 'â¶';
   document.querySelectorAll('.fs-btn, #fullscreen-btn').forEach(b => b.textContent = icon);
 });
 
-// ── AUTOSALVATAGGIO ────────────────────────────────────────────
+// ââ AUTOSALVATAGGIO ââââââââââââââââââââââââââââââââââââââââââââ
 const AUTOSAVE_KEY_SESSION = 'hrm-autosave-session';
 let autosaveInterval = null;
 
@@ -2802,12 +2837,12 @@ function checkAutosaveRecovery() {
   if (confirm(`Trovato un salvataggio automatico di una sessione (durata: ${dur}) interrotta. Vuoi recuperarla e salvarla nello storico?`)) {
     sessions.unshift({ id: Date.now(), date: s.date, duration: s.duration, maxHR: s.maxHR, avgHR: s.avgHR, zonePcts: s.zonePcts, zoneTicks: s.zoneTicks });
     saveSessionsToStorage();
-    toast('Sessione recuperata e salvata ✓');
+    toast('Sessione recuperata e salvata â');
   }
   clearSessionSnapshot();
 }
 
-// Pop-up alla chiusura se una sessione è attiva
+// Pop-up alla chiusura se una sessione Ã¨ attiva
 window.addEventListener('beforeunload', e => {
   if (sessionActive) {
     saveSessionSnapshot();
@@ -2816,9 +2851,9 @@ window.addEventListener('beforeunload', e => {
   }
 });
 
-// ══════════════════════════════════════════════════════════════
-// ── MAPPA ────────────────────────────────────────────────────
-// ══════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ââ MAPPA ââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 let leafletMap = null;
 let mapGpsWatchId = null;
 let mapLiveMarker = null;
@@ -2827,10 +2862,10 @@ let mapFollowMode = true; // segue automaticamente la posizione GPS
 let mapLastHeading = 0;   // ultima direzione nota (gradi, 0=nord), per il cursore triangolare
 let mapElevOffsetM = null; // offset di calibrazione quota (quota mappa - quota GPS grezza)
 
-// ── RILEVAMENTO AUTOMATICO SALITE (scheda Mappa) ──────────────
+// ââ RILEVAMENTO AUTOMATICO SALITE (scheda Mappa) ââââââââââââââ
 // Unico motore di navigazione salite dell'app: rileva automaticamente per
-// prossimità quando ci si avvicina a una salita salvata, e salva
-// l'ascensione nello storico al termine. La sezione Salite è ora un
+// prossimitÃ  quando ci si avvicina a una salita salvata, e salva
+// l'ascensione nello storico al termine. La sezione Salite Ã¨ ora un
 // archivio puro (libreria, storico, previsioni), senza logica di
 // navigazione propria.
 const MAP_CLIMB_APPROACH_RADIUS_M = 1000; // 1km di preavviso (non oltre)
@@ -2855,13 +2890,13 @@ let mapClimbTotalDistM     = 0;
 let mapClimbTotalElevM     = 0;
 let mapClimbLastTrackPos   = null; // ultima posizione usata per calcolare i delta di distanza/dislivello
 let mapClimbLastGoodUpdateTime = null; // timestamp dell'ultimo aggiornamento di posizione affidabile
-                                        // sulla traccia — usato per calcolare la durata reale,
+                                        // sulla traccia â usato per calcolare la durata reale,
                                         // non l'istante in cui l'ascensione viene chiusa/salvata
 let mapClimbLostTrackCount = 0;    // letture consecutive fuori traccia (perpDist troppo grande)
 const MAP_CLIMB_LOST_TRACK_LIMIT = 5; // dopo N letture fuori traccia, valuta il completamento automatico
 let mapClimbApproachPrevDist = null; // per rilevare se ci si avvicina o allontana
 let mapClimbApproachAwayCount = 0;   // letture consecutive in allontanamento
-let mapClimbDismissedIds = new Set(); // salite chiuse manualmente (non ripropose finché si resta in zona)
+let mapClimbDismissedIds = new Set(); // salite chiuse manualmente (non ripropose finchÃ© si resta in zona)
 let mapClimbCheckCounter    = 0; // limita la frequenza del controllo "economico" su tutte le salite
 let mapElevCalibrating = false;
 
@@ -2871,11 +2906,11 @@ let trackPaused = false;
 let trackPoints = [];        // [{lat, lon, ele, t}]
 let trackPolyline = null;
 
-// ── NAVIGAZIONE TRACCIA REGISTRATA (traccia di riferimento) ────
+// ââ NAVIGAZIONE TRACCIA REGISTRATA (traccia di riferimento) ââââ
 let navTrackRef = null;          // traccia caricata come riferimento (oggetto track)
 let navTrackPoints = null;       // punti con distanza cumulativa {lat,lon,dist}
 let navTrackLastMatchedIdx = null;
-let navTrackDoneLine = null;     // L.polyline: tratto già percorso
+let navTrackDoneLine = null;     // L.polyline: tratto giÃ  percorso
 let navTrackAheadLine = null;    // L.polyline: tratto ancora davanti
 let trackStartTime = null;
 let trackPausedMs = 0;
@@ -2897,16 +2932,16 @@ let offlineAreaLayers = [];      // rettangoli L.rectangle disegnati sulla mappa
 let offlineAreasVisible = false;
 let offlineCancelRequested = false;
 
-// ── INIT MAPPA (lazy, solo alla prima apertura scheda) ────────
+// ââ INIT MAPPA (lazy, solo alla prima apertura scheda) ââââââââ
 function initMapView() {
   if (!leafletMap) {
     leafletMap = L.map('leaflet-map', { zoomControl: false, attributionControl: true })
-      .setView([45.4642, 9.19], 12); // default: Milano, verrà ricentrata sul GPS
+      .setView([45.4642, 9.19], 12); // default: Milano, verrÃ  ricentrata sul GPS
     // OpenTopoMap: stile topografico con curve di livello, ideale per bici/montagna.
     // Sottodominio fisso ('a') per far coincidere le chiavi di cache con i
     // tile scaricati offline (altrimenti la rotazione a/b/c causherebbe cache-miss).
     L.tileLayer('https://a.tile.opentopomap.org/{z}/{x}/{y}.png', {
-      attribution: 'Map data: © OpenStreetMap contributors, SRTM | Map style: © OpenTopoMap (CC-BY-SA)',
+      attribution: 'Map data: Â© OpenStreetMap contributors, SRTM | Map style: Â© OpenTopoMap (CC-BY-SA)',
       maxZoom: 17,
     }).addTo(leafletMap);
 
@@ -2921,11 +2956,16 @@ function initMapView() {
   setFollowMode(true);
   mapElevOffsetM = null; // ricalibra la quota ad ogni apertura della scheda
   startMapGPS();
+  // Inclinometro: ripristina il listener se era attivo (nota: su iOS il
+  // permesso richiede un gesto, quindi dopo un reload va ri-toccato il
+  // pulsante se i sensori non emettono dati)
+  if (inclineEnabled) startInclineListener();
+  updateInclineBtn();
   renderTracksList();
   renderOfflinePacksList();
 }
 
-// ── FOLLOW MODE (auto-centratura su posizione GPS) ────────────
+// ââ FOLLOW MODE (auto-centratura su posizione GPS) ââââââââââââ
 function setFollowMode(on) {
   mapFollowMode = on;
   const btn = document.getElementById('map-locate-btn');
@@ -2939,10 +2979,10 @@ function toggleFollowMode() {
   }
 }
 
-// ── GPS LIVE (solo per la mappa) ──────────────────────────────
+// ââ GPS LIVE (solo per la mappa) ââââââââââââââââââââââââââââââ
 function startMapGPS() {
   if (!navigator.geolocation) { toast('GPS non disponibile'); return; }
-  if (mapGpsWatchId !== null) return; // già attivo
+  if (mapGpsWatchId !== null) return; // giÃ  attivo
   mapGpsWatchId = navigator.geolocation.watchPosition(onMapGPSUpdate, e => toast('GPS: ' + e.message), {
     enableHighAccuracy: true, maximumAge: 2000, timeout: 10000
   });
@@ -2951,17 +2991,17 @@ function startMapGPS() {
 function stopMapGPS() {
   if (mapGpsWatchId !== null) { navigator.geolocation.clearWatch(mapGpsWatchId); mapGpsWatchId = null; }
   mapLastPos = null;
-  resetMapClimbDetection(); // ripartirà da zero alla prossima apertura della scheda
+  resetMapClimbDetection(); // ripartirÃ  da zero alla prossima apertura della scheda
   mapClimbDismissedIds.clear();
 }
 
 function calcBearing(a, b) {
-  const φ1 = a.latitude * Math.PI / 180, φ2 = b.latitude * Math.PI / 180;
-  const Δλ = (b.longitude - a.longitude) * Math.PI / 180;
-  const y = Math.sin(Δλ) * Math.cos(φ2);
-  const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
-  const θ = Math.atan2(y, x);
-  return (θ * 180 / Math.PI + 360) % 360;
+  const Ï1 = a.latitude * Math.PI / 180, Ï2 = b.latitude * Math.PI / 180;
+  const ÎÎ» = (b.longitude - a.longitude) * Math.PI / 180;
+  const y = Math.sin(ÎÎ») * Math.cos(Ï2);
+  const x = Math.cos(Ï1) * Math.sin(Ï2) - Math.sin(Ï1) * Math.cos(Ï2) * Math.cos(ÎÎ»);
+  const Î¸ = Math.atan2(y, x);
+  return (Î¸ * 180 / Math.PI + 360) % 360;
 }
 
 const GPS_ARROW_ICON = L.divIcon({
@@ -3006,7 +3046,7 @@ function onMapGPSUpdate(pos) {
     if (d > 3) mapLastHeading = calcBearing(mapLastPos.coords, pos.coords);
   }
 
-  // Marker posizione live — triangolo direzionale
+  // Marker posizione live â triangolo direzionale
   if (!mapLiveMarker) {
     mapLiveMarker = L.marker([lat, lon], { icon: GPS_ARROW_ICON }).addTo(leafletMap);
     leafletMap.setView([lat, lon], 16);
@@ -3020,14 +3060,14 @@ function onMapGPSUpdate(pos) {
     if (svg) svg.style.transform = `rotate(${mapLastHeading}deg)`;
   }
 
-  // Velocità corrente
+  // VelocitÃ  corrente
   let speedKmh = speed != null && speed >= 0 ? speed * 3.6 : null;
   if (speedKmh == null && mapLastPos) {
     const d = haversineMeters(mapLastPos.coords, pos.coords);
     const dt = (pos.timestamp - mapLastPos.timestamp) / 1000;
     if (dt > 0) speedKmh = (d / dt) * 3.6;
   }
-  document.getElementById('map-speed').textContent = speedKmh != null ? speedKmh.toFixed(1) : '—';
+  document.getElementById('map-speed').textContent = speedKmh != null ? speedKmh.toFixed(1) : 'â';
 
   // Quota corrente, calibrata con dato di elevazione reale (offset una
   // tantum per sessione mappa) per correggere la sovrastima tipica del GPS
@@ -3038,7 +3078,7 @@ function onMapGPSUpdate(pos) {
     const corrected = mapElevOffsetM !== null ? altitude + mapElevOffsetM : altitude;
     document.getElementById('map-altitude').textContent = Math.round(corrected);
   } else {
-    document.getElementById('map-altitude').textContent = '—';
+    document.getElementById('map-altitude').textContent = 'â';
   }
 
   // Se registrazione attiva e non in pausa, accumula traccia + dislivello
@@ -3056,8 +3096,8 @@ function onMapGPSUpdate(pos) {
     }
 
     // Dislivello positivo live: filtro a soglia per ridurre il rumore
-    // tipico dell'altitudine GPS (±5-10m). Verrà ricalibrato a fine
-    // registrazione con dati di quota più accurati, se disponibili.
+    // tipico dell'altitudine GPS (Â±5-10m). VerrÃ  ricalibrato a fine
+    // registrazione con dati di quota piÃ¹ accurati, se disponibili.
     if (altitude != null) {
       if (trackLastEle === null) {
         trackLastEle = altitude;
@@ -3084,13 +3124,13 @@ function onMapGPSUpdate(pos) {
   mapLastPos = pos;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// ── RILEVAMENTO AUTOMATICO SALITE — SCHEDA MAPPA ────────────────
-// ═══════════════════════════════════════════════════════════════
-// Due stadi: (1) controllo economico — distanza in linea retta dal punto
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ââ RILEVAMENTO AUTOMATICO SALITE â SCHEDA MAPPA ââââââââââââââââ
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Due stadi: (1) controllo economico â distanza in linea retta dal punto
 // di partenza di OGNI salita salvata, eseguito ogni pochi fix per non
-// sprecare cicli quando non serve; (2) controllo dettagliato — proiezione
-// sulla traccia GPX, ma solo per la salita già individuata come vicina.
+// sprecare cicli quando non serve; (2) controllo dettagliato â proiezione
+// sulla traccia GPX, ma solo per la salita giÃ  individuata come vicina.
 function checkNearbyClimbsForMap(coords) {
   if (mapClimbPhase === 'active') {
     updateActiveMapClimbTracking(coords);
@@ -3102,7 +3142,7 @@ function checkNearbyClimbsForMap(coords) {
   }
 
   // Fase 'none': il controllo economico gira ogni 3 fix (~3-6 secondi)
-  // per limitare il lavoro quando si hanno molte salite salvate — la
+  // per limitare il lavoro quando si hanno molte salite salvate â la
   // distanza da un punto di partenza non cambia in modo significativo
   // in pochi secondi di pedalata.
   mapClimbCheckCounter++;
@@ -3140,9 +3180,9 @@ function updateApproachingMapClimb(coords) {
   }
 
   // Rileva se ci si sta avvicinando o allontanando: se la distanza cresce
-  // per letture consecutive, la salita non è più "in avvicinamento" (es.
+  // per letture consecutive, la salita non Ã¨ piÃ¹ "in avvicinamento" (es.
   // salita breve appena completata, o semplice transito nelle vicinanze
-  // senza mai davvero avvicinarsi) — annulla il rilevamento.
+  // senza mai davvero avvicinarsi) â annulla il rilevamento.
   if (mapClimbApproachPrevDist != null) {
     if (distToStart > mapClimbApproachPrevDist + 8) {
       mapClimbApproachAwayCount++;
@@ -3159,7 +3199,7 @@ function updateApproachingMapClimb(coords) {
   updateClimbApproachPopup(c.name, distToStart);
 
   // Test aggancio: entro il raggio dal punto di partenza, OPPURE molto
-  // vicini alla traccia GPX (permette di agganciare anche a metà salita).
+  // vicini alla traccia GPX (permette di agganciare anche a metÃ  salita).
   // In entrambi i casi, verifica anche che la direzione di marcia sia
   // coerente con il verso di salita (non si aggancia se si sta scendendo
   // la stessa strada nel verso opposto).
@@ -3202,12 +3242,13 @@ function updateApproachingMapClimb(coords) {
     hideClimbApproachPopup();
     showActiveClimbOverlay(c);
     updateActiveClimbOverlayUI();
+    startInclineCapture(); // azzera i buffer dell'inclinometro per questa ascensione
   }
 }
 
-// Confronta la direzione di marcia attuale (mapLastHeading, già calcolata
+// Confronta la direzione di marcia attuale (mapLastHeading, giÃ  calcolata
 // da onMapGPSUpdate) con la direzione della traccia nel punto abbinato.
-// Ritorna false se si sta viaggiando nel verso opposto (discesa) — evita
+// Ritorna false se si sta viaggiando nel verso opposto (discesa) â evita
 // di agganciare la navigazione salita quando si percorre il tratto al
 // contrario.
 function isTravelDirectionUphill(trackPts, idx) {
@@ -3239,11 +3280,11 @@ function updateActiveMapClimbTracking(coords) {
       trackedOk = true;
     }
     // Se ci si allontana troppo dalla traccia (perpDist >= 60), non
-    // aggiorniamo la distanza — ma la contiamo: se succede ripetutamente
+    // aggiorniamo la distanza â ma la contiamo: se succede ripetutamente
     // *dopo* essere arrivati vicino alla fine (tipico quando la strada
     // reale continua oltre l'ultimo punto registrato nel GPX), consideriamo
     // la salita comunque completata invece di restare bloccati in attesa
-    // di un aggancio che non arriverà più (vedi sotto).
+    // di un aggancio che non arriverÃ  piÃ¹ (vedi sotto).
   } else {
     // Nessuna traccia GPX: fallback ad accumulo semplice tra fix
     if (mapLastPos) {
@@ -3255,6 +3296,9 @@ function updateActiveMapClimbTracking(coords) {
   if (trackedOk) {
     mapClimbLostTrackCount = 0;
     mapClimbLastGoodUpdateTime = Date.now();
+    // Campione per il profilo da inclinometro: distanza cumulativa e
+    // quota GPS grezza (usata solo come riferimento di segno/verso)
+    inclineDistSamples.push({ t: Date.now(), dist: mapClimbDistanceDone, alt: coords.altitude ?? null });
   } else {
     mapClimbLostTrackCount++;
   }
@@ -3267,8 +3311,8 @@ function updateActiveMapClimbTracking(coords) {
     if (mapClimbDistanceDone < cum) { mapClimbCurrentSegIdx = i; break; }
   }
 
-  // Accumula distanza/dislivello percorsi (per velocità media e VAM
-  // dell'ascensione) e registra lo split di tempo per sezione — stessa
+  // Accumula distanza/dislivello percorsi (per velocitÃ  media e VAM
+  // dell'ascensione) e registra lo split di tempo per sezione â stessa
   // logica prima usata dal flusso manuale di Salite, ora consolidata qui
   if (mapClimbLastTrackPos) {
     const d = haversineMeters(mapClimbLastTrackPos, coords);
@@ -3292,33 +3336,37 @@ function updateActiveMapClimbTracking(coords) {
 
   updateActiveClimbOverlayUI();
 
-  // Completamento salita — due modi:
+  // Completamento salita â due modi:
   // 1) distanza percorsa arriva alla fine della salita (caso normale)
-  // 2) traccia persa ripetutamente essendo già molto vicini alla fine
-  //    (tipico quando la strada reale continua oltre il GPX registrato) —
+  // 2) traccia persa ripetutamente essendo giÃ  molto vicini alla fine
+  //    (tipico quando la strada reale continua oltre il GPX registrato) â
   //    evita che il fumetto resti bloccato indefinitamente a "pochi metri
   //    dalla fine" come nel bug segnalato
   const nearEnd = mapClimbDistanceDone >= totalM - 15;
   const lostNearEnd = mapClimbLostTrackCount >= MAP_CLIMB_LOST_TRACK_LIMIT && mapClimbDistanceDone >= totalM * 0.9;
 
   if (nearEnd || lostNearEnd) {
-    toast(`🏁 "${c.name}" completata!`);
+    toast(`ð "${c.name}" completata!`);
     dismissActiveClimbOverlay();
   }
 }
 
-// Salva l'ascensione rilevata in Mappa nello storico (Salite → Storico
+// Salva l'ascensione rilevata in Mappa nello storico (Salite â Storico
 // ascensioni), con la stessa struttura dati usata in precedenza dal
-// flusso manuale — così Storico e Previsioni funzionano invariati.
+// flusso manuale â cosÃ¬ Storico e Previsioni funzionano invariati.
 function saveMapAscent(climb) {
   if (!mapClimbStartTime) return;
   // Usa l'ultimo aggiornamento di posizione affidabile come istante di
   // fine, non il momento in cui l'ascensione viene effettivamente salvata
-  // (che può essere molto più tardi se il completamento automatico non è
-  // scattato subito e la chiusura è stata manuale)
+  // (che puÃ² essere molto piÃ¹ tardi se il completamento automatico non Ã¨
+  // scattato subito e la chiusura Ã¨ stata manuale)
   const endTime = mapClimbLastGoodUpdateTime || Date.now();
   const duration = Math.floor((endTime - mapClimbStartTime) / 1000);
   if (duration < 5) return; // ascensione troppo breve, probabile falso positivo
+
+  // Confronta il profilo registrato dall'inclinometro con l'archivio
+  // e, se le differenze sono significative, salva la proposta di correzione
+  finalizeInclineProposal(climb);
 
   const avgHR = mapClimbHrSamples.length
     ? Math.round(mapClimbHrSamples.reduce((a, b) => a + b, 0) / mapClimbHrSamples.length)
@@ -3347,7 +3395,7 @@ function saveMapAscent(climb) {
   };
   ascents.unshift(ascent);
   saveAscents();
-  toast('Ascensione salvata nello storico ✓');
+  toast('Ascensione salvata nello storico â');
 }
 
 function resetMapClimbDetection() {
@@ -3369,9 +3417,501 @@ function resetMapClimbDetection() {
   mapClimbLastTrackPos = null;
   mapClimbLastGoodUpdateTime = null;
   mapClimbLostTrackCount = 0;
+  inclineSamples = [];
+  inclineDistSamples = [];
 }
 
-// ── UI: pop-up avvicinamento ────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ââ INCLINOMETRO: correzione altimetria salite ââââââââââââââââââ
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Registra la pendenza reale dalla sensoristica del telefono
+// (gravitÃ  via `devicemotion`) mentre si affronta una salita
+// rilevata automaticamente in Mappa. A salita terminata confronta
+// il profilo misurato con quello d'archivio e, se le differenze
+// superano le soglie, propone una correzione (nuovo set di sezioni,
+// spezzando anche tratti lunghi o disomogenei) da confermare nel
+// dettaglio della salita.
+const INCLINE_SAMPLE_MS    = 200;  // cadenza campionamento sensore (5 Hz)
+const INCLINE_EMA_ALPHA    = 0.12; // low-pass sul pitch istantaneo
+const INCLINE_WINDOW_S     = 12;   // media mobile del pitch per il calcolo
+const INCLINE_BIN_M        = 25;   // risoluzione spaziale del profilo misurato
+const CORR_MIN_SECTION_M  = 50;   // lunghezza minima di una sottosezione
+const CORR_MAX_SECTION_M  = 500;   // oltre questa lunghezza la sezione si spezza comunque
+const CORR_GRADE_BREAK_PP = 1.5;  // salto di pendenza che innesta uno spezzamento
+const CORR_MAX_SECTIONS   = 12;   // numero massimo di sezioni proposte
+const CORR_MIN_COVERED    = 0.8;  // serve almeno l'80% della salita percorsa
+const CORR_MIN_ELEV_DIFF_M  = 15;  // Î dislivello minimo per proporre la correzione
+const CORR_MIN_AVG_DIFF_PP = 1.5;  // Î pendenza media minima per proporre
+
+let inclineEnabled = localStorage.getItem('hrm-incline-enabled') === '1';
+let inclineListening = false;
+let inclineEmaDeg = null;      // pitch corrente filtrato (gradi)
+let inclineLastSampleT = 0;
+let inclineSamples = [];      // {t, deg} â solo durante la navigazione salita
+let inclineDistSamples = [];  // {t, dist, alt} â un campione per fix GPS affidabile
+
+function updateInclineBtn() {
+  const b = document.getElementById('map-incline-btn');
+  if (b) b.classList.toggle('on', inclineEnabled);
+}
+
+// Attivazione/disattivazione da parte dell'utente (pulsante "ð Pendenza").
+// Su iOS (â¥13) i sensori di movimento richiedono un permesso esplicito,
+// che deve essere concesso da un gesto dell'utente: il tap sul pulsante.
+async function toggleInclinometer() {
+  if (!inclineEnabled) {
+    try {
+      if (typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) {
+        await DeviceOrientationEvent.requestPermission();
+      }
+      if (typeof DeviceMotionEvent !== 'undefined' && DeviceMotionEvent.requestPermission) {
+        await DeviceMotionEvent.requestPermission();
+      }
+    } catch (e) {
+      toast('Permesso sensori negato');
+      return;
+    }
+    if (!window.DeviceMotionEvent) { toast('Inclinometro non disponibile su questo dispositivo'); return; }
+    inclineEnabled = true;
+    startInclineListener();
+    toast('ð Inclinometro attivo');
+  } else {
+    inclineEnabled = false;
+    stopInclineListener();
+    toast('ð Inclinometro disattivato');
+  }
+  localStorage.setItem('hrm-incline-enabled', inclineEnabled ? '1' : '0');
+  updateInclineBtn();
+}
+
+function startInclineListener() {
+  if (inclineListening) return;
+  inclineListening = true;
+  window.addEventListener('devicemotion', onDeviceMotion);
+}
+
+function stopInclineListener() {
+  if (!inclineListening) return;
+  window.removeEventListener('devicemotion', onDeviceMotion);
+  inclineListening = false;
+  inclineEmaDeg = null;
+}
+
+// Montaggio presunto: telefono fissato al manubrio, schermo verso il
+// ciclista, bordo superiore in avanti (portrait). In salita il bordo
+// anteriore si alza e la componente della gravitÃ  lungo l'asse di marcia
+// del dispositivo cresce. Con il telefono in landscape si usa l'asse x.
+// Il VERSO viene verificato a fine salita confrontando il profilo del
+// sensore con la quota GPS (vedi finalizeInclineProposal), quindi un
+// montaggio "specchiato" non produce dati invalidi.
+function inclinePitchDeg(g) {
+  const total = Math.sqrt(g.x * g.x + g.y * g.y + g.z * g.z) || 9.81;
+  const angle = (screen.orientation && typeof screen.orientation.angle === 'number')
+    ? screen.orientation.angle
+    : (typeof window.orientation === 'number' ? window.orientation : 0);
+  const norm = ((angle % 360) + 360) % 360;
+  let s; // componente della gravitÃ  lungo l'asse di marcia
+  if (norm === 90)       s =  g.x / total;
+  else if (norm === 180) s = -g.y / total;
+  else if (norm === 270) s = -g.x / total;
+  else                   s =  g.y / total;
+  return Math.asin(Math.max(-1, Math.min(1, s))) * 180 / Math.PI;
+}
+
+function onDeviceMotion(e) {
+  const g = e.accelerationIncludingGravity;
+  if (!g || g.x == null || g.y == null || g.z == null) return;
+  const now = Date.now();
+  if (now - inclineLastSampleT < INCLINE_SAMPLE_MS) return; // decimazione a 5 Hz
+  inclineLastSampleT = now;
+  const deg = inclinePitchDeg(g);
+  if (inclineEmaDeg === null) inclineEmaDeg = deg;
+  else inclineEmaDeg += INCLINE_EMA_ALPHA * (deg - inclineEmaDeg); // low-pass
+  // Campiona solo mentre la navigazione salita Ã¨ attiva (e il dato serve)
+  if (mapClimbPhase === 'active') inclineSamples.push({ t: now, deg: inclineEmaDeg });
+}
+
+// Chiamato all'aggancio della salita: azzera i buffer per la nuova ascensione
+function startInclineCapture() {
+  inclineSamples = [];
+  inclineDistSamples = [];
+}
+
+// ââ Costruzione della proposta di correzione âââââââââââââââââââââ
+function finalizeInclineProposal(climb) {
+  try {
+    if (!inclineEnabled) return;
+    const samples = inclineSamples, dists = inclineDistSamples;
+    if (!samples || samples.length < 30 || !dists || dists.length < 6) return;
+
+    const totalM = climb.segments.reduce((s, seg) => s + seg.km * 1000, 0);
+    const coveredM = Math.min(dists[dists.length - 1].dist, totalM);
+    // Serve quasi tutta la salita: su una frazione percorsa il confronto
+    // con l'archivio sarebbe poco significativo
+    if (coveredM < 200 || coveredM < totalM * CORR_MIN_COVERED) return;
+
+    // Pitch con media mobile su INCLINE_WINDOW_S, via prefix-sum (O(1) per query)
+    const halfMs = INCLINE_WINDOW_S * 1000 / 2;
+    const T = samples.map(s => s.t);
+    const P = new Array(samples.length + 1).fill(0);
+    for (let i = 0; i < samples.length; i++) P[i + 1] = P[i] + samples[i].deg;
+    const lowerBound = (arr, x) => {
+      let lo = 0, hi = arr.length;
+      while (lo < hi) { const m = (lo + hi) >> 1; if (arr[m] < x) lo = m + 1; else hi = m; }
+      return lo;
+    };
+    const pitchAt = (t) => {
+      const a = lowerBound(T, t - halfMs), b = lowerBound(T, t + halfMs + 1);
+      return b > a ? (P[b] - P[a]) / (b - a) : null;
+    };
+
+    // Integrazione: Îh = sin(pitch) Â· Îd tra fix GPS consecutivi,
+    // accumulata in bin spaziali di INCLINE_BIN_M
+    const binRise = new Map();
+    for (let i = 1; i < dists.length; i++) {
+      const d0 = dists[i - 1].dist, d1 = dists[i].dist;
+      if (d1 - d0 <= 0 || d1 - d0 > 100) continue; // fix doppi o salti anomali
+      const pitch = pitchAt((dists[i - 1].t + dists[i].t) / 2);
+      if (pitch == null) continue;
+      const rise = Math.sin(pitch * Math.PI / 180) * (d1 - d0);
+      const bi = Math.floor(((d0 + d1) / 2) / INCLINE_BIN_M);
+      binRise.set(bi, (binRise.get(bi) || 0) + rise);
+    }
+    if (binRise.size < 4) return;
+    const nBins = Math.max(...binRise.keys()) + 1;
+    const bins = [];
+    for (let bi = 0; bi < nBins; bi++) {
+      const rise = binRise.get(bi) || 0;
+      bins.push({ start: bi * INCLINE_BIN_M, end: (bi + 1) * INCLINE_BIN_M, rise });
+    }
+
+    // Verifica del verso: correlazione tra l'elevazione cumulativa da
+    // sensore e la quota GPS (grezza ma utile come riferimento di segno).
+    // Se anti-correlata, il telefono Ã¨ montato con l'asse specchiato.
+    const sensorElevAt = (d) => {
+      let e = 0;
+      for (const b of bins) {
+        if (d >= b.end) e += b.rise;
+        else { if (d > b.start) e += b.rise * (d - b.start) / (b.end - b.start); break; }
+      }
+      return e;
+    };
+    const xs = [], ys = [];
+    for (const ds of dists) {
+      if (ds.alt == null) continue;
+      xs.push(sensorElevAt(ds.dist));
+      ys.push(ds.alt);
+    }
+    if (xs.length >= 10) {
+      const corr = pearson(xs, ys);
+      if (corr < -0.3) {
+        for (const b of bins) b.rise = -b.rise; // monta specchiata: ribalta
+      }
+    }
+
+    const measuredElevM = bins.reduce((s, b) => s + b.rise, 0);
+
+    // Elevazione d'archivio cumulativa alla distanza percorsa
+    const archiveElevAt = (d) => {
+      let e = 0, rem = d;
+      for (const seg of climb.segments) {
+        const len = seg.km * 1000;
+        if (rem <= len) return e + (seg.altEnd - seg.altStart) * rem / len;
+        e += seg.altEnd - seg.altStart;
+        rem -= len;
+      }
+      return e;
+    };
+    const archiveElevM = archiveElevAt(coveredM);
+    const measuredAvgGrade = measuredElevM / coveredM * 100;
+    const archiveAvgGrade = archiveElevM / coveredM * 100;
+
+    // Soglie di discrepanza: sotto questi scostamenti non si propone nulla
+    const dElev = measuredElevM - archiveElevM;
+    if (Math.abs(dElev) < CORR_MIN_ELEV_DIFF_M &&
+        Math.abs(measuredAvgGrade - archiveAvgGrade) < CORR_MIN_AVG_DIFF_PP) return;
+
+    // Suddivisione in sottosezioni (cambio pendenza significativo,
+    // lunghezza minima 50 m, spezzamento forzato oltre 500 m)
+    const sections = segmentInclineBins(bins);
+    if (!sections.length) return;
+
+    // Nuove sezioni: quota di partenza ancorata all'altitudine d'archivio
+    // (il sensore misura dislivelli relativi, non quote assolute)
+    let alt = climb.segments[0].altStart;
+    const newSegments = sections.map((sec, i) => {
+      const km = parseFloat(((sec.end - sec.start) / 1000).toFixed(3));
+      const grade = parseFloat((sec.rise / (sec.end - sec.start) * 100).toFixed(2));
+      const seg = { km, grade, label: `M${i + 1}`, altStart: Math.round(alt), altEnd: Math.round(alt + sec.rise) };
+      alt += sec.rise;
+      return seg;
+    });
+    // Coda non coperta dal sensore (salita chiusa poco prima della fine):
+    // mantieni le sezioni d'archivio rimanenti, riallineate alle nuove quote
+    if (coveredM < totalM - 15) {
+      let rem = totalM - coveredM;
+      for (const seg of climb.segments) {
+        if (rem <= 0) break;
+        const len = seg.km * 1000;
+        const take = Math.min(len, rem);
+        newSegments.push({
+          km: parseFloat((take / 1000).toFixed(3)),
+          grade: seg.grade,
+          label: seg.label || '',
+          altStart: Math.round(alt),
+          altEnd: Math.round(alt + take * seg.grade / 100),
+        });
+        alt += take * seg.grade / 100;
+        rem -= take;
+      }
+    }
+
+    // Salva la proposta (una per salita: l'ultima registrazione vince)
+    const list = loadClimbCorrections().filter(c => c.climbId !== climb.addedAt);
+    list.unshift({
+      climbId: climb.addedAt,
+      date: new Date().toISOString(),
+      coveredM: Math.round(coveredM),
+      archiveElevM: Math.round(archiveElevM),
+      measuredElevM: Math.round(measuredElevM),
+      archiveAvgGrade: +archiveAvgGrade.toFixed(1),
+      measuredAvgGrade: +measuredAvgGrade.toFixed(1),
+      profile: bins.map(b => +b.rise.toFixed(1)),
+      binM: INCLINE_BIN_M,
+      segments: newSegments,
+    });
+    saveClimbCorrections(list);
+    toast(`ð Differenza altimetria su "${climb.name}" â apri la salita per revisionarla`);
+  } catch (e) {
+    console.error('Proposta correzione altimetria non riuscita:', e);
+  }
+}
+
+function pearson(xs, ys) {
+  const n = xs.length;
+  if (n < 3) return 0;
+  const mx = xs.reduce((a, b) => a + b, 0) / n;
+  const my = ys.reduce((a, b) => a + b, 0) / n;
+  let num = 0, dx = 0, dy = 0;
+  for (let i = 0; i < n; i++) {
+    const a = xs[i] - mx, b = ys[i] - my;
+    num += a * b; dx += a * a; dy += b * b;
+  }
+  return (dx > 0 && dy > 0) ? num / Math.sqrt(dx * dy) : 0;
+}
+
+// Raggruppa i bin in sezioni omogenee di pendenza. Un bin spezza la sezione
+// in corso se la sua pendenza locale devia dalla media della sezione per
+// almeno CORR_GRADE_BREAK_PP punti (a patto che la sezione abbia giÃ 
+// raggiunto CORR_MIN_SECTION_M), o se la sezione supera CORR_MAX_SECTION_M.
+// Poi fondi le sezioni piÃ¹ simili finchÃ© non scendono sotto
+// CORR_MAX_SECTIONS e assorbi quelle piÃ¹ corte del minimo.
+function segmentInclineBins(bins) {
+  const sections = [];
+  let cur = null;
+  for (const b of bins) {
+    const grade = b.rise / (b.end - b.start) * 100;
+    if (cur) {
+      const curAvg = cur.rise / (cur.end - cur.start) * 100;
+      const length = b.end - cur.start;
+      if ((length >= CORR_MIN_SECTION_M && Math.abs(grade - curAvg) >= CORR_GRADE_BREAK_PP) ||
+          length >= CORR_MAX_SECTION_M) {
+        sections.push(cur);
+        cur = { start: b.start, end: b.end, rise: b.rise };
+        continue;
+      }
+      cur.end = b.end;
+      cur.rise += b.rise;
+    } else {
+      cur = { start: b.start, end: b.end, rise: b.rise };
+    }
+  }
+  if (cur) sections.push(cur);
+
+  // Fondi le sezioni adiacenti con pendenza quasi identica (< 0.75 punti):
+  // lo spezzamento forzato a CORR_MAX_SECTION_M non deve creare sezioni
+  // ridondanti su tratti in realtÃ  omogenei
+  for (let i = 0; i < sections.length - 1; ) {
+    const gA = sections[i].rise / (sections[i].end - sections[i].start) * 100;
+    const gB = sections[i + 1].rise / (sections[i + 1].end - sections[i + 1].start) * 100;
+    if (Math.abs(gA - gB) < 0.75) {
+      sections[i] = { start: sections[i].start, end: sections[i + 1].end, rise: sections[i].rise + sections[i + 1].rise };
+      sections.splice(i + 1, 1);
+    } else i++;
+  }
+
+  // Assorbi le sezioni brevi (< 100 m) nella sezione adiacente con
+  // pendenza piÃ¹ simile: elimina gli artefatti di transizione generati
+  // dalla media mobile del pitch sui cambi di pendenza
+  for (let i = sections.length - 1; i >= 0 && sections.length > 1; i--) {
+    const len = sections[i].end - sections[i].start;
+    if (len >= 100) continue;
+    const g = sections[i].rise / len * 100;
+    const gPrev = i > 0 ? sections[i - 1].rise / (sections[i - 1].end - sections[i - 1].start) * 100 : Infinity;
+    const gNext = i < sections.length - 1 ? sections[i + 1].rise / (sections[i + 1].end - sections[i + 1].start) * 100 : Infinity;
+    if (Math.abs(g - gPrev) <= Math.abs(g - gNext)) {
+      sections[i - 1].end = sections[i].end;
+      sections[i - 1].rise += sections[i].rise;
+    } else {
+      sections[i + 1].start = sections[i].start;
+      sections[i + 1].rise += sections[i].rise;
+    }
+    sections.splice(i, 1);
+  }
+
+  // Fondi le coppie adiacenti con pendenza piÃ¹ simile
+  while (sections.length > CORR_MAX_SECTIONS) {
+    let bestI = 0, bestDiff = Infinity;
+    for (let i = 0; i < sections.length - 1; i++) {
+      const gA = sections[i].rise / (sections[i].end - sections[i].start) * 100;
+      const gB = sections[i + 1].rise / (sections[i + 1].end - sections[i + 1].start) * 100;
+      const diff = Math.abs(gA - gB);
+      if (diff < bestDiff) { bestDiff = diff; bestI = i; }
+    }
+    sections[bestI] = { start: sections[bestI].start, end: sections[bestI + 1].end, rise: sections[bestI].rise + sections[bestI + 1].rise };
+    sections.splice(bestI + 1, 1);
+  }
+
+  // Assorbi le sezioni sotto la lunghezza minima (dalla fine verso l'inizio;
+  // la prima viene assorbita nella successiva se Ã¨ troppo corta)
+  for (let i = sections.length - 1; i > 0; i--) {
+    if (sections[i].end - sections[i].start < CORR_MIN_SECTION_M) {
+      sections[i - 1].end = sections[i].end;
+      sections[i - 1].rise += sections[i].rise;
+      sections.splice(i, 1);
+    }
+  }
+  if (sections.length > 1 && sections[0].end - sections[0].start < CORR_MIN_SECTION_M) {
+    sections[1].start = sections[0].start;
+    sections[1].rise += sections[0].rise;
+    sections.shift();
+  }
+  return sections;
+}
+
+// ââ Storage proposte di correzione (localStorage) ââââââââââââââââ
+function loadClimbCorrections() {
+  try { return JSON.parse(localStorage.getItem('hrm-climb-corrections') || '[]'); }
+  catch { return []; }
+}
+function saveClimbCorrections(list) {
+  localStorage.setItem('hrm-climb-corrections', JSON.stringify(list));
+}
+
+// ââ UI: card di revisione nel dettaglio salita âââââââââââââââââââ
+function renderPendingCorrection(climbId) {
+  const slot = document.getElementById('climb-correction-slot');
+  if (!slot) return;
+  const climb = climbs.find(c => c.addedAt === climbId);
+  if (!climb) { slot.innerHTML = ''; return; }
+  const corr = loadClimbCorrections().find(c => c.climbId === climbId);
+
+  let html = '';
+  if (climb.originalSegments && !corr) {
+    const when = climb.correctedAt ? new Date(climb.correctedAt).toLocaleDateString('it-IT') : 'data non nota';
+    html += `<div class="corr-note"><span>ð§ Profilo corretto con inclinometro (${when})</span><button class="corr-restore" onclick="restoreOriginalSegments(${climbId})">â©ï¸ Ripristina originale</button></div>`;
+  }
+  if (!corr) { slot.innerHTML = html; return; }
+
+  const dElev = corr.measuredElevM - corr.archiveElevM;
+  const sign = dElev >= 0 ? '+' : 'â';
+  const warn = Math.abs(dElev) >= CORR_MIN_ELEV_DIFF_M ? ' class="warn"' : '';
+  html += `
+  <div class="corr-card">
+    <div class="corr-title">ð§ Correzione altimetria proposta</div>
+    <p class="corr-sub">Registrata il ${new Date(corr.date).toLocaleDateString('it-IT')} con l'inclinometro del telefono su ${(corr.coveredM / 1000).toFixed(1)} km. Linea tratteggiata: profilo d'archivio. Linea azzurra: profilo misurato.</p>
+    <svg class="corr-svg" viewBox="0 0 360 110" preserveAspectRatio="none">${drawCorrectionSVG(climb, corr)}</svg>
+    <div class="corr-stats">
+      <div><span>Archivio</span><b>${corr.archiveElevM} m Â· ${corr.archiveAvgGrade}%</b></div>
+      <div><span>Misurato</span><b>${corr.measuredElevM} m Â· ${corr.measuredAvgGrade}%</b></div>
+      <div><span>Î dislivello</span><b${warn}>${sign}${Math.abs(dElev)} m</b></div>
+    </div>
+    <div class="corr-btns">
+      <button class="corr-accept" onclick="acceptClimbCorrection(${climbId})">â Applica correzione</button>
+      <button class="corr-reject" onclick="rejectClimbCorrection(${climbId})">â Scarta</button>
+    </div>
+  </div>`;
+  slot.innerHTML = html;
+}
+
+// Confronto visivo dei due profili cumulativi sulla distanza percorsa
+function drawCorrectionSVG(climb, corr) {
+  const W = 360, H = 110, PAD = 6;
+  const coveredM = corr.coveredM || 1;
+
+  // Profilo archivio cumulativo, tagliato alla distanza coperta
+  const archPts = [{ d: 0, e: 0 }];
+  let d = 0, e = 0;
+  for (const seg of climb.segments) {
+    const len = seg.km * 1000;
+    if (d + len <= coveredM) {
+      e += seg.altEnd - seg.altStart;
+      d += len;
+      archPts.push({ d, e });
+    } else {
+      const take = coveredM - d;
+      archPts.push({ d: coveredM, e: e + (seg.altEnd - seg.altStart) * take / len });
+      break;
+    }
+  }
+  if (archPts[archPts.length - 1].d < coveredM) {
+    archPts.push({ d: coveredM, e: archPts[archPts.length - 1].e });
+  }
+
+  // Profilo misurato cumulativo dai bin
+  const measPts = [{ d: 0, e: 0 }];
+  let me = 0;
+  corr.profile.forEach((rise, i) => {
+    me += rise;
+    measPts.push({ d: (i + 1) * corr.binM, e: me });
+  });
+
+  const maxE = Math.max(archPts[archPts.length - 1].e, measPts[measPts.length - 1].e, 1);
+  const X = dd => PAD + (Math.min(dd, coveredM) / coveredM) * (W - 2 * PAD);
+  const Y = ee => H - PAD - (ee / maxE) * (H - 2 * PAD - 8);
+  const toPts = pts => pts.map(p => `${X(p.d).toFixed(1)},${Y(p.e).toFixed(1)}`).join(' ');
+
+  let svg = `<polygon points="${toPts(measPts)} ${X(coveredM).toFixed(1)},${H - PAD} ${PAD},${H - PAD}" fill="rgba(79,195,247,.22)"/>`;
+  svg += `<polyline points="${toPts(archPts)}" fill="none" stroke="#888" stroke-width="2" stroke-dasharray="5,4"/>`;
+  svg += `<polyline points="${toPts(measPts)}" fill="none" stroke="var(--accent)" stroke-width="2"/>`;
+  return svg;
+}
+
+async function acceptClimbCorrection(climbId) {
+  const corr = loadClimbCorrections().find(c => c.climbId === climbId);
+  const climb = climbs.find(c => c.addedAt === climbId);
+  if (!corr || !climb) return;
+  if (!climb.originalSegments) climb.originalSegments = climb.segments; // backup per ripristino
+  climb.segments = corr.segments;
+  climb.correctedBy = 'inclinometro';
+  climb.correctedAt = corr.date;
+  await saveClimbs();
+  saveClimbCorrections(loadClimbCorrections().filter(c => c.climbId !== climbId));
+  renderClimbList();
+  openClimbDetail(climbId); // re-render con il nuovo profilo
+  toast('Altimetria della salita aggiornata â');
+}
+
+function rejectClimbCorrection(climbId) {
+  saveClimbCorrections(loadClimbCorrections().filter(c => c.climbId !== climbId));
+  renderPendingCorrection(climbId);
+  toast('Correzione scartata');
+}
+
+async function restoreOriginalSegments(climbId) {
+  const climb = climbs.find(c => c.addedAt === climbId);
+  if (!climb || !climb.originalSegments) return;
+  if (!confirm('Ripristinare il profilo altimetrico originale?')) return;
+  climb.segments = climb.originalSegments;
+  delete climb.originalSegments;
+  delete climb.correctedBy;
+  delete climb.correctedAt;
+  await saveClimbs();
+  openClimbDetail(climbId);
+  toast('Profilo originale ripristinato â');
+}
+
+// ââ UI: pop-up avvicinamento ââââââââââââââââââââââââââââââââââââ
 function showClimbApproachPopup(climb, distM) {
   const el = document.getElementById('map-climb-approach');
   el.classList.add('visible');
@@ -3380,7 +3920,7 @@ function showClimbApproachPopup(climb, distM) {
 function updateClimbApproachPopup(name, distM) {
   const el = document.getElementById('map-climb-approach');
   el.classList.toggle('near', distM <= 300);
-  document.getElementById('mca-name').textContent = `🚵 In avvicinamento: ${name}`;
+  document.getElementById('mca-name').textContent = `ðµ In avvicinamento: ${name}`;
   document.getElementById('mca-dist').textContent = distM >= 1000
     ? `${(distM/1000).toFixed(1)} km all'inizio`
     : `${Math.round(distM)} m all'inizio`;
@@ -3389,15 +3929,15 @@ function hideClimbApproachPopup() {
   document.getElementById('map-climb-approach').classList.remove('visible');
 }
 // Chiusura manuale: l'utente sta solo transitando vicino alla salita e non
-// intende salirla — nasconde il fumetto e annulla il rilevamento; questa
-// salita specifica non verrà riproposta finché non si esce dalla scheda
+// intende salirla â nasconde il fumetto e annulla il rilevamento; questa
+// salita specifica non verrÃ  riproposta finchÃ© non si esce dalla scheda
 // Mappa (o non ci si allontana e riavvicina in una sessione successiva)
 function dismissClimbApproachPopup() {
   if (mapDetectedClimb) mapClimbDismissedIds.add(mapDetectedClimb.addedAt);
   resetMapClimbDetection();
 }
 
-// ── UI: pop-up navigazione attiva ───────────────────────────────
+// ââ UI: pop-up navigazione attiva âââââââââââââââââââââââââââââââ
 function showActiveClimbOverlay(climb) {
   const el = document.getElementById('map-climb-overlay');
   el.classList.add('visible');
@@ -3406,8 +3946,8 @@ function showActiveClimbOverlay(climb) {
 function hideActiveClimbOverlayUI() {
   document.getElementById('map-climb-overlay').classList.remove('visible');
 }
-// Chiude la navigazione salita attiva — sia per completamento naturale sia
-// per chiusura manuale (✕). Salva sempre l'ascensione nello storico se è
+// Chiude la navigazione salita attiva â sia per completamento naturale sia
+// per chiusura manuale (â). Salva sempre l'ascensione nello storico se Ã¨
 // stata effettivamente agganciata (mapClimbStartTime impostato), anche se
 // non completata per intero, mirando il comportamento del precedente
 // flusso manuale di Salite.
@@ -3433,7 +3973,7 @@ function updateActiveClimbOverlayUI() {
 }
 
 // Mini profilo altimetrico con cursore, stile identico a drawProfile() di
-// Salite ma su un canvas più piccolo adatto all'overlay della mappa.
+// Salite ma su un canvas piÃ¹ piccolo adatto all'overlay della mappa.
 function drawMapClimbProfile(c) {
   const segs = c.segments;
   const W = 360, H = 90, PAD = 4;
@@ -3491,7 +4031,7 @@ function startTrackRecording() {
   document.getElementById('map-btn-pause').style.display  = '';
   document.getElementById('map-btn-resume').style.display = 'none';
   document.getElementById('map-btn-stop').disabled   = false;
-  document.getElementById('map-avg-speed').textContent = '—';
+  document.getElementById('map-avg-speed').textContent = 'â';
   document.getElementById('map-distance').textContent  = '0.0';
   document.getElementById('map-duration').textContent  = '00:00';
   document.getElementById('map-elevgain').textContent  = '0';
@@ -3503,7 +4043,7 @@ function startTrackRecording() {
     updateTrackStats();
   }, 1000);
 
-  toast('▶ Registrazione traccia avviata');
+  toast('â¶ Registrazione traccia avviata');
 }
 
 function pauseTrackRecording() {
@@ -3512,7 +4052,7 @@ function pauseTrackRecording() {
   trackPausedAt = Date.now();
   document.getElementById('map-btn-pause').style.display  = 'none';
   document.getElementById('map-btn-resume').style.display = 'block';
-  toast('⏸ Traccia in pausa');
+  toast('â¸ Traccia in pausa');
 }
 
 function resumeTrackRecording() {
@@ -3522,7 +4062,7 @@ function resumeTrackRecording() {
   trackPausedAt  = null;
   document.getElementById('map-btn-pause').style.display  = 'block';
   document.getElementById('map-btn-resume').style.display = 'none';
-  toast('▶ Traccia ripresa');
+  toast('â¶ Traccia ripresa');
 }
 
 function stopTrackRecording() {
@@ -3557,9 +4097,9 @@ function stopTrackRecording() {
   tracks.unshift(track);
   saveTracks();
   renderTracksList();
-  toast('✓ Traccia salvata');
+  toast('â Traccia salvata');
 
-  // Calibrazione asincrona del dislivello con dati di quota più accurati
+  // Calibrazione asincrona del dislivello con dati di quota piÃ¹ accurati
   // (richiede connessione; se fallisce resta il valore da GPS grezzo)
   calibrateTrackElevation(track.id);
 }
@@ -3568,15 +4108,15 @@ function updateTrackStats() {
   const elapsed = Math.floor((Date.now() - trackStartTime - trackPausedMs) / 1000);
   document.getElementById('map-distance').textContent = (trackDistM / 1000).toFixed(1);
   const avgKmh = elapsed > 0 ? (trackDistM/1000) / (elapsed/3600) : 0;
-  document.getElementById('map-avg-speed').textContent = avgKmh > 0 ? avgKmh.toFixed(1) : '—';
+  document.getElementById('map-avg-speed').textContent = avgKmh > 0 ? avgKmh.toFixed(1) : 'â';
 }
 
-// ── CALIBRAZIONE DISLIVELLO (Open-Elevation) ───────────────────
-// L'altitudine dal GPS è tipicamente imprecisa (±5-10m). A fine
-// registrazione, se c'è connessione, richiediamo le quote reali per i
-// punti della traccia da un servizio di elevazione (dati SRTM), più
+// ââ CALIBRAZIONE DISLIVELLO (Open-Elevation) âââââââââââââââââââ
+// L'altitudine dal GPS Ã¨ tipicamente imprecisa (Â±5-10m). A fine
+// registrazione, se c'Ã¨ connessione, richiediamo le quote reali per i
+// punti della traccia da un servizio di elevazione (dati SRTM), piÃ¹
 // accurato, e ricalcoliamo il dislivello con lo stesso filtro a soglia.
-const ELEV_CALIBRATION_THRESHOLD_M = 2; // soglia più stretta: dato meno rumoroso
+const ELEV_CALIBRATION_THRESHOLD_M = 2; // soglia piÃ¹ stretta: dato meno rumoroso
 const ELEV_API_MAX_POINTS = 100;        // limite pratico per una richiesta
 
 async function calibrateTrackElevation(trackId) {
@@ -3618,15 +4158,15 @@ async function calibrateTrackElevation(trackId) {
       tracks[idx].elevCalibrated = true;
       saveTracks();
       renderTracksList();
-      toast(`✓ Dislivello calibrato: ${Math.round(gain)} m`);
+      toast(`â Dislivello calibrato: ${Math.round(gain)} m`);
     }
   } catch (e) {
     // Nessuna connessione o servizio non raggiungibile: resta il dato GPS grezzo
-    toast('⚠️ Calibrazione quota non riuscita — uso dato GPS');
+    toast('â ï¸ Calibrazione quota non riuscita â uso dato GPS');
   }
 }
 
-// ── STORAGE TRACCE ─────────────────────────────────────────────
+// ââ STORAGE TRACCE âââââââââââââââââââââââââââââââââââââââââââââ
 function loadTracks() {
   try { return JSON.parse(localStorage.getItem('hrm-tracks') || '[]'); } catch { return []; }
 }
@@ -3657,7 +4197,7 @@ function renderTracksList() {
         <div class="track-card-header-left">
           <input type="checkbox" class="track-select-cb" ${isSelected ? 'checked' : ''} onchange="toggleTrackSelection(${t.id})">
           <div>
-            <div class="track-name">${name} <button class="track-rename-btn" onclick="renameTrack(${t.id})">✏️</button></div>
+            <div class="track-name">${name} <button class="track-rename-btn" onclick="renameTrack(${t.id})">âï¸</button></div>
             <div class="track-date">${dateStr}</div>
           </div>
         </div>
@@ -3668,21 +4208,21 @@ function renderTracksList() {
         <span>Vel. media <b>${t.avgSpeedKmh} km/h</b></span>
       </div>
       <div class="track-stats" style="margin-top:-4px">
-        <span>Dislivello+ <b>${t.elevGainM ?? '—'} m</b> ${t.elevCalibrated ? '✓ calibrato' : '(GPS grezzo)'}</span>
+        <span>Dislivello+ <b>${t.elevGainM ?? 'â'} m</b> ${t.elevCalibrated ? 'â calibrato' : '(GPS grezzo)'}</span>
       </div>
       <div class="track-btns">
-        <button class="track-btn nav" onclick="startTrackNavigation(${t.id})">▶ Naviga</button>
-        <button class="track-btn dl" onclick="downloadTrackGPX(${t.id})">↓ GPX</button>
-        <button class="track-btn del" onclick="deleteTrack(${t.id})">✕</button>
+        <button class="track-btn nav" onclick="startTrackNavigation(${t.id})">â¶ Naviga</button>
+        <button class="track-btn dl" onclick="downloadTrackGPX(${t.id})">â GPX</button>
+        <button class="track-btn del" onclick="deleteTrack(${t.id})">â</button>
       </div>
     </div>`;
   }).join('');
   updateMergeBar();
 }
 
-// ── NAVIGAZIONE TRACCIA REGISTRATA ──────────────────────────────
+// ââ NAVIGAZIONE TRACCIA REGISTRATA ââââââââââââââââââââââââââââââ
 // Carica una traccia salvata come riferimento sulla mappa: il tratto
-// ancora davanti viene mostrato di un colore, quello già percorso
+// ancora davanti viene mostrato di un colore, quello giÃ  percorso
 // (rispetto alla posizione GPS live) di un altro colore.
 function startTrackNavigation(id) {
   const track = tracks.find(t => t.id === id);
@@ -3712,9 +4252,9 @@ function startTrackNavigation(id) {
   leafletMap.fitBounds(navTrackAheadLine.getBounds(), { padding: [30, 30] });
 
   document.getElementById('track-nav-label').textContent =
-    `🗺️ Navigazione: ${(track.distanceM/1000).toFixed(1)} km`;
+    `ðºï¸ Navigazione: ${(track.distanceM/1000).toFixed(1)} km`;
   document.getElementById('map-track-nav-banner').classList.add('visible');
-  toast('▶ Traccia caricata come riferimento');
+  toast('â¶ Traccia caricata come riferimento');
 }
 
 function stopTrackNavigation() {
@@ -3753,7 +4293,7 @@ function updateMergeBar() {
   const btn = document.getElementById('btn-merge-tracks');
   if (!label || !btn) return;
   label.textContent = count === 0 ? 'Nessuna traccia selezionata'
-    : count === 1 ? '1 traccia selezionata — scegline almeno 2'
+    : count === 1 ? '1 traccia selezionata â scegline almeno 2'
     : `${count} tracce selezionate`;
   btn.disabled = count < 2;
 }
@@ -3775,7 +4315,7 @@ async function mergeSelectedTracks() {
   const mergedTrack = {
     id: Date.now(),
     name: `${selected[0].name || 'Traccia'} + ${selected.length - 1} altr${selected.length - 1 === 1 ? 'a' : 'e'}`,
-    date: selected[0].date, // inizia dalla traccia più vecchia
+    date: selected[0].date, // inizia dalla traccia piÃ¹ vecchia
     duration: totalDuration,
     distanceM: Math.round(totalDist),
     avgSpeedKmh: totalDuration > 0 ? Math.round((totalDist/1000) / (totalDuration/3600) * 10) / 10 : 0,
@@ -3799,7 +4339,7 @@ async function mergeSelectedTracks() {
 
   selectedTrackIds.clear();
   renderTracksList();
-  toast('✓ Tracce unite');
+  toast('â Tracce unite');
 
   // Ricalibra il dislivello della traccia unita con dati di quota accurati
   calibrateTrackElevation(mergedTrack.id);
@@ -3817,7 +4357,7 @@ function renameTrack(id) {
   renderTracksList();
 }
 
-// ── IMPORT GPX DALLA MEMORIA DEL TELEFONO ───────────────────────
+// ââ IMPORT GPX DALLA MEMORIA DEL TELEFONO âââââââââââââââââââââââ
 function onTrackGpxImport(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -3825,7 +4365,7 @@ function onTrackGpxImport(event) {
   reader.onload = e => {
     try {
       const points = parseGPXForTrack(e.target.result);
-      if (points.length < 2) { toast('⚠️ File GPX non valido o vuoto'); return; }
+      if (points.length < 2) { toast('â ï¸ File GPX non valido o vuoto'); return; }
 
       // Distanza totale
       let distM = 0;
@@ -3867,12 +4407,12 @@ function onTrackGpxImport(event) {
       tracks.unshift(track);
       saveTracks();
       renderTracksList();
-      toast(`✓ "${track.name}" importata (${(distM/1000).toFixed(1)} km)`);
+      toast(`â "${track.name}" importata (${(distM/1000).toFixed(1)} km)`);
 
-      // Prova comunque la calibrazione quota con dati più accurati
+      // Prova comunque la calibrazione quota con dati piÃ¹ accurati
       calibrateTrackElevation(track.id);
     } catch (err) {
-      toast('⚠️ Errore nella lettura del file GPX');
+      toast('â ï¸ Errore nella lettura del file GPX');
     }
   };
   reader.readAsText(file);
@@ -3933,7 +4473,7 @@ ${pts}
 </gpx>`;
 }
 
-// ── SHEETS (tracce / offline) ──────────────────────────────────
+// ââ SHEETS (tracce / offline) ââââââââââââââââââââââââââââââââââ
 function openTracksSheet()  { renderTracksList(); document.getElementById('tracks-sheet').classList.add('open'); }
 function closeTracksSheet() {
   document.getElementById('tracks-sheet').classList.remove('open');
@@ -3946,7 +4486,7 @@ function openOfflineSheet() {
 }
 function closeOfflineSheet() { document.getElementById('offline-sheet').classList.remove('open'); }
 
-// ── OFFLINE TILES ───────────────────────────────────────────────
+// ââ OFFLINE TILES âââââââââââââââââââââââââââââââââââââââââââââââ
 function lonToTileX(lon, zoom) { return Math.floor((lon + 180) / 360 * Math.pow(2, zoom)); }
 function latToTileY(lat, zoom) {
   const rad = lat * Math.PI / 180;
@@ -3978,10 +4518,10 @@ function updateOfflineEstimate() {
   el.classList.toggle('over', n > OFFLINE_TILE_LIMIT);
   const btn = document.getElementById('btn-offline-download');
   if (n > OFFLINE_TILE_LIMIT) {
-    el.innerHTML = `<b>${n}</b> tile richiesti — supera il limite di ${OFFLINE_TILE_LIMIT} per sessione. Riduci lo zoom o inquadra un'area più piccola.`;
+    el.innerHTML = `<b>${n}</b> tile richiesti â supera il limite di ${OFFLINE_TILE_LIMIT} per sessione. Riduci lo zoom o inquadra un'area piÃ¹ piccola.`;
     if (btn) btn.disabled = true;
   } else {
-    el.innerHTML = `<b>${n}</b> tile nell'area visibile · zoom ${zoom} — entro il limite di ${OFFLINE_TILE_LIMIT}.`;
+    el.innerHTML = `<b>${n}</b> tile nell'area visibile Â· zoom ${zoom} â entro il limite di ${OFFLINE_TILE_LIMIT}.`;
     if (btn) btn.disabled = false;
   }
 }
@@ -3992,7 +4532,7 @@ async function startOfflineDownload() {
   const tiles = getVisibleTileList(zoom);
   if (tiles.length === 0) { toast('Nessun tile da scaricare'); return; }
   if (tiles.length > OFFLINE_TILE_LIMIT) {
-    toast(`Troppi tile (${tiles.length}) — riduci l'area o lo zoom`);
+    toast(`Troppi tile (${tiles.length}) â riduci l'area o lo zoom`);
     return;
   }
 
@@ -4000,7 +4540,7 @@ async function startOfflineDownload() {
   offlineCancelRequested = false;
   const btn = document.getElementById('btn-offline-download');
   btn.disabled = true;
-  btn.textContent = '⏳ Download in corso…';
+  btn.textContent = 'â³ Download in corsoâ¦';
   const wrap = document.getElementById('offline-progress-wrap');
   wrap.classList.add('active');
 
@@ -4023,7 +4563,7 @@ async function startOfflineDownload() {
 
   offlineDownloading = false;
   btn.disabled = false;
-  btn.textContent = "⬇️ Scarica quest'area";
+  btn.textContent = "â¬ï¸ Scarica quest'area";
   wrap.classList.remove('active');
 
   // Salva metadati del pacchetto scaricato
@@ -4038,7 +4578,7 @@ async function startOfflineDownload() {
   saveOfflinePacks();
   renderOfflinePacksList();
   if (offlineAreasVisible) drawOfflineAreasOverlay();
-  toast(`✓ ${done} tile salvati per uso offline`);
+  toast(`â ${done} tile salvati per uso offline`);
 }
 
 function loadOfflinePacks() {
@@ -4059,8 +4599,8 @@ function renderOfflinePacksList() {
     const d = new Date(p.date);
     const dateStr = d.toLocaleDateString('it-IT', { day:'2-digit', month:'short', year:'numeric' });
     return `<div class="offline-pack-card">
-      <span>${dateStr} · zoom ${p.zoom} · ${p.tileCount} tile</span>
-      <button class="track-btn del" style="flex:none;padding:6px 10px" onclick="deleteOfflinePack(${p.id})">✕</button>
+      <span>${dateStr} Â· zoom ${p.zoom} Â· ${p.tileCount} tile</span>
+      <button class="track-btn del" style="flex:none;padding:6px 10px" onclick="deleteOfflinePack(${p.id})">â</button>
     </div>`;
   }).join('');
 }
@@ -4075,20 +4615,20 @@ function deleteOfflinePack(id) {
   if (offlineAreasVisible) drawOfflineAreasOverlay(); // ridisegna senza l'area eliminata
 }
 
-// ── VISUALIZZAZIONE AREE OFFLINE SULLA MAPPA ────────────────────
+// ââ VISUALIZZAZIONE AREE OFFLINE SULLA MAPPA ââââââââââââââââââââ
 // Disegna un rettangolo semi-trasparente per ciascuna area scaricata,
 // usando i confini salvati al momento del download. Aree sovrapposte
 // (scaricate in momenti diversi) si sommano visivamente, dando un'idea
-// immediata di cosa è coperto.
+// immediata di cosa Ã¨ coperto.
 function toggleOfflineAreasOverlay() {
   offlineAreasVisible = !offlineAreasVisible;
   const btn = document.getElementById('btn-toggle-offline-overlay');
   if (offlineAreasVisible) {
     drawOfflineAreasOverlay();
-    if (btn) { btn.textContent = '👁️ Nascondi aree scaricate'; btn.classList.add('on'); }
+    if (btn) { btn.textContent = 'ðï¸ Nascondi aree scaricate'; btn.classList.add('on'); }
   } else {
     clearOfflineAreasOverlay();
-    if (btn) { btn.textContent = '👁️ Mostra aree scaricate'; btn.classList.remove('on'); }
+    if (btn) { btn.textContent = 'ðï¸ Mostra aree scaricate'; btn.classList.remove('on'); }
   }
 }
 
@@ -4116,7 +4656,7 @@ initClimbsStorage(); // carica le salite da IndexedDB (asincrono) e poi renderiz
 renderAscentList();
 checkAutosaveRecovery();
 
-// ── SERVICE WORKER (offline) ────────────────────────────────────
+// ââ SERVICE WORKER (offline) ââââââââââââââââââââââââââââââââââââ
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
