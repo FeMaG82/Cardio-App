@@ -709,6 +709,14 @@
 
   /* ── CORREZIONE ALTIMETRIA (inclinometro) ── */
   .map-menu-btn.on { background: rgba(79,195,247,.15); border-color: var(--accent); color: var(--accent); }
+  .calib-current {
+    background: rgba(79,195,247,.06); border: 1px solid rgba(79,195,247,.25); border-radius: 10px;
+    padding: 10px 12px; font-size: 13px; color: #ccc; margin-bottom: 14px;
+  }
+  .calib-current b { color: var(--accent); font-family: var(--mono); }
+  .calib-reset-row { margin-top: 10px; }
+  .calib-reset-row button { width: 100%; padding: 10px; }
+  #incline-calib-sheet h4 { font-size: 13px; font-weight: 800; margin-bottom: 2px; }
   .corr-card {
     background: var(--card); border: 1px solid var(--accent); border-radius: 12px;
     padding: 14px 16px; margin-bottom: 14px;
@@ -1096,6 +1104,7 @@
     <!-- Top bar: menu tracce + offline -->
     <div class="map-topbar">
       <button class="map-menu-btn" id="map-incline-btn" onclick="toggleInclinometer()">📐 Pendenza</button>
+      <button class="map-menu-btn" onclick="openInclineCalib()">⚙️ Calibra</button>
       <button class="map-menu-btn" onclick="openTracksSheet()">🗂️ Tracce</button>
       <button class="map-menu-btn" onclick="openOfflineSheet()">⬇️ Offline</button>
     </div>
@@ -1228,6 +1237,28 @@
 
     <h3 style="margin-top:22px">Aree scaricate</h3>
     <div id="offline-packs-list"></div>
+  </div>
+</div>
+
+<!-- Sheet: Calibrazione inclinometro -->
+<div class="map-sheet-overlay" id="incline-calib-sheet">
+  <div class="map-sheet">
+    <h3>⚙️ Calibrazione inclinometro</h3>
+    <p class="hint">Il telefono misura l'inclinazione con cui è montato sul manubrio. Per avere pendenze corrette serve compensare l'angolo di montaggio.</p>
+
+    <div class="calib-current" id="incline-calib-current"></div>
+
+    <h4>Auto: su strada piana</h4>
+    <p class="hint">Metti la bici su un tratto pianeggiante, da ferma, e lascia misurare per 10 secondi. Funziona con qualsiasi montaggio.</p>
+    <div class="offline-top-row">
+      <button class="btn-offline-dl" id="btn-incline-autocal" onclick="startFlatCalibration()">📏 Calibra su piano (10 s)</button>
+      <button class="map-sheet-close-top" onclick="closeInclineCalib()">✕ Chiudi</button>
+    </div>
+    <div class="offline-progress-track" id="incline-calib-track" style="display:none"><div class="offline-progress-fill" id="incline-calib-fill" style="width:0%"></div></div>
+    <div class="offline-progress-label" id="incline-calib-label"></div>
+    <div class="calib-reset-row">
+      <button class="corr-reject" onclick="resetMountOffset()">Azzera calibrazione</button>
+    </div>
   </div>
 </div>
 
@@ -3452,6 +3483,71 @@ let inclineLastSampleT = 0;
 let inclineSamples = [];      // {t, deg} — solo durante la navigazione salita
 let inclineDistSamples = [];  // {t, dist, alt} — un campione per fix GPS affidabile
 
+// ── Calibrazione montaggio ──
+// Angolo (gradi) con cui il telefono è fissato alla bici: 0 = piatto sul
+// piano orizzontale. Positivo = bordo superiore più alto, negativo = bordo
+// superiore più basso (es. -20 se inclinato indietro per visibilità).
+// Il pitch corretto è: pitchGrezzo − offsetMontaggio.
+let inclineMountOffset = (() => {
+  const v = parseFloat(localStorage.getItem('hrm-incline-mount-offset'));
+  return Number.isFinite(v) ? v : 0;
+})();
+let calibTimer = null;
+
+function renderInclineCalibState() {
+  const el = document.getElementById('incline-calib-current');
+  if (el) {
+    el.innerHTML = inclineMountOffset === 0
+      ? 'Offset attuale: <b>0°</b> (non calibrato — il telefono deve essere montato piatto)'
+      : `Offset attuale: <b>${inclineMountOffset.toFixed(1)}°</b>`;
+  }
+}
+function saveMountOffset(v) {
+  inclineMountOffset = v;
+  localStorage.setItem('hrm-incline-mount-offset', String(v));
+  renderInclineCalibState();
+}
+function openInclineCalib() {
+  renderInclineCalibState();
+  document.getElementById('incline-calib-sheet').classList.add('open');
+}
+function closeInclineCalib() { document.getElementById('incline-calib-sheet').classList.remove('open'); }
+function resetMountOffset() {
+  saveMountOffset(0);
+  toast('⚙️ Calibrazione azzerata (montaggio piatto)');
+}
+// Auto-calibrazione: 10 s di media del pitch grezzo da fermi su strada piana.
+// Richiede l'inclinometro attivo; il valore medio diventa il nuovo offset.
+function startFlatCalibration() {
+  if (!inclineEnabled) { toast('Attiva prima 📐 Pendenza, poi calibra'); return; }
+  if (calibTimer) return;
+  const track = document.getElementById('incline-calib-track');
+  const fill = document.getElementById('incline-calib-fill');
+  const label = document.getElementById('incline-calib-label');
+  track.style.display = 'block';
+  const raws = [];
+  const DURATION_MS = 10000, TICK_MS = 250;
+  let elapsed = 0;
+  toast('📱 Bici ferma su strada piana: misuro per 10 s…');
+  calibTimer = setInterval(() => {
+    elapsed += TICK_MS;
+    if (inclineEmaDeg !== null) raws.push(inclineEmaDeg + inclineMountOffset); // pitch grezzo
+    fill.style.width = Math.min(100, elapsed / DURATION_MS * 100) + '%';
+    label.textContent = Math.max(0, Math.ceil((DURATION_MS - elapsed) / 1000)) + ' s rimanenti…';
+    if (elapsed >= DURATION_MS) {
+      clearInterval(calibTimer);
+      calibTimer = null;
+      track.style.display = 'none';
+      fill.style.width = '0%';
+      if (raws.length < 10) { label.textContent = ''; toast('Nessun dato dal sensore: riprova'); return; }
+      const avg = raws.reduce((s, v) => s + v, 0) / raws.length;
+      saveMountOffset(Math.round(avg * 10) / 10);
+      label.textContent = '';
+      toast(`⚙️ Calibrato: montaggio a ${inclineMountOffset.toFixed(1)}°`);
+    }
+  }, TICK_MS);
+}
+
 function updateInclineBtn() {
   const b = document.getElementById('map-incline-btn');
   if (b) b.classList.toggle('on', inclineEnabled);
@@ -3517,7 +3613,9 @@ function inclinePitchDeg(g) {
   else if (norm === 180) s = -g.y / total;
   else if (norm === 270) s = -g.x / total;
   else                   s =  g.y / total;
-  return Math.asin(Math.max(-1, Math.min(1, s))) * 180 / Math.PI;
+  // Sottrae l'angolo di montaggio (calibrazione): su strada piana il pitch
+  // corretto deve essere 0, qualunque sia l'inclinazione del supporto.
+  return Math.asin(Math.max(-1, Math.min(1, s))) * 180 / Math.PI - inclineMountOffset;
 }
 
 function onDeviceMotion(e) {
