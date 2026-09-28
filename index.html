@@ -87,6 +87,7 @@
   .status-dot.connected { background: var(--z1); box-shadow: 0 0 8px var(--z1); }
   .status-dot.connecting { background: var(--z3); animation: pulse 1s infinite; }
   #status-text { font-size: 15px; color: #ddd; flex: 1; font-weight: 600; }
+  #wake-lock-ind { font-size: 14px; margin-right: 6px; }
   #connect-btn {
     padding: 8px 18px; border-radius: 20px; border: none;
     background: var(--accent); color: var(--bg);
@@ -419,22 +420,6 @@
   .map-hr-num { font-size: 24px; font-weight: 900; color: #111; font-family: var(--mono); line-height: 1; }
   .map-hr-unit { font-size: 9px; color: #555; font-weight: 700; }
 
-  /* Cerchio pendenza live: stesso stile del cerchio BPM, accanto ad esso */
-  .map-incline-overlay {
-    position: absolute; top: 94px; left: 12px; z-index: 500;
-    width: 74px; height: 74px; border-radius: 50%;
-    background: #fff; border: 5px solid var(--z2);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    box-shadow: 0 2px 14px rgba(0,0,0,.6);
-  }
-  .map-incline-overlay[hidden] { display: none; }
-  .map-incline-num { font-size: 24px; font-weight: 900; color: #111; font-family: var(--mono); line-height: 1; }
-  .map-incline-unit { font-size: 9px; color: #555; font-weight: 700; margin-top: 1px; }
-
-  /* Tasto toggle correzione pendenza (SALITE) quando attivo */
-  .climb-history-access-btn.incline-on {
-    background: rgba(139,195,74,.15); border-color: var(--z2); color: var(--z2);
-  }
 
   .map-fs-btn { position: absolute; top: 12px; right: 12px; z-index: 500; }
 
@@ -724,16 +709,8 @@
     display: flex; justify-content: space-between; align-items: center;
   }
 
-  /* ── CORREZIONE ALTIMETRIA (inclinometro) ── */
+  /* ── CORREZIONE ALTIMETRIA (DEM) ── */
   .map-menu-btn.on { background: rgba(79,195,247,.15); border-color: var(--accent); color: var(--accent); }
-  .calib-current {
-    background: rgba(79,195,247,.06); border: 1px solid rgba(79,195,247,.25); border-radius: 10px;
-    padding: 10px 12px; font-size: 13px; color: #ccc; margin-bottom: 14px;
-  }
-  .calib-current b { color: var(--accent); font-family: var(--mono); }
-  .calib-reset-row { margin-top: 10px; }
-  .calib-reset-row button { width: 100%; padding: 10px; }
-  #incline-calib-sheet h4 { font-size: 13px; font-weight: 800; margin-bottom: 2px; }
   .corr-card {
     background: var(--card); border: 1px solid var(--accent); border-radius: 12px;
     padding: 14px 16px; margin-bottom: 14px;
@@ -782,6 +759,7 @@
   <div class="status-bar">
     <div class="status-dot" id="status-dot"></div>
     <span id="status-text">Non connesso</span>
+    <span id="wake-lock-ind" hidden title="Schermo sempre attivo (registrazione in corso)">🔒</span>
     <button id="connect-btn" onclick="connectBLE()">Connetti</button>
     <button class="fs-btn" id="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
   </div>
@@ -997,8 +975,6 @@
 
     <button class="climb-history-access-btn" onclick="openAscentHistorySheet()">📜 Storico ascensioni</button>
     <button class="climb-history-access-btn" style="margin-top:8px;background:rgba(139,195,74,.08);border-color:rgba(139,195,74,.3);color:var(--z2)" onclick="openPredictionsSheet()">📈 Previsioni prestazioni</button>
-    <button class="climb-history-access-btn" id="incline-toggle-btn" style="margin-top:8px" onclick="toggleInclinometer()">Attiva correzione pendenza</button>
-    <button class="climb-history-access-btn" style="margin-top:8px" onclick="openInclineCalib()">⚙️ Calibrazione inclinometro</button>
   </div>
 </div>
 
@@ -1118,12 +1094,6 @@
     <div class="map-hr-overlay" id="map-hr-circle">
       <div class="map-hr-num" id="map-hr-num">—</div>
       <div class="map-hr-unit">bpm</div>
-    </div>
-
-    <!-- Cerchio pendenza live (visibile solo se correzione attiva e pendenza ≥ 2%) -->
-    <div class="map-incline-overlay" id="map-incline-circle" hidden>
-      <div class="map-incline-num" id="map-incline-num">—</div>
-      <div class="map-incline-unit">% pendenza</div>
     </div>
 
     <!-- Top bar: menu tracce + offline -->
@@ -1262,29 +1232,6 @@
     <div id="offline-packs-list"></div>
   </div>
 </div>
-
-<!-- Sheet: Calibrazione inclinometro -->
-<div class="map-sheet-overlay" id="incline-calib-sheet">
-  <div class="map-sheet">
-    <h3>⚙️ Calibrazione inclinometro</h3>
-    <p class="hint">Il telefono misura l'inclinazione con cui è montato sul manubrio. Per avere pendenze corrette serve compensare l'angolo di montaggio.</p>
-
-    <div class="calib-current" id="incline-calib-current"></div>
-
-    <h4>Auto: su strada piana</h4>
-    <p class="hint">Metti la bici su un tratto pianeggiante, da ferma, e lascia misurare per 10 secondi. Funziona con qualsiasi montaggio.</p>
-    <div class="offline-top-row">
-      <button class="btn-offline-dl" id="btn-incline-autocal" onclick="startFlatCalibration()">📏 Calibra su piano (10 s)</button>
-      <button class="map-sheet-close-top" onclick="closeInclineCalib()">✕ Chiudi</button>
-    </div>
-    <div class="offline-progress-track" id="incline-calib-track" style="display:none"><div class="offline-progress-fill" id="incline-calib-fill" style="width:0%"></div></div>
-    <div class="offline-progress-label" id="incline-calib-label"></div>
-    <div class="calib-reset-row">
-      <button class="corr-reject" onclick="resetMountOffset()">Azzera calibrazione</button>
-    </div>
-  </div>
-</div>
-
 
 <!-- Modal aggiunta salita -->
 <div class="modal-overlay" id="add-modal">
@@ -1687,6 +1634,7 @@ function startSession() {
   }, 1000);
 
   startAutosave();
+  syncWakeLock(); // schermo attivo finché la sessione monitor registra
   toast('Sessione avviata');
 }
 
@@ -1727,6 +1675,7 @@ function stopSession() {
 
   stopAutosave();
   clearSessionSnapshot();
+  syncWakeLock(); // rilascia il lock se non c'è la registrazione traccia attiva
   if (hrSamples.length === 0) { toast('Nessun dato registrato'); return; }
 
   // Chiude l'ultimo lap ancora aperto (dall'ultimo tap fino alla fine sessione)
@@ -1940,8 +1889,10 @@ function showView(id, btn) {
 // Questo permette di caricarne un numero elevato senza rischio di
 // "ingolfare" lo spazio disponibile.
 const IDB_NAME = 'hrm-db';
-const IDB_VERSION = 1;
+const IDB_VERSION = 2; // v2: aggiunti store 'tracks' (libreria tracce) e 'track-rec' (checkpoint registrazione)
 const IDB_STORE_CLIMBS = 'climbs';
+const IDB_STORE_TRACKS = 'tracks';   // tracce registrate/importate (prima erano in localStorage)
+const IDB_STORE_TRACKREC = 'track-rec'; // checkpoint della registrazione traccia in corso
 
 function openClimbsDB() {
   return new Promise((resolve, reject) => {
@@ -1950,6 +1901,12 @@ function openClimbsDB() {
       const db = e.target.result;
       if (!db.objectStoreNames.contains(IDB_STORE_CLIMBS)) {
         db.createObjectStore(IDB_STORE_CLIMBS, { keyPath: 'addedAt' });
+      }
+      if (!db.objectStoreNames.contains(IDB_STORE_TRACKS)) {
+        db.createObjectStore(IDB_STORE_TRACKS, { keyPath: 'id' });
+      }
+      if (!db.objectStoreNames.contains(IDB_STORE_TRACKREC)) {
+        db.createObjectStore(IDB_STORE_TRACKREC, { keyPath: 'id' });
       }
     };
     req.onsuccess = e => resolve(e.target.result);
@@ -1982,6 +1939,71 @@ async function idbPutClimb(climb) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(IDB_STORE_CLIMBS, 'readwrite');
     tx.objectStore(IDB_STORE_CLIMBS).put(climb);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+// ── TRACCE in IndexedDB ─────────────────────────────────────
+// Le tracce GPS (centinaia di KB l'una) erano in localStorage
+// (limite ~5MB, errore silenzioso quando pieno): come le salite,
+// passano a IndexedDB. saveTracks non può più fallire in silenzio.
+async function idbGetAllTracks() {
+  const db = await openClimbsDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE_TRACKS, 'readonly');
+    const req = tx.objectStore(IDB_STORE_TRACKS).getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbClearTracks() {
+  const db = await openClimbsDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE_TRACKS, 'readwrite');
+    tx.objectStore(IDB_STORE_TRACKS).clear();
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function idbPutTrack(track) {
+  const db = await openClimbsDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE_TRACKS, 'readwrite');
+    tx.objectStore(IDB_STORE_TRACKS).put(track);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+// ── CHECKPOINT della registrazione traccia in corso ──────────
+async function idbGetTrackRec() {
+  const db = await openClimbsDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE_TRACKREC, 'readonly');
+    const req = tx.objectStore(IDB_STORE_TRACKREC).get('current');
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbPutTrackRec(state) {
+  const db = await openClimbsDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE_TRACKREC, 'readwrite');
+    tx.objectStore(IDB_STORE_TRACKREC).put(state);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function idbClearTrackRec() {
+  const db = await openClimbsDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE_TRACKREC, 'readwrite');
+    tx.objectStore(IDB_STORE_TRACKREC).clear();
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });
@@ -2285,6 +2307,11 @@ function parseXlsx() {
     closeAddModal();
     const totalKm = segments.reduce((s, g) => s + g.km, 0).toFixed(1);
     toast('"' + name + '" aggiunta — ' + segments.length + ' sezioni · ' + totalKm + ' km');
+    // Verifica/correzione altimetria via DEM (a posteriori, online):
+    // confronta il profilo del GPX col modello digitale del terreno e,
+    // se le differenze superano le soglie, propone la correzione con
+    // sezioni ridefinite dal profilo reale
+    demCorrectClimb(climbs[0].addedAt);
 
   } catch (err) {
     statusEl.textContent = '⚠️ Errore nel parsing: ' + err.message;
@@ -2907,6 +2934,55 @@ window.addEventListener('beforeunload', e => {
     e.preventDefault();
     e.returnValue = '';
   }
+  if (trackRecording) saveTrackCheckpoint(); // best-effort: coperto anche dal timer 30 s
+});
+
+// ══════════════════════════════════════════════════════════════
+// ── WAKE LOCK: schermo sempre attivo durante le registrazioni ──
+// ══════════════════════════════════════════════════════════════
+// Con il telefono in tasca e lo schermo spento, Chrome congela la
+// pagina (GPS e timer si fermano): la traccia smette di registrare
+// e una chiusura forzata perde tutto. Il lock "screen" impedisce al
+// telefono di bloccarsi finché c'è una registrazione attiva (traccia
+// o sessione monitor), così il GPS continua a girare. Chrome può
+// comunque rilasciare il lock: viene riacquisito quando l'app torna
+// visibile. Nessun lock se entrambe le registrazioni sono spente.
+let wakeLock = null;
+
+async function requestWakeLock() {
+  if (wakeLock || !('wakeLock' in navigator)) return;
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+    wakeLock.addEventListener('release', () => { wakeLock = null; updateWakeLockIndicator(); });
+    updateWakeLockIndicator();
+  } catch (e) { /* permesso negato o schermo già bloccato: prosegui senza */ }
+}
+
+function releaseWakeLock() {
+  if (wakeLock) { try { wakeLock.release(); } catch (e) {} wakeLock = null; }
+  updateWakeLockIndicator();
+}
+
+// Il lock serve solo mentre qualcosa sta registrando (anche in pausa
+// breve il telefono può restare acceso: al resume la ripresa è subito)
+function shouldHoldWakeLock() {
+  return trackRecording || sessionActive;
+}
+
+function syncWakeLock() {
+  if (shouldHoldWakeLock()) requestWakeLock();
+  else releaseWakeLock();
+}
+
+function updateWakeLockIndicator() {
+  const el = document.getElementById('wake-lock-ind');
+  if (el) el.hidden = !wakeLock;
+}
+
+// Riacquisisce il lock quando l'app torna in primo piano (Chrome lo
+// rilascia automaticamente quando la pagina diventa invisibile)
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) syncWakeLock();
 });
 
 // ══════════════════════════════════════════════════════════════
@@ -2978,7 +3054,8 @@ let trackElevGainM = 0;      // dislivello positivo accumulato (filtrato a sogli
 let trackLastEle = null;     // ultima quota "stabile" usata come riferimento per il filtro
 const ELEV_NOISE_THRESHOLD_M = 3; // soglia (m) per ignorare il rumore GPS sulla quota
 let trackTimer = null;
-let tracks = loadTracks();
+let trackAutosaveInterval = null; // checkpoint 30 s della registrazione in corso
+let tracks = []; // popolato in modo asincrono da initTracksStorage() all'avvio
 let selectedTrackIds = new Set(); // tracce selezionate per l'unione
 
 // Offline tiles
@@ -3014,11 +3091,6 @@ function initMapView() {
   setFollowMode(true);
   mapElevOffsetM = null; // ricalibra la quota ad ogni apertura della scheda
   startMapGPS();
-  // Inclinometro: ripristina il listener se era attivo (nota: su iOS il
-  // permesso richiede un gesto, quindi dopo un reload va ri-toccato il
-  // pulsante se i sensori non emettono dati)
-  if (inclineEnabled) startInclineListener();
-  updateInclineBtn();
   renderTracksList();
   renderOfflinePacksList();
 }
@@ -3300,7 +3372,6 @@ function updateApproachingMapClimb(coords) {
     hideClimbApproachPopup();
     showActiveClimbOverlay(c);
     updateActiveClimbOverlayUI();
-    startInclineCapture(); // azzera i buffer dell'inclinometro per questa ascensione
   }
 }
 
@@ -3354,9 +3425,6 @@ function updateActiveMapClimbTracking(coords) {
   if (trackedOk) {
     mapClimbLostTrackCount = 0;
     mapClimbLastGoodUpdateTime = Date.now();
-    // Campione per il profilo da inclinometro: distanza cumulativa e
-    // quota GPS grezza (usata solo come riferimento di segno/verso)
-    inclineDistSamples.push({ t: Date.now(), dist: mapClimbDistanceDone, alt: coords.altitude ?? null });
   } else {
     mapClimbLostTrackCount++;
   }
@@ -3422,10 +3490,6 @@ function saveMapAscent(climb) {
   const duration = Math.floor((endTime - mapClimbStartTime) / 1000);
   if (duration < 5) return; // ascensione troppo breve, probabile falso positivo
 
-  // Confronta il profilo registrato dall'inclinometro con l'archivio
-  // e, se le differenze sono significative, salva la proposta di correzione
-  finalizeInclineProposal(climb);
-
   const avgHR = mapClimbHrSamples.length
     ? Math.round(mapClimbHrSamples.reduce((a, b) => a + b, 0) / mapClimbHrSamples.length)
     : null;
@@ -3475,326 +3539,101 @@ function resetMapClimbDetection() {
   mapClimbLastTrackPos = null;
   mapClimbLastGoodUpdateTime = null;
   mapClimbLostTrackCount = 0;
-  inclineSamples = [];
-  inclineDistSamples = [];
 }
 
 // ═══════════════════════════════════════════════════════════════
-// ── INCLINOMETRO: correzione altimetria salite ──────────────────
+// ── CORREZIONE ALTIMETRIA SALITE VIA DEM (a posteriori) ────────
 // ═══════════════════════════════════════════════════════════════
-// Registra la pendenza reale dalla sensoristica del telefono
-// (gravità via `devicemotion`) mentre si affronta una salita
-// rilevata automaticamente in Mappa. A salita terminata confronta
-// il profilo misurato con quello d'archivio e, se le differenze
-// superano le soglie, propone una correzione (nuovo set di sezioni,
-// spezzando anche tratti lunghi o disomogenei) da confermare nel
-// dettaglio della salita.
-const INCLINE_SAMPLE_MS    = 200;  // cadenza campionamento sensore (5 Hz)
-const INCLINE_EMA_ALPHA    = 0.12; // low-pass sul pitch istantaneo
-const INCLINE_WINDOW_S     = 12;   // media mobile del pitch per il calcolo
-const INCLINE_BIN_M        = 25;   // risoluzione spaziale del profilo misurato
+// Il telefono non ha barometro e l'inclinometro (accelerometro) a
+// bordo bici restituisce valori inaffidabili: la correzione
+// dell'altimetria avviene quindi a posteriori, al salvataggio di
+// una salita, interrogando un modello digitale del terreno (DEM
+// Copernicus GLO-90, ~90 m, via API open-elevation) sui punti GPS
+// del GPX caricato. Il profilo DEM viene confrontato con quello
+// d'archivio (sezioni Excel): se le differenze superano le soglie,
+// si propone una correzione con sezioni ridefinite dal profilo reale
+// (da confermare nel dettaglio della salita).
+const DEM_BIN_M           = 25;   // risoluzione spaziale del profilo DEM
+const DEM_MAX_POINTS      = 400;  // sottocampionamento della traccia per l'API
 const CORR_MIN_SECTION_M  = 50;   // lunghezza minima di una sottosezione
-const CORR_MAX_SECTION_M  = 500;   // oltre questa lunghezza la sezione si spezza comunque
-const CORR_GRADE_BREAK_PP = 1.5;  // salto di pendenza che innesta uno spezzamento
+const CORR_MAX_SECTION_M  = 500;  // oltre questa lunghezza la sezione si spezza comunque
+const CORR_GRADE_BREAK_PP = 2.0;  // salto di pendenza che innesta uno spezzamento
 const CORR_MAX_SECTIONS   = 12;   // numero massimo di sezioni proposte
-const CORR_MIN_COVERED    = 0.8;  // serve almeno l'80% della salita percorsa
 const CORR_MIN_ELEV_DIFF_M  = 15;  // Δ dislivello minimo per proporre la correzione
 const CORR_MIN_AVG_DIFF_PP = 1.5;  // Δ pendenza media minima per proporre
 
-let inclineEnabled = localStorage.getItem('hrm-incline-enabled') === '1';
-let inclineListening = false;
-let inclineEmaDeg = null;      // pitch corrente filtrato (gradi)
-let inclineLastSampleT = 0;
-let inclineSamples = [];      // {t, deg} — solo durante la navigazione salita
-let inclineDistSamples = [];  // {t, dist, alt} — un campione per fix GPS affidabile
-let inclineLiveBuf = [];       // buffer pendenza live: media mobile INCLINE_WINDOW_S
+let demCorrecting = false;
 
-// ── Calibrazione montaggio ──
-// Angolo (gradi) con cui il telefono è fissato alla bici: 0 = piatto sul
-// piano orizzontale. Positivo = bordo superiore più alto, negativo = bordo
-// superiore più basso (es. -20 se inclinato indietro per visibilità).
-// Il pitch corretto è: pitchGrezzo − offsetMontaggio.
-let inclineMountOffset = (() => {
-  const v = parseFloat(localStorage.getItem('hrm-incline-mount-offset'));
-  return Number.isFinite(v) ? v : 0;
-})();
-let calibTimer = null;
-
-function renderInclineCalibState() {
-  const el = document.getElementById('incline-calib-current');
-  if (el) {
-    el.innerHTML = inclineMountOffset === 0
-      ? 'Offset attuale: <b>0°</b> (non calibrato — il telefono deve essere montato piatto)'
-      : `Offset attuale: <b>${inclineMountOffset.toFixed(1)}°</b>`;
+// Interroga open-elevation (DEM Copernicus GLO-90) per una lista di
+// punti {lat,lon}: richieste POST in batch (max 100 punti ciascuna).
+async function fetchDemElevations(pts) {
+  const out = [];
+  for (let i = 0; i < pts.length; i += 100) {
+    const batch = pts.slice(i, i + 100).map(p => ({ latitude: p.lat, longitude: p.lon }));
+    const resp = await fetch('https://api.open-elevation.com/api/v1/lookup', {
+      method: 'POST',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ locations: batch })
+    });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    const elevs = (data.results || []).map(r => r.elevation);
+    if (elevs.length !== batch.length) throw new Error('Risposta incompleta');
+    out.push(...elevs);
   }
+  return out;
 }
-function saveMountOffset(v) {
-  inclineMountOffset = v;
-  localStorage.setItem('hrm-incline-mount-offset', String(v));
-  renderInclineCalibState();
-}
-function openInclineCalib() {
-  renderInclineCalibState();
-  document.getElementById('incline-calib-sheet').classList.add('open');
-}
-function closeInclineCalib() { document.getElementById('incline-calib-sheet').classList.remove('open'); }
-function resetMountOffset() {
-  saveMountOffset(0);
-  toast('⚙️ Calibrazione azzerata (montaggio piatto)');
-}
-// Auto-calibrazione: 10 s di media del pitch da fermi su strada piana.
-// Autosufficiente: chiede da sola il permesso ai sensori (il tap sul bottone
-// è il gesto richiesto da iOS) e accende un proprio listener devicemotion
-// temporaneo — funziona in qualsiasi momento, anche con l'inclinometro
-// spento e senza registrazione in corso. Con la bici ferma la lettura è
-// più stabile (niente vibrazioni di rotolamento).
-async function startFlatCalibration() {
-  if (calibTimer) return;
+
+// Costruisce la proposta di correzione DEM per una salita e la mette in
+// coda di revisione (card nel dettaglio salita). Chiamata automaticamente
+// al salvataggio di una nuova salita e manualmente dal tasto nel dettaglio.
+async function demCorrectClimb(climbId) {
+  const climb = climbs.find(c => c.addedAt === climbId);
+  if (!climb || !climb.gpxPoints || climb.gpxPoints.length < 10) return;
+  if (demCorrecting) return;
+  demCorrecting = true;
   try {
-    if (typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) {
-      await DeviceOrientationEvent.requestPermission();
+    // Sottocampiona la traccia (max DEM_MAX_POINTS) mantenendo gli estremi
+    const pts = climb.gpxPoints;
+    const step = Math.max(1, Math.ceil(pts.length / DEM_MAX_POINTS));
+    const sampled = pts.filter((_, i) => i % step === 0);
+    if (sampled[sampled.length - 1] !== pts[pts.length - 1]) sampled.push(pts[pts.length - 1]);
+
+    const elevs = await fetchDemElevations(sampled);
+    // Difesa dagli outlier: quota DEM che salta oltre 30 m rispetto ai
+    // vicini viene sostituita con la media dei due adiacenti
+    for (let i = 1; i < elevs.length - 1; i++) {
+      const ref = (elevs[i - 1] + elevs[i + 1]) / 2;
+      if (Math.abs(elevs[i] - ref) > 30) elevs[i] = ref;
     }
-    if (typeof DeviceMotionEvent !== 'undefined' && DeviceMotionEvent.requestPermission) {
-      await DeviceMotionEvent.requestPermission();
-    }
-  } catch (e) { toast('Permesso sensori negato'); return; }
-  if (!window.DeviceMotionEvent) { toast('Inclinometro non disponibile su questo dispositivo'); return; }
-
-  const track = document.getElementById('incline-calib-track');
-  const fill = document.getElementById('incline-calib-fill');
-  const label = document.getElementById('incline-calib-label');
-  track.style.display = 'block';
-
-  // Listener temporaneo dedicato: raccoglie il pitch GREZZO (senza offset)
-  const raws = [];
-  let lastT = 0;
-  const handler = (ev) => {
-    const g = ev.accelerationIncludingGravity;
-    if (!g || g.x == null || g.y == null || g.z == null) return;
-    const now = Date.now();
-    if (now - lastT < INCLINE_SAMPLE_MS) return;
-    lastT = now;
-    // pitch grezzo = inclinePitchDeg (che sottrae l'offset) + offset attuale
-    raws.push(inclinePitchDeg(g) + inclineMountOffset);
-  };
-  window.addEventListener('devicemotion', handler);
-
-  toast('📱 Bici ferma su strada piana: misuro per 10 s…');
-  const DURATION_MS = 10000, TICK_MS = 250;
-  let elapsed = 0;
-  calibTimer = setInterval(() => {
-    elapsed += TICK_MS;
-    fill.style.width = Math.min(100, elapsed / DURATION_MS * 100) + '%';
-    label.textContent = Math.max(0, Math.ceil((DURATION_MS - elapsed) / 1000)) + ' s rimanenti…';
-    if (elapsed >= DURATION_MS) {
-      clearInterval(calibTimer);
-      calibTimer = null;
-      window.removeEventListener('devicemotion', handler);
-      track.style.display = 'none';
-      fill.style.width = '0%';
-      if (raws.length < 10) { label.textContent = ''; toast('Nessun dato dal sensore: riprova'); return; }
-      const avg = raws.reduce((s, v) => s + v, 0) / raws.length;
-      saveMountOffset(Math.round(avg * 10) / 10);
-      label.textContent = '';
-      toast(`⚙️ Calibrato: montaggio a ${inclineMountOffset.toFixed(1)}°`);
-    }
-  }, TICK_MS);
-}
-
-function updateInclineBtn() {
-  const b = document.getElementById('incline-toggle-btn');
-  if (b) {
-    b.textContent = inclineEnabled ? '✓ Correzione pendenza ATTIVA — tocca per disattivare' : 'Attiva correzione pendenza';
-    b.classList.toggle('incline-on', inclineEnabled);
-  }
-  const c = document.getElementById('map-incline-circle');
-  if (c && !inclineEnabled) c.hidden = true;
-}
-
-// Attivazione/disattivazione da parte dell'utente (pulsante "📐 Pendenza").
-// Su iOS (≥13) i sensori di movimento richiedono un permesso esplicito,
-// che deve essere concesso da un gesto dell'utente: il tap sul pulsante.
-async function toggleInclinometer() {
-  if (!inclineEnabled) {
-    try {
-      if (typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) {
-        await DeviceOrientationEvent.requestPermission();
-      }
-      if (typeof DeviceMotionEvent !== 'undefined' && DeviceMotionEvent.requestPermission) {
-        await DeviceMotionEvent.requestPermission();
-      }
-    } catch (e) {
-      toast('Permesso sensori negato');
-      return;
-    }
-    if (!window.DeviceMotionEvent) { toast('Inclinometro non disponibile su questo dispositivo'); return; }
-    inclineEnabled = true;
-    startInclineListener();
-    toast('📐 Inclinometro attivo');
-  } else {
-    inclineEnabled = false;
-    stopInclineListener();
-    toast('📐 Inclinometro disattivato');
-  }
-  localStorage.setItem('hrm-incline-enabled', inclineEnabled ? '1' : '0');
-  updateInclineBtn();
-}
-
-function startInclineListener() {
-  if (inclineListening) return;
-  inclineListening = true;
-  window.addEventListener('devicemotion', onDeviceMotion);
-}
-
-function stopInclineListener() {
-  if (!inclineListening) return;
-  window.removeEventListener('devicemotion', onDeviceMotion);
-  inclineListening = false;
-  inclineEmaDeg = null;
-}
-
-// Montaggio presunto: telefono fissato al manubrio, schermo verso il
-// ciclista, bordo superiore in avanti (portrait). In salita il bordo
-// anteriore si alza e la componente della gravità lungo l'asse di marcia
-// del dispositivo cresce. Con il telefono in landscape si usa l'asse x.
-// Il VERSO viene verificato a fine salita confrontando il profilo del
-// sensore con la quota GPS (vedi finalizeInclineProposal), quindi un
-// montaggio "specchiato" non produce dati invalidi.
-function inclinePitchDeg(g) {
-  const total = Math.sqrt(g.x * g.x + g.y * g.y + g.z * g.z) || 9.81;
-  const angle = (screen.orientation && typeof screen.orientation.angle === 'number')
-    ? screen.orientation.angle
-    : (typeof window.orientation === 'number' ? window.orientation : 0);
-  const norm = ((angle % 360) + 360) % 360;
-  let s; // componente della gravità lungo l'asse di marcia
-  if (norm === 90)       s =  g.x / total;
-  else if (norm === 180) s = -g.y / total;
-  else if (norm === 270) s = -g.x / total;
-  else                   s =  g.y / total;
-  // Sottrae l'angolo di montaggio (calibrazione): su strada piana il pitch
-  // corretto deve essere 0, qualunque sia l'inclinazione del supporto.
-  return Math.asin(Math.max(-1, Math.min(1, s))) * 180 / Math.PI - inclineMountOffset;
-}
-
-function onDeviceMotion(e) {
-  const g = e.accelerationIncludingGravity;
-  if (!g || g.x == null || g.y == null || g.z == null) return;
-  const now = Date.now();
-  if (now - inclineLastSampleT < INCLINE_SAMPLE_MS) return; // decimazione a 5 Hz
-  inclineLastSampleT = now;
-  const deg = inclinePitchDeg(g);
-  if (inclineEmaDeg === null) inclineEmaDeg = deg;
-  else inclineEmaDeg += INCLINE_EMA_ALPHA * (deg - inclineEmaDeg); // low-pass
-
-  // Buffer per la pendenza LIVE (media mobile 12 s): sempre attivo quando
-  // l'inclinometro è acceso, indipendentemente dalla navigazione salita.
-  inclineLiveBuf.push({ t: now, deg: inclineEmaDeg });
-  const cutoff = now - INCLINE_WINDOW_S * 1000;
-  while (inclineLiveBuf.length && inclineLiveBuf[0].t < cutoff) inclineLiveBuf.shift();
-  updateInclineCircle(now);
-
-  // Campiona per la proposta di correzione solo durante la navigazione salita
-  if (mapClimbPhase === 'active') inclineSamples.push({ t: now, deg: inclineEmaDeg });
-}
-
-// Cerchio pendenza live sulla mappa: mostra la pendenza (in %, tan del pitch)
-// media sugli ultimi 12 s, solo se ≥ 2% e la mappa è visibile.
-function updateInclineCircle(now) {
-  const c = document.getElementById('map-incline-circle');
-  if (!c) return;
-  if (!inclineEnabled || inclineLiveBuf.length < 10) { c.hidden = true; return; }
-  const mapVisible = document.getElementById('view-map').classList.contains('active');
-  if (!mapVisible) { c.hidden = true; return; }
-  let sum = 0;
-  for (const s of inclineLiveBuf) sum += s.deg;
-  const avgDeg = sum / inclineLiveBuf.length;
-  const gradePct = Math.tan(avgDeg * Math.PI / 180) * 100;
-  if (gradePct < 2) { c.hidden = true; return; }
-  c.hidden = false;
-  document.getElementById('map-incline-num').textContent = gradePct.toFixed(1);
-}
-
-// Chiamato all'aggancio della salita: azzera i buffer per la nuova ascensione
-function startInclineCapture() {
-  inclineSamples = [];
-  inclineDistSamples = [];
-}
-
-// ── Costruzione della proposta di correzione ─────────────────────
-function finalizeInclineProposal(climb) {
-  try {
-    if (!inclineEnabled) return;
-    const samples = inclineSamples, dists = inclineDistSamples;
-    if (!samples || samples.length < 30 || !dists || dists.length < 6) return;
+    // Media mobile (5 punti) per attenuare i gradini del DEM a 90 m
+    const smooth = elevs.map((e, i) => {
+      let s = 0, n = 0;
+      for (let j = Math.max(0, i - 2); j <= Math.min(elevs.length - 1, i + 2); j++) { s += elevs[j]; n++; }
+      return s / n;
+    });
 
     const totalM = climb.segments.reduce((s, seg) => s + seg.km * 1000, 0);
-    const coveredM = Math.min(dists[dists.length - 1].dist, totalM);
-    // Serve quasi tutta la salita: su una frazione percorsa il confronto
-    // con l'archivio sarebbe poco significativo
-    if (coveredM < 200 || coveredM < totalM * CORR_MIN_COVERED) return;
+    const coveredM = Math.min(sampled[sampled.length - 1].dist, totalM);
+    if (coveredM < 200) return;
 
-    // Pitch con media mobile su INCLINE_WINDOW_S, via prefix-sum (O(1) per query)
-    const halfMs = INCLINE_WINDOW_S * 1000 / 2;
-    const T = samples.map(s => s.t);
-    const P = new Array(samples.length + 1).fill(0);
-    for (let i = 0; i < samples.length; i++) P[i + 1] = P[i] + samples[i].deg;
-    const lowerBound = (arr, x) => {
-      let lo = 0, hi = arr.length;
-      while (lo < hi) { const m = (lo + hi) >> 1; if (arr[m] < x) lo = m + 1; else hi = m; }
-      return lo;
-    };
-    const pitchAt = (t) => {
-      const a = lowerBound(T, t - halfMs), b = lowerBound(T, t + halfMs + 1);
-      return b > a ? (P[b] - P[a]) / (b - a) : null;
+    // Interpolazione lineare del profilo DEM smoothato sulla distanza
+    const eleAt = (d) => {
+      let lo = 0, hi = sampled.length - 1;
+      while (hi - lo > 1) { const m = (lo + hi) >> 1; if (sampled[m].dist < d) lo = m; else hi = m; }
+      const d0 = sampled[lo].dist, d1 = sampled[hi].dist;
+      const t = d1 > d0 ? (d - d0) / (d1 - d0) : 0;
+      return smooth[lo] + (smooth[hi] - smooth[lo]) * t;
     };
 
-    // Integrazione: Δh = sin(pitch) · Δd tra fix GPS consecutivi,
-    // accumulata in bin spaziali di INCLINE_BIN_M
-    const binRise = new Map();
-    for (let i = 1; i < dists.length; i++) {
-      const d0 = dists[i - 1].dist, d1 = dists[i].dist;
-      if (d1 - d0 <= 0 || d1 - d0 > 100) continue; // fix doppi o salti anomali
-      const pitch = pitchAt((dists[i - 1].t + dists[i].t) / 2);
-      if (pitch == null) continue;
-      const rise = Math.sin(pitch * Math.PI / 180) * (d1 - d0);
-      const bi = Math.floor(((d0 + d1) / 2) / INCLINE_BIN_M);
-      binRise.set(bi, (binRise.get(bi) || 0) + rise);
-    }
-    if (binRise.size < 4) return;
-    const nBins = Math.max(...binRise.keys()) + 1;
+    // Profilo DEM in bin spaziali di DEM_BIN_M (dislivello per bin)
+    const firstEle = eleAt(0);
+    const nBins = Math.max(1, Math.floor(coveredM / DEM_BIN_M));
     const bins = [];
-    for (let bi = 0; bi < nBins; bi++) {
-      const rise = binRise.get(bi) || 0;
-      bins.push({ start: bi * INCLINE_BIN_M, end: (bi + 1) * INCLINE_BIN_M, rise });
-    }
+    for (let bi = 0; bi < nBins; bi++) bins.push({ start: bi * DEM_BIN_M, end: (bi + 1) * DEM_BIN_M, rise: 0 });
+    for (const b of bins) b.rise = eleAt(b.end) - eleAt(b.start);
 
-    // Verifica del verso: correlazione tra l'elevazione cumulativa da
-    // sensore e la quota GPS (grezza ma utile come riferimento di segno).
-    // Se anti-correlata, il telefono è montato con l'asse specchiato.
-    const sensorElevAt = (d) => {
-      let e = 0;
-      for (const b of bins) {
-        if (d >= b.end) e += b.rise;
-        else { if (d > b.start) e += b.rise * (d - b.start) / (b.end - b.start); break; }
-      }
-      return e;
-    };
-    const xs = [], ys = [];
-    for (const ds of dists) {
-      if (ds.alt == null) continue;
-      xs.push(sensorElevAt(ds.dist));
-      ys.push(ds.alt);
-    }
-    if (xs.length >= 10) {
-      const corr = pearson(xs, ys);
-      if (corr < -0.3) {
-        for (const b of bins) b.rise = -b.rise; // monta specchiata: ribalta
-      }
-    }
-
-    const measuredElevM = bins.reduce((s, b) => s + b.rise, 0);
-
-    // Elevazione d'archivio cumulativa alla distanza percorsa
+    // Confronto con il profilo d'archivio (sezioni Excel)
     const archiveElevAt = (d) => {
       let e = 0, rem = d;
       for (const seg of climb.segments) {
@@ -3805,32 +3644,49 @@ function finalizeInclineProposal(climb) {
       }
       return e;
     };
+    const measuredElevM = eleAt(coveredM) - firstEle;
     const archiveElevM = archiveElevAt(coveredM);
     const measuredAvgGrade = measuredElevM / coveredM * 100;
     const archiveAvgGrade = archiveElevM / coveredM * 100;
 
-    // Soglie di discrepanza: sotto questi scostamenti non si propone nulla
+    // Soglie di discrepanza: sotto questi scostamenti il profilo d'archivio
+    // è già coerente col terreno reale, non si propone nulla. Tre controlli:
+    // 1) Δ dislivello totale, 2) Δ pendenza media, 3) Δ forma: scarto medio
+    // pendenza-per-pendenza sui bin (cattura sezioni con lo stesso dislivello
+    // totale ma distribuzione diversa, es. "5%" che in realtà è 10% + 3%)
+    let sumAbsGradeDiff = 0;
+    for (const b of bins) {
+      const demGrade = b.rise / (b.end - b.start) * 100;
+      const archGrade = (archiveElevAt(b.end) - archiveElevAt(b.start)) / (b.end - b.start) * 100;
+      sumAbsGradeDiff += Math.abs(demGrade - archGrade);
+    }
+    const meanGradeDiff = sumAbsGradeDiff / bins.length;
     const dElev = measuredElevM - archiveElevM;
     if (Math.abs(dElev) < CORR_MIN_ELEV_DIFF_M &&
-        Math.abs(measuredAvgGrade - archiveAvgGrade) < CORR_MIN_AVG_DIFF_PP) return;
+        Math.abs(measuredAvgGrade - archiveAvgGrade) < CORR_MIN_AVG_DIFF_PP &&
+        meanGradeDiff < CORR_GRADE_BREAK_PP) {
+      climb.demChecked = true;
+      await saveClimbs();
+      toast('✓ Altimetria verificata col DEM: profilo già corretto');
+      return;
+    }
 
-    // Suddivisione in sottosezioni (cambio pendenza significativo,
-    // lunghezza minima 50 m, spezzamento forzato oltre 500 m)
+    // Ridefinizione delle sezioni dal profilo DEM reale
     const sections = segmentInclineBins(bins);
     if (!sections.length) return;
 
-    // Nuove sezioni: quota di partenza ancorata all'altitudine d'archivio
-    // (il sensore misura dislivelli relativi, non quote assolute)
-    let alt = climb.segments[0].altStart;
+    // Nuove sezioni con quote DEM assolute (il DEM dà quote vere, non relative)
+    let alt = firstEle;
     const newSegments = sections.map((sec, i) => {
       const km = parseFloat(((sec.end - sec.start) / 1000).toFixed(3));
-      const grade = parseFloat((sec.rise / (sec.end - sec.start) * 100).toFixed(2));
-      const seg = { km, grade, label: `M${i + 1}`, altStart: Math.round(alt), altEnd: Math.round(alt + sec.rise) };
-      alt += sec.rise;
+      const rise = eleAt(sec.end) - eleAt(sec.start);
+      const grade = parseFloat((rise / (sec.end - sec.start) * 100).toFixed(2));
+      const seg = { km, grade, label: `M${i + 1}`, altStart: Math.round(alt), altEnd: Math.round(alt + rise) };
+      alt += rise;
       return seg;
     });
-    // Coda non coperta dal sensore (salita chiusa poco prima della fine):
-    // mantieni le sezioni d'archivio rimanenti, riallineate alle nuove quote
+    // Coda non coperta dal GPX (traccia più corta dell'Excel): mantieni le
+    // sezioni d'archivio rimanenti, riallineate alle quote DEM
     if (coveredM < totalM - 15) {
       let rem = totalM - coveredM;
       for (const seg of climb.segments) {
@@ -3845,11 +3701,11 @@ function finalizeInclineProposal(climb) {
           altEnd: Math.round(alt + take * seg.grade / 100),
         });
         alt += take * seg.grade / 100;
-        rem -= take;
+        rem -= len;
       }
     }
 
-    // Salva la proposta (una per salita: l'ultima registrazione vince)
+    // Salva la proposta (una per salita: l'ultima vince)
     const list = loadClimbCorrections().filter(c => c.climbId !== climb.addedAt);
     list.unshift({
       climbId: climb.addedAt,
@@ -3860,28 +3716,21 @@ function finalizeInclineProposal(climb) {
       archiveAvgGrade: +archiveAvgGrade.toFixed(1),
       measuredAvgGrade: +measuredAvgGrade.toFixed(1),
       profile: bins.map(b => +b.rise.toFixed(1)),
-      binM: INCLINE_BIN_M,
+      binM: DEM_BIN_M,
+      source: 'dem',
       segments: newSegments,
     });
     saveClimbCorrections(list);
-    toast(`📐 Differenza altimetria su "${climb.name}" — apri la salita per revisionarla`);
+    toast(`⛰️ Differenza altimetria su "${climb.name}" — apri la salita per revisionarla`);
+    renderClimbList();
   } catch (e) {
-    console.error('Proposta correzione altimetria non riuscita:', e);
+    console.error('Correzione DEM non riuscita:', e);
+    toast('⚠️ Verifica DEM non riuscita (rete?) — riprova dal dettaglio della salita');
+  } finally {
+    demCorrecting = false;
   }
 }
 
-function pearson(xs, ys) {
-  const n = xs.length;
-  if (n < 3) return 0;
-  const mx = xs.reduce((a, b) => a + b, 0) / n;
-  const my = ys.reduce((a, b) => a + b, 0) / n;
-  let num = 0, dx = 0, dy = 0;
-  for (let i = 0; i < n; i++) {
-    const a = xs[i] - mx, b = ys[i] - my;
-    num += a * b; dx += a * a; dy += b * b;
-  }
-  return (dx > 0 && dy > 0) ? num / Math.sqrt(dx * dy) : 0;
-}
 
 // Raggruppa i bin in sezioni omogenee di pendenza. Un bin spezza la sezione
 // in corso se la sua pendenza locale devia dalla media della sezione per
@@ -3992,7 +3841,12 @@ function renderPendingCorrection(climbId) {
   let html = '';
   if (climb.originalSegments && !corr) {
     const when = climb.correctedAt ? new Date(climb.correctedAt).toLocaleDateString('it-IT') : 'data non nota';
-    html += `<div class="corr-note"><span>🔧 Profilo corretto con inclinometro (${when})</span><button class="corr-restore" onclick="restoreOriginalSegments(${climbId})">↩︎ Ripristina originale</button></div>`;
+    html += `<div class="corr-note"><span>⛰️ Profilo corretto con DEM (${when})</span><button class="corr-restore" onclick="restoreOriginalSegments(${climbId})">↩︎ Ripristina originale</button></div>`;
+  }
+  // Tasto manuale: verifica/correzione DEM su richiesta (utile se al
+  // salvataggio la rete non era disponibile, o per salite vecchie)
+  if (!corr && climb.gpxPoints && climb.gpxPoints.length >= 10) {
+    html += `<div class="corr-note"><button class="corr-accept" style="width:100%" onclick="demCorrectClimb(${climbId})">⛰️ Verifica/correggi altimetria con DEM</button></div>`;
   }
   if (!corr) { slot.innerHTML = html; return; }
 
@@ -4001,12 +3855,12 @@ function renderPendingCorrection(climbId) {
   const warn = Math.abs(dElev) >= CORR_MIN_ELEV_DIFF_M ? ' class="warn"' : '';
   html += `
   <div class="corr-card">
-    <div class="corr-title">🔧 Correzione altimetria proposta</div>
-    <p class="corr-sub">Registrata il ${new Date(corr.date).toLocaleDateString('it-IT')} con l'inclinometro del telefono su ${(corr.coveredM / 1000).toFixed(1)} km. Linea tratteggiata: profilo d'archivio. Linea azzurra: profilo misurato.</p>
+    <div class="corr-title">⛰️ Correzione altimetria proposta (DEM)</div>
+    <p class="corr-sub">Il modello digitale del terreno (Copernicus GLO-90, ~90 m) su ${(corr.coveredM / 1000).toFixed(1)} km di traccia GPX diverge dal profilo d'archivio. Linea tratteggiata: profilo d'archivio. Linea azzurra: profilo DEM reale.</p>
     <svg class="corr-svg" viewBox="0 0 360 110" preserveAspectRatio="none">${drawCorrectionSVG(climb, corr)}</svg>
     <div class="corr-stats">
       <div><span>Archivio</span><b>${corr.archiveElevM} m · ${corr.archiveAvgGrade}%</b></div>
-      <div><span>Misurato</span><b>${corr.measuredElevM} m · ${corr.measuredAvgGrade}%</b></div>
+      <div><span>DEM</span><b>${corr.measuredElevM} m · ${corr.measuredAvgGrade}%</b></div>
       <div><span>Δ dislivello</span><b${warn}>${sign}${Math.abs(dElev)} m</b></div>
     </div>
     <div class="corr-btns">
@@ -4066,7 +3920,7 @@ async function acceptClimbCorrection(climbId) {
   if (!corr || !climb) return;
   if (!climb.originalSegments) climb.originalSegments = climb.segments; // backup per ripristino
   climb.segments = corr.segments;
-  climb.correctedBy = 'inclinometro';
+  climb.correctedBy = 'dem';
   climb.correctedAt = corr.date;
   await saveClimbs();
   saveClimbCorrections(loadClimbCorrections().filter(c => c.climbId !== climbId));
@@ -4205,6 +4059,8 @@ function startTrackRecording() {
   trackStartTime  = Date.now();
   trackElevGainM  = 0;
   trackLastEle    = null;
+  syncWakeLock(); // schermo attivo finché dura la registrazione
+  idbClearTrackRec(); // eventuali checkpoint vecchi di registrazioni precedenti
 
   if (trackPolyline) { leafletMap.removeLayer(trackPolyline); }
   trackPolyline = L.polyline([], { color: '#4fc3f7', weight: 4 }).addTo(leafletMap);
@@ -4226,6 +4082,11 @@ function startTrackRecording() {
     updateTrackStats();
   }, 1000);
 
+  // Checkpoint ogni 30 s: se l'app muore (Android chiusura forzata, crash
+  // di Chrome), al prossimo avvio la traccia si recupera fino all'ultimo
+  // checkpoint — al massimo 30 s di pedilavata persi
+  trackAutosaveInterval = setInterval(saveTrackCheckpoint, 30000);
+
   toast('▶ Registrazione traccia avviata');
 }
 
@@ -4233,6 +4094,7 @@ function pauseTrackRecording() {
   if (!trackRecording || trackPaused) return;
   trackPaused   = true;
   trackPausedAt = Date.now();
+  saveTrackCheckpoint(); // persisti subito lo stato con la pausa
   document.getElementById('map-btn-pause').style.display  = 'none';
   document.getElementById('map-btn-resume').style.display = 'block';
   toast('⏸ Traccia in pausa');
@@ -4254,6 +4116,9 @@ function stopTrackRecording() {
   trackRecording = false;
   trackPaused    = false;
   clearInterval(trackTimer);
+  clearInterval(trackAutosaveInterval);
+  idbClearTrackRec(); // registrazione chiusa: il checkpoint non serve più
+  syncWakeLock(); // rilascia il lock se non c'è altro in registrazione
 
   document.getElementById('map-btn-start').disabled  = false;
   document.getElementById('map-btn-pause').disabled  = true;
@@ -4350,11 +4215,107 @@ async function calibrateTrackElevation(trackId) {
 }
 
 // ── STORAGE TRACCE ─────────────────────────────────────────────
-function loadTracks() {
-  try { return JSON.parse(localStorage.getItem('hrm-tracks') || '[]'); } catch { return []; }
+// Carica le tracce da IndexedDB all'avvio; se lo store è vuoto ma esiste
+// ancora il vecchio salvataggio localStorage 'hrm-tracks' (versioni
+// precedenti dell'app), lo migra automaticamente una tantum.
+async function initTracksStorage() {
+  try {
+    let loaded = await idbGetAllTracks();
+    if (loaded.length === 0) {
+      const legacy = localStorage.getItem('hrm-tracks');
+      if (legacy) {
+        try {
+          const parsed = JSON.parse(legacy);
+          if (Array.isArray(parsed) && parsed.length) {
+            for (const t of parsed) await idbPutTrack(t);
+            loaded = parsed;
+          }
+          localStorage.removeItem('hrm-tracks');
+        } catch { /* legacy corrotto: ignora */ }
+      }
+    }
+    tracks = loaded;
+    renderTracksList();
+  } catch (e) {
+    console.error('Caricamento tracce non riuscito:', e);
+    tracks = [];
+  }
+  await checkTrackRecovery();
 }
-function saveTracks() {
-  localStorage.setItem('hrm-tracks', JSON.stringify(tracks));
+
+async function saveTracks() {
+  try {
+    await idbClearTracks();
+    for (const t of tracks) await idbPutTrack(t);
+  } catch (e) {
+    // Mai più fallimenti silenziosi: l'utente deve sapere che il
+    // salvataggio non è andato a buon fine
+    console.error('Salvataggio tracce non riuscito:', e);
+    toast('⚠️ Errore nel salvataggio delle tracce — verifica lo spazio disponibile');
+  }
+}
+
+// ── RECUPERO REGISTRAZIONE INTERROTTA ───────────────────────
+// All'avvio, se esiste il checkpoint di una registrazione non chiusa
+// (app chiusa/uccisa da Android durante l'uscita, crash di Chrome),
+// propone di salvarla nella libreria Tracce.
+async function checkTrackRecovery() {
+  try {
+    const rec = await idbGetTrackRec();
+    if (!rec || !rec.points || rec.points.length < 2) {
+      if (rec) await idbClearTrackRec();
+      return;
+    }
+    const km = (rec.distM / 1000).toFixed(1);
+    const lastT = (rec.points[rec.points.length - 1].t || rec.startTime) || rec.startTime;
+    const min = Math.max(1, Math.round((lastT - rec.startTime) / 60000));
+    if (confirm(`⚠️ Trovata una registrazione traccia interrotta (${km} km, ~${min} min — probabilmente l'app è stata chiusa durante l'uscita). Salvarla nella libreria Tracce?`)) {
+      const duration = Math.max(1, Math.floor((lastT - rec.startTime) / 1000));
+      const startD = new Date(rec.startTime);
+      const track = {
+        id: Date.now(),
+        name: `Traccia (recupero) ${startD.toLocaleDateString('it-IT')} ${startD.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}`,
+        date: startD.toISOString(),
+        duration,
+        distanceM: Math.round(rec.distM || 0),
+        avgSpeedKmh: duration > 0 ? Math.round((rec.distM/1000) / (duration/3600) * 10) / 10 : 0,
+        elevGainM: Math.round(rec.elevGainM || 0),
+        elevGainRawM: Math.round(rec.elevGainM || 0),
+        elevCalibrated: false,
+        recovered: true,
+        points: rec.points,
+      };
+      tracks.unshift(track);
+      await saveTracks();
+      renderTracksList();
+      calibrateTrackElevation(track.id);
+      toast('✓ Traccia interrotta recuperata e salvata');
+    }
+    await idbClearTrackRec();
+  } catch (e) {
+    console.error('Recupero registrazione interrotta non riuscito:', e);
+  }
+}
+
+// Checkpoint della registrazione in corso: chiamato ogni 30 s e alla
+// chiusura/pausa. Se la pagina muore, al prossimo avvio la traccia
+// si recupera dal checkpoint (perdi al massimo gli ultimi 30 s).
+async function saveTrackCheckpoint() {
+  if (!trackRecording) return;
+  try {
+    const pausedMs = trackPaused && trackPausedAt ? trackPausedMs + (Date.now() - trackPausedAt) : trackPausedMs;
+    await idbPutTrackRec({
+      id: 'current',
+      points: trackPoints,
+      distM: trackDistM,
+      elevGainM: trackElevGainM,
+      startTime: trackStartTime,
+      pausedMs,
+      date: new Date().toISOString(),
+    });
+  } catch (e) {
+    console.error('Checkpoint registrazione non riuscito:', e);
+  }
 }
 
 function renderTracksList() {
@@ -4836,6 +4797,7 @@ function clearOfflineAreasOverlay() {
 loadZoneInputs();
 renderHistory();
 initClimbsStorage(); // carica le salite da IndexedDB (asincrono) e poi renderizza
+initTracksStorage(); // carica le tracce da IndexedDB + propone il recupero di registrazioni interrotte
 renderAscentList();
 checkAutosaveRecovery();
 
