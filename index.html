@@ -2986,6 +2986,89 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // ══════════════════════════════════════════════════════════════
+// ── CAMPANELLO BICI (doppio tap) ──────────────────────────────
+// ══════════════════════════════════════════════════════════════
+// Suono "ring-ring" sintetizzato con Web Audio: nessun file audio
+// da scaricare o cache-are, funziona offline. L'AudioContext può
+// essere creato/resumato solo da un gesto utente: il doppio tap lo è.
+let bellCtx = null;
+function bellAudioCtx() {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return null;
+  if (!bellCtx) bellCtx = new AC();
+  if (bellCtx.state === 'suspended') bellCtx.resume();
+  return bellCtx;
+}
+
+// Un singolo "ring": fondamentale ~2.1 kHz + parziale disintonizzato
+// di ~14 Hz (il battimento tipico dei campanelli in ottone) + armoniche.
+// Attacco 5 ms, coda esponenziale ~0.9 s.
+function bellStrike(ctx, t) {
+  const master = ctx.createGain();
+  master.gain.setValueAtTime(0.9, t);
+  master.connect(ctx.destination);
+  const partials = [
+    [2093, 1.00], // fondamentale
+    [2107, 0.70], // battimento ~14 Hz
+    [2637, 0.28], // armonica
+    [3520, 0.12], // armonica
+  ];
+  for (const [freq, vol] of partials) {
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.005);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
+    osc.connect(g);
+    g.connect(master);
+    osc.start(t);
+    osc.stop(t + 0.95);
+  }
+}
+
+function ringBell() {
+  const ctx = bellAudioCtx();
+  if (!ctx) return;
+  const t = ctx.currentTime + 0.02;
+  bellStrike(ctx, t);
+  bellStrike(ctx, t + 0.28); // ring-ring!
+}
+
+// ── DOPPIO TAP → campanello ───────────────────────────────────
+// Due tocchi entro 350 ms e a meno di ~45 px, su un punto NON
+// interattivo di qualunque scheda → suona. I tap su bottoni, card,
+// marker e altri elementi con azioni sono esclusi (devono fare la
+// loro azione, non suonare); scroll e pinch non contano come tap.
+let bellLastTapT = 0, bellLastTapX = 0, bellLastTapY = 0;
+let bellTapMoved = false;
+const BELL_TAP_MS = 350, BELL_TAP_PX = 45;
+
+function bellTapInteractive(el) {
+  if (!el || !el.closest) return true; // non è un elemento DOM: per sicurezza ignora
+  return !!el.closest('button, a, input, select, textarea, label, [onclick], .leaflet-interactive, .leaflet-control');
+}
+
+document.addEventListener('touchstart', () => { bellTapMoved = false; }, { passive: true });
+document.addEventListener('touchmove', () => { bellTapMoved = true; }, { passive: true });
+document.addEventListener('touchend', (e) => {
+  if (bellTapMoved) return;                       // scroll/pinch in corso: non è un tap
+  if (e.touches && e.touches.length > 0) return;  // c'è ancora un dito: multi-touch
+  const t = (e.changedTouches && e.changedTouches[0]) || e;
+  if (typeof t.clientX !== 'number') return;
+  if (bellTapInteractive(t.target)) { bellLastTapT = 0; return; }
+  const now = Date.now();
+  const dx = t.clientX - bellLastTapX, dy = t.clientY - bellLastTapY;
+  if (now - bellLastTapT <= BELL_TAP_MS && Math.hypot(dx, dy) <= BELL_TAP_PX) {
+    bellLastTapT = 0; // reset: un triplo tap non suona due volte
+    ringBell();
+  } else {
+    bellLastTapT = now; bellLastTapX = t.clientX; bellLastTapY = t.clientY;
+  }
+}, { passive: true });
+
+// ══════════════════════════════════════════════════════════════
 // ── MAPPA ────────────────────────────────────────────────────
 // ══════════════════════════════════════════════════════════════
 let leafletMap = null;
@@ -3070,7 +3153,9 @@ let offlineCancelRequested = false;
 // ── INIT MAPPA (lazy, solo alla prima apertura scheda) ────────
 function initMapView() {
   if (!leafletMap) {
-    leafletMap = L.map('leaflet-map', { zoomControl: false, attributionControl: true })
+    // doubleClickZoom disattivato: il doppio tap ovunque (mappa inclusa)
+    // suona il campanello bici; lo zoom manuale resta col pinch a due dita.
+    leafletMap = L.map('leaflet-map', { zoomControl: false, doubleClickZoom: false, attributionControl: true })
       .setView([45.4642, 9.19], 12); // default: Milano, verrà ricentrata sul GPS
     // OpenTopoMap: stile topografico con curve di livello, ideale per bici/montagna.
     // Sottodominio fisso ('a') per far coincidere le chiavi di cache con i
