@@ -1,0 +1,14 @@
+{
+  "name": "Cardio-App",
+  "short_name": "Cardio-App",
+  "description": "Allenamento con frequenza cardiaca, salite e tracce GPS",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#0a0a0f",
+  "icons": [
+    { "src": "icona.png", "sizes": "any", "type": "image/png", "purpose": "any" },
+    { "src": "icona.png", "sizes": "any", "type": "image/png", "purpose": "maskable" }
+  ]
+}
