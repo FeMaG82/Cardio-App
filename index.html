@@ -974,6 +974,10 @@
         <label>Token GitHub</label>
         <div class="zone-inputs"><input type="password" id="backup-token" placeholder="github_pat_…" autocomplete="off"></div>
       </div>
+      <div class="zone-setting-row">
+        <label>Scadenza token</label>
+        <div class="zone-inputs"><input type="date" id="backup-expiry"></div>
+      </div>
       <div class="zone-setting-row" id="backup-auto-row">
         <label>Backup automatico</label>
         <div class="zone-inputs" style="font-size:12px;color:var(--muted);">
@@ -987,7 +991,7 @@
       <button class="settings-btn" style="background:var(--card);color:#ccc;" onclick="cloudBackupRestore()">⬇️ Ripristina dal cloud</button>
     </div>
     <p class="settings-note" id="backup-status">Backup mai eseguito</p>
-    <p class="settings-note" style="font-size:11px;line-height:1.5;margin-top:4px;">Come creare il token: github.com → Settings → Developer settings → Fine-grained tokens → Generate new token → Repository access: solo la repo del backup → Permissions → Contents: Read and write. Il token resta solo su questo telefono e non viene mai scritto nel file di backup.</p>
+    <p class="settings-note" style="font-size:11px;line-height:1.5;margin-top:4px;">Come creare il token: github.com → Settings → Developer settings → Fine-grained tokens → Generate new token → Repository access: solo la repo del backup → Permissions → Contents: Read and write. Il token resta solo su questo telefono e non viene mai scritto nel file di backup. Nel campo «Scadenza token» inserisci la data di scadenza che vedi nella lista dei token: l'app ti avvisa in anticipo quando sta per scadere.</p>
   </div>
 
   <div class="settings-section">
@@ -3119,6 +3123,7 @@ const BACKUP_REPO_KEY = 'hrm-backup-repo';
 const BACKUP_TOKEN_KEY = 'hrm-backup-token';
 const BACKUP_AUTO_KEY = 'hrm-backup-auto';
 const BACKUP_INFO_KEY = 'hrm-backup-info'; // { date, bytes } ultimo backup
+const BACKUP_EXPIRY_KEY = 'hrm-backup-expiry'; // data di scadenza del token (YYYY-MM-DD, facoltativa)
 let backupBusy = false;
 let backupAutoTimer = null;
 
@@ -3226,7 +3231,9 @@ async function cloudBackupNow(manual) {
     if (manual) toast('☁️ Backup completato (' + fmtBackupBytes(json.length) + ')');
   } catch (e) {
     console.error('Backup cloud non riuscito:', e);
-    toast('⚠️ Backup non riuscito: ' + (e.message || 'errore di rete'));
+    const authErr = /bad credentials|unauthorized/i.test(e.message || '');
+    toast('⚠️ Backup non riuscito: ' + (e.message || 'errore di rete') +
+      (authErr ? ' — token scaduto o non valido: generane uno nuovo su GitHub e incollalo in Zone → Backup' : ''));
   } finally {
     backupBusy = false;
   }
@@ -3270,6 +3277,8 @@ function saveBackupConfig() {
   const repo = (document.getElementById('backup-repo').value || '').trim();
   const token = (document.getElementById('backup-token').value || '').trim();
   const auto = document.getElementById('backup-auto').checked;
+  const expEl = document.getElementById('backup-expiry');
+  if (expEl) localStorage.setItem(BACKUP_EXPIRY_KEY, (expEl.value || '').trim());
   localStorage.setItem(BACKUP_REPO_KEY, repo);
   // campo vuoto = non toccare il token già salvato
   if (token) localStorage.setItem(BACKUP_TOKEN_KEY, token);
@@ -3288,17 +3297,29 @@ function renderBackupUI() {
     tokEl.value = '';
     tokEl.placeholder = cfg.token ? '✓ token salvato — lascia vuoto per tenerlo' : 'github_pat_…';
   }
+  const expEl = document.getElementById('backup-expiry');
+  if (expEl) expEl.value = localStorage.getItem(BACKUP_EXPIRY_KEY) || '';
   const autoEl = document.getElementById('backup-auto');
   if (autoEl) autoEl.checked = cfg.auto;
   const stEl = document.getElementById('backup-status');
   if (stEl) {
     let info = null;
     try { info = JSON.parse(localStorage.getItem(BACKUP_INFO_KEY) || 'null'); } catch { }
-    stEl.textContent = info
+    // avviso pre-scadenza del token (se l'utente ha impostato la data)
+    const expiry = (localStorage.getItem(BACKUP_EXPIRY_KEY) || '').trim();
+    let expMsg = '';
+    if (expiry) {
+      const days = Math.ceil((new Date(expiry + 'T23:59:59').getTime() - Date.now()) / 86400000);
+      if (days < 0) expMsg = ' 🚨 Token SCADUTO: generane uno nuovo su GitHub e incollalo qui sopra';
+      else if (days <= 7) expMsg = ' 🚨 Il token scade tra ' + days + ' giorni: generane uno nuovo ora';
+      else if (days <= 30) expMsg = ' ⚠️ Il token scade tra ' + days + ' giorni';
+      else expMsg = ' · il token scade tra ' + days + ' giorni';
+    }
+    stEl.textContent = (info
       ? 'Ultimo backup: ' + new Date(info.date).toLocaleDateString('it-IT') + ' ' +
         new Date(info.date).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) +
         ' · ' + fmtBackupBytes(info.bytes || 0)
-      : 'Backup mai eseguito';
+      : 'Backup mai eseguito') + expMsg;
   }
 }
 
