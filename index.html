@@ -279,6 +279,12 @@
   }
   .settings-note { font-size: 12px; color: var(--muted); margin-top: 8px; text-align: center; }
 
+  /* ── BACKUP CLOUD ── */
+  #backup-repo, #backup-token { width: 100%; max-width: 340px; text-align: left; font-family: var(--mono); font-size: 12px; }
+  .backup-row-btns { display: flex; gap: 8px; margin-top: 8px; }
+  .backup-row-btns .settings-btn { flex: 1; }
+  #backup-auto-row .zone-inputs input[type="checkbox"] { width: auto; margin: 0; }
+
   /* ── UTILS ── */
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
   .toast {
@@ -954,6 +960,34 @@
 
     <button class="settings-btn" onclick="saveZones()">Salva Zone</button>
     <p class="settings-note">Le zone vengono salvate nel dispositivo e persistono tra le sessioni.</p>
+  </div>
+
+  <div class="settings-section">
+    <h2>☁️ Backup su GitHub</h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Backup completo su una tua repo GitHub <b>privata</b>: archivio salite (con sezioni e correzioni DEM), registro ascensioni, sessioni, tracce GPX, zone e pesi. Ogni backup è una versione datata: le versioni precedenti restano nella cronologia della repo, recuperabili dalla pagina del file su GitHub.</p>
+    <div class="zone-settings-card">
+      <div class="zone-setting-row">
+        <label>Repo privata</label>
+        <div class="zone-inputs"><input type="text" id="backup-repo" placeholder="utente/nome-repo" autocapitalize="off" autocorrect="off" autocomplete="off"></div>
+      </div>
+      <div class="zone-setting-row">
+        <label>Token GitHub</label>
+        <div class="zone-inputs"><input type="password" id="backup-token" placeholder="github_pat_…" autocomplete="off"></div>
+      </div>
+      <div class="zone-setting-row" id="backup-auto-row">
+        <label>Backup automatico</label>
+        <div class="zone-inputs" style="font-size:12px;color:var(--muted);">
+          <input type="checkbox" id="backup-auto" checked style="width:auto;"> <span for="backup-auto">a fine sessione/traccia e dopo le modifiche</span>
+        </div>
+      </div>
+    </div>
+    <button class="settings-btn" onclick="saveBackupConfig()">Salva configurazione</button>
+    <div class="backup-row-btns">
+      <button class="settings-btn" onclick="cloudBackupNow(true)">☁️ Backup ora</button>
+      <button class="settings-btn" style="background:var(--card);color:#ccc;" onclick="cloudBackupRestore()">⬇️ Ripristina dal cloud</button>
+    </div>
+    <p class="settings-note" id="backup-status">Backup mai eseguito</p>
+    <p class="settings-note" style="font-size:11px;line-height:1.5;margin-top:4px;">Come creare il token: github.com → Settings → Developer settings → Fine-grained tokens → Generate new token → Repository access: solo la repo del backup → Permissions → Contents: Read and write. Il token resta solo su questo telefono e non viene mai scritto nel file di backup.</p>
   </div>
 
   <div class="settings-section">
@@ -1701,6 +1735,7 @@ function stopSession() {
   saveSessionsToStorage();
   renderHistory();
   toast('Sessione salvata ✓');
+  scheduleAutoBackup(); // backup cloud silenzioso a fine sessione (se configurato)
 }
 
 // ── HISTORY ────────────────────────────────────────────────────
@@ -1830,6 +1865,7 @@ function loadZoneInputs() {
   });
   if (userWeightKg) document.getElementById('user-weight-kg').value = userWeightKg;
   if (bikeGearKg) document.getElementById('bike-gear-kg').value = bikeGearKg;
+  renderBackupUI(); // sezione Backup nelle impostazioni
 }
 
 function saveZones() {
@@ -2016,6 +2052,7 @@ async function saveClimbs() {
   try {
     await idbClearClimbs();
     for (const c of climbs) await idbPutClimb(c);
+    scheduleAutoBackup(); // backup cloud silenzioso (se configurato)
   } catch (e) { console.error('Salvataggio salite non riuscito:', e); }
 }
 
@@ -3067,6 +3104,203 @@ document.addEventListener('touchend', (e) => {
     bellLastTapT = now; bellLastTapX = t.clientX; bellLastTapY = t.clientY;
   }
 }, { passive: true });
+
+// ══════════════════════════════════════════════════════════════
+// ── BACKUP CLOUD (GitHub) ─────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+// Backup completo dell'app su una repo GitHub PRIVATA dell'utente
+// (REST API contents). Ogni backup è un commit: la cronologia di
+// git conserva tutte le versioni, ripristinabili dall'interfaccia
+// web di GitHub. Token fine-grained limitato alla sola repo, con
+// solo il permesso Contents: Read and write. Il token non entra
+// MAI nel file di backup: resta solo nel telefono.
+const BACKUP_PATH = 'cardio-backup.json';
+const BACKUP_REPO_KEY = 'hrm-backup-repo';
+const BACKUP_TOKEN_KEY = 'hrm-backup-token';
+const BACKUP_AUTO_KEY = 'hrm-backup-auto';
+const BACKUP_INFO_KEY = 'hrm-backup-info'; // { date, bytes } ultimo backup
+let backupBusy = false;
+let backupAutoTimer = null;
+
+function backupConfig() {
+  return {
+    repo: (localStorage.getItem(BACKUP_REPO_KEY) || '').trim(),
+    token: (localStorage.getItem(BACKUP_TOKEN_KEY) || '').trim(),
+    auto: localStorage.getItem(BACKUP_AUTO_KEY) !== '0',
+  };
+}
+
+function ghHeaders(cfg) {
+  return {
+    Authorization: 'Bearer ' + cfg.token,
+    Accept: 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+  };
+}
+
+function fmtBackupBytes(n) {
+  if (n >= 1048576) return (n / 1048576).toFixed(1) + ' MB';
+  if (n >= 1024) return Math.round(n / 1024) + ' KB';
+  return n + ' B';
+}
+
+// base64 di una stringa UTF-8 (btoa da solo rifiuta i caratteri >255,
+// e il backup contiene testo italiano e nomi di luogo)
+function utf8ToBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) {
+    bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  }
+  return btoa(bin);
+}
+
+// Dump completo: localStorage (chiavi hrm-*) + IndexedDB (salite, tracce).
+// Esclude il token (credenziale: non si backuppa nel cloud) e i pacchetti
+// mappa offline (i tile non sono dati dell'app, si riscaricano).
+async function buildBackupDump() {
+  const dump = { kind: 'cardio-app-backup', version: 1, date: new Date().toISOString(), localStorage: {}, idb: {} };
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('hrm-') && k !== 'hrm-offline-packs' && k !== BACKUP_TOKEN_KEY) {
+      dump.localStorage[k] = localStorage.getItem(k);
+    }
+  }
+  const db = await openClimbsDB();
+  for (const store of [IDB_STORE_CLIMBS, IDB_STORE_TRACKS]) {
+    dump.idb[store] = await new Promise((res, rej) => {
+      const rq = db.transaction(store, 'readonly').objectStore(store).getAll();
+      rq.onsuccess = () => res(rq.result || []);
+      rq.onerror = () => rej(rq.error);
+    });
+  }
+  db.close();
+  return dump;
+}
+
+// Applica un dump (ripristino): localStorage + IndexedDB
+async function applyBackupDump(dump) {
+  if (!dump || dump.kind !== 'cardio-app-backup') throw new Error('file di backup non valido');
+  for (const [k, v] of Object.entries(dump.localStorage || {})) localStorage.setItem(k, v);
+  const db = await openClimbsDB();
+  for (const store of [IDB_STORE_CLIMBS, IDB_STORE_TRACKS]) {
+    const items = (dump.idb || {})[store] || [];
+    if (!items.length) continue;
+    await new Promise((res, rej) => {
+      const tx = db.transaction(store, 'readwrite');
+      for (const it of items) tx.objectStore(store).put(it);
+      tx.oncomplete = () => res();
+      tx.onerror = () => rej(tx.error);
+    });
+  }
+  db.close();
+}
+
+async function cloudBackupNow(manual) {
+  const cfg = backupConfig();
+  if (!cfg.repo || !cfg.token) { if (manual) toast('⚠️ Configura repo e token in Zone → Backup'); return; }
+  if (backupBusy) return;
+  if (!navigator.onLine) { if (manual) toast('⚠️ Sei offline: backup rimandato'); return; }
+  backupBusy = true;
+  try {
+    const json = JSON.stringify(await buildBackupDump());
+    // SHA del file esistente: serve a GitHub per aggiornare, senza crea
+    let sha = null;
+    const cur = await fetch('https://api.github.com/repos/' + cfg.repo + '/contents/' + BACKUP_PATH, { headers: ghHeaders(cfg) });
+    if (cur.ok) sha = (await cur.json()).sha;
+    const res = await fetch('https://api.github.com/repos/' + cfg.repo + '/contents/' + BACKUP_PATH, {
+      method: 'PUT',
+      headers: ghHeaders(cfg),
+      body: JSON.stringify({
+        message: 'Backup Cardio-App ' + new Date().toISOString(),
+        content: utf8ToBase64(json),
+        ...(sha ? { sha } : {}),
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || ('HTTP ' + res.status));
+    }
+    localStorage.setItem(BACKUP_INFO_KEY, JSON.stringify({ date: Date.now(), bytes: json.length }));
+    renderBackupUI();
+    if (manual) toast('☁️ Backup completato (' + fmtBackupBytes(json.length) + ')');
+  } catch (e) {
+    console.error('Backup cloud non riuscito:', e);
+    toast('⚠️ Backup non riuscito: ' + (e.message || 'errore di rete'));
+  } finally {
+    backupBusy = false;
+  }
+}
+
+async function cloudBackupRestore() {
+  const cfg = backupConfig();
+  if (!cfg.repo || !cfg.token) { toast('⚠️ Configura repo e token in Zone → Backup'); return; }
+  if (sessionActive || trackRecording) { toast('⚠️ Ferma sessione o traccia prima di ripristinare'); return; }
+  if (!confirm('Ripristinare il backup dal cloud? I dati attuali di salite, sessioni, tracce e impostazioni verranno sovrascritti.')) return;
+  backupBusy = true;
+  try {
+    const res = await fetch('https://api.github.com/repos/' + cfg.repo + '/contents/' + BACKUP_PATH, {
+      headers: Object.assign({}, ghHeaders(cfg), { Accept: 'application/vnd.github.raw' }),
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status + (res.status === 404 ? ' — nessun backup in repo' : ''));
+    const dump = await res.json();
+    await applyBackupDump(dump);
+    renderBackupUI();
+    toast('✅ Backup ripristinato (' + (dump.idb.climbs || []).length + ' salite, ' + (dump.idb.tracks || []).length + ' tracce) — riavvio…');
+    setTimeout(() => location.reload(), 1500);
+  } catch (e) {
+    console.error('Ripristino backup non riuscito:', e);
+    toast('⚠️ Ripristino non riuscito: ' + (e.message || 'errore di rete'));
+  } finally {
+    backupBusy = false;
+  }
+}
+
+// Backup automatico silenzioso: programmato a fine sessione/traccia e
+// dopo ogni salvataggio di salite/tracce. Debounce 60 s: raffiche di
+// modifiche = un solo backup. Errori: solo console (niente toast spam).
+function scheduleAutoBackup() {
+  const cfg = backupConfig();
+  if (!cfg.auto || !cfg.repo || !cfg.token || backupBusy) return;
+  clearTimeout(backupAutoTimer);
+  backupAutoTimer = setTimeout(() => { cloudBackupNow(false); }, 60000);
+}
+
+function saveBackupConfig() {
+  const repo = (document.getElementById('backup-repo').value || '').trim();
+  const token = (document.getElementById('backup-token').value || '').trim();
+  const auto = document.getElementById('backup-auto').checked;
+  localStorage.setItem(BACKUP_REPO_KEY, repo);
+  // campo vuoto = non toccare il token già salvato
+  if (token) localStorage.setItem(BACKUP_TOKEN_KEY, token);
+  localStorage.setItem(BACKUP_AUTO_KEY, auto ? '1' : '0');
+  renderBackupUI();
+  toast('✓ Configurazione backup salvata');
+}
+
+function renderBackupUI() {
+  const repoEl = document.getElementById('backup-repo');
+  if (!repoEl) return;
+  const cfg = backupConfig();
+  repoEl.value = cfg.repo;
+  const tokEl = document.getElementById('backup-token');
+  if (tokEl) {
+    tokEl.value = '';
+    tokEl.placeholder = cfg.token ? '✓ token salvato — lascia vuoto per tenerlo' : 'github_pat_…';
+  }
+  const autoEl = document.getElementById('backup-auto');
+  if (autoEl) autoEl.checked = cfg.auto;
+  const stEl = document.getElementById('backup-status');
+  if (stEl) {
+    let info = null;
+    try { info = JSON.parse(localStorage.getItem(BACKUP_INFO_KEY) || 'null'); } catch { }
+    stEl.textContent = info
+      ? 'Ultimo backup: ' + new Date(info.date).toLocaleDateString('it-IT') + ' ' +
+        new Date(info.date).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) +
+        ' · ' + fmtBackupBytes(info.bytes || 0)
+      : 'Backup mai eseguito';
+  }
+}
 
 // ══════════════════════════════════════════════════════════════
 // ── MAPPA ────────────────────────────────────────────────────
@@ -4332,6 +4566,7 @@ async function saveTracks() {
   try {
     await idbClearTracks();
     for (const t of tracks) await idbPutTrack(t);
+    scheduleAutoBackup(); // backup cloud silenzioso (se configurato)
   } catch (e) {
     // Mai più fallimenti silenziosi: l'utente deve sapere che il
     // salvataggio non è andato a buon fine
