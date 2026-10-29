@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#0a0a0f">
+<meta name="theme-color" content="#0a0a12">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icona.png">
@@ -13,73 +13,104 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <style>
   :root {
-    --bg:       #0a0a0f;
-    --surface:  #13131c;
-    --card:     #1a1a26;
+    --bg:       #0a0a12;
+    --surface:  rgba(18,20,46,.96);
+    --card:     rgba(18,20,46,.72);
     --border:   #2a2a3e;
     --text:     #e8e8f0;
-    --muted:    #cfcfe6;
-    --accent:   #4fc3f7;
+    --muted:    #b9c0d8;
+    --accent:   #00ff41;
+    --accent-on:#7dff9e;
+    --red:      #ff2e2e;
     --z1:       #4caf93;
     --z2:       #8bc34a;
     --z3:       #ffc107;
     --z4:       #ff7043;
     --z5:       #e53935;
     --radius:   14px;
-    --mono:     'Courier New', monospace;
+    --mono:     'Consolas', 'Courier New', monospace;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
   body {
-    background: var(--bg);
+    background-color: #0a0a12;
+    background-image: linear-gradient(160deg, #12122e 0%, #1a1a40 55%, #232355 100%);
+    background-attachment: fixed;
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     min-height: 100dvh;
     overflow-x: hidden;
   }
+  /* Nebulose spaziali (tema "Countdown") */
+  body::before {
+    content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(ellipse 320px 190px at 82% 4%,   rgba(58,134,255,.22), transparent 70%),
+      radial-gradient(ellipse 380px 240px at 8% 30%,   rgba(124,58,237,.20), transparent 70%),
+      radial-gradient(ellipse 300px 200px at 85% 82%,  rgba(0,255,65,.07),  transparent 70%);
+  }
+  /* Stelline sparse */
+  body::after {
+    content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background-image:
+      radial-gradient(1.4px 1.4px at 22px 38px,    rgba(255,255,255,.85), transparent 60%),
+      radial-gradient(1px 1px     at 121px 95px,   rgba(255,255,255,.55), transparent 60%),
+      radial-gradient(1.6px 1.6px at 205px 51px,   rgba(255,255,255,.9),  transparent 60%),
+      radial-gradient(1px 1px     at 288px 148px,  rgba(255,255,255,.5),  transparent 60%),
+      radial-gradient(1.2px 1.2px at 74px 212px,   rgba(255,255,255,.7),  transparent 60%),
+      radial-gradient(1px 1px     at 166px 268px,  rgba(255,255,255,.5),  transparent 60%),
+      radial-gradient(1.5px 1.5px at 246px 200px,  rgba(255,255,255,.8),  transparent 60%),
+      radial-gradient(1.1px 1.1px at 312px 305px,  rgba(255,255,255,.6),  transparent 60%);
+    background-size: 340px 340px;
+  }
 
   /* ── NAV ── */
   nav {
     display: flex;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
+    background: rgba(10,10,18,.55);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(0,255,65,.15);
     position: sticky; top: 0; z-index: 100;
-    padding: 0 4px;
+    padding: 8px 4px;
   }
   nav button {
-    flex: 1; padding: 14px 1px; background: none; border: none;
-    color: #e040fb; font-size: 12.5px; font-weight: 800;
-    letter-spacing: .01em; text-transform: uppercase; cursor: pointer;
-    border-bottom: 3px solid transparent; transition: all .2s;
+    flex: 1; padding: 9px 1px; background: none; border: none;
+    color: var(--muted); font-size: 12.5px; font-weight: 800;
+    letter-spacing: .04em; text-transform: uppercase; cursor: pointer;
+    border-radius: 10px; transition: all .2s;
   }
   nav button.active {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-    background: rgba(79,195,247,.08);
-    border-radius: 8px 8px 0 0;
+    color: var(--accent-on);
+    background: rgba(0,255,65,.15);
   }
 
-  /* Tasto accesso Zone in fondo al Monitor — stessa grafica fluo del nav */
+  /* Tasto accesso Zone in fondo al Monitor */
   .zone-access-btn {
-    display: block; width: 100%; margin-top: 16px;
-    padding: 14px 0; background: rgba(224,64,251,.08);
-    border: 1px solid rgba(224,64,251,.3); border-radius: 12px;
-    color: #e040fb; font-size: 14px; font-weight: 800;
-    letter-spacing: .04em; text-transform: uppercase; cursor: pointer;
+    display: block; width: 80px; margin: 16px auto 0;
+    padding: 7px 0; background: rgba(18,20,46,.72);
+    border: 1px solid rgba(0,255,65,.45); border-radius: 13px;
+    color: var(--accent-on); font-size: 11.5px; font-weight: 700;
+    cursor: pointer; transition: background .2s;
   }
-  .zone-access-btn:active { background: rgba(224,64,251,.18); }
+  .zone-access-btn:active { background: rgba(0,255,65,.18); }
 
   /* ── VIEWS ── */
-  .view { display: none; padding: 20px 16px 100px; }
+  .view { display: none; padding: 20px 16px 100px; position: relative; }
   .view.active { display: block; }
+
+  /* Filigrana cardiogramma-montagna con bici da corsa (come il logo dell'app) */
+  .app-watermark {
+    position: absolute; left: 0; right: 0; bottom: 96px;
+    width: 100%; height: 190px; opacity: .10;
+    pointer-events: none; z-index: -1;
+  }
 
   /* ── MONITOR VIEW ── */
   .status-bar {
     display: flex; align-items: center; gap: 10px;
-    margin-bottom: 20px; padding: 12px 16px;
-    background: var(--card); border-radius: var(--radius);
-    border: 1px solid var(--border);
+    margin-bottom: 14px; padding: 10px 2px;
+    background: none; border: none;
   }
   .status-dot {
     width: 10px; height: 10px; border-radius: 50%;
@@ -88,12 +119,12 @@
   }
   .status-dot.connected { background: var(--z1); box-shadow: 0 0 8px var(--z1); }
   .status-dot.connecting { background: var(--z3); animation: pulse 1s infinite; }
-  #status-text { font-size: 15px; color: #ddd; flex: 1; font-weight: 600; }
+  #status-text { font-size: 12px; color: var(--muted); flex: 1; font-weight: 600; }
   #wake-lock-ind { font-size: 14px; margin-right: 6px; }
   #connect-btn {
-    padding: 8px 18px; border-radius: 20px; border: none;
-    background: var(--accent); color: var(--bg);
-    font-size: 13px; font-weight: 700; cursor: pointer;
+    padding: 5px 14px; border-radius: 7px; border: none;
+    background: rgba(0,255,65,.16); color: var(--accent-on);
+    font-size: 11px; font-weight: 700; cursor: pointer;
     transition: opacity .2s;
   }
   #connect-btn:disabled { opacity: .4; cursor: not-allowed; }
@@ -160,94 +191,120 @@
     100% { opacity: 0; box-shadow: inset 0 0 60px 18px rgba(233,30,140,0); }
   }
 
-  .hr-label { font-size: 11px; letter-spacing: .1em; color: #aaa; text-transform: uppercase; margin-bottom: 8px; }
+  .hr-label { font-size: 10px; letter-spacing: .18em; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
   .hr-circle {
     width: 210px; height: 210px; border-radius: 50%;
-    background: #fff;
-    border: 10px solid var(--muted);
+    background: rgba(13,15,44,.88);
+    border: 7px solid var(--accent);
+    box-shadow: 0 0 0 20px rgba(0,255,65,.22);
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     transition: border-color .4s;
-    box-shadow: 0 0 32px rgba(0,0,0,.5);
     cursor: pointer;
   }
   .hr-value {
-    font-size: 96px; font-weight: 900; line-height: 1;
+    font-size: 64px; font-weight: 900; line-height: 1;
     font-variant-numeric: tabular-nums;
-    color: #111; font-family: var(--mono);
+    color: #fff; font-family: var(--mono);
+    -webkit-text-stroke: 4px var(--red);
+    paint-order: stroke fill;
   }
-  .hr-unit { font-size: 14px; color: #555; margin-top: -4px; font-weight: 700; letter-spacing: .08em; }
-  .zone-badge {
-    display: inline-block; margin-top: 10px;
-    padding: 5px 14px; border-radius: 20px;
-    font-size: 12px; font-weight: 700; letter-spacing: .05em;
-    background: var(--border); color: var(--muted);
-    transition: all .4s;
-  }
-  /* ZONE BAR — vertical on the right */
+  .hr-unit { font-size: 13px; color: var(--muted); margin-top: 2px; font-weight: 700; letter-spacing: .1em; }
+  .zone-badge { display: none; } /* la zona è già indicata dalle pillole a destra */
+  /* ZONE PILLS — colonna verticale a destra del cerchio */
   .hr-right {
-    width: 150px; display: flex; flex-direction: column; gap: 5px;
-    align-self: stretch; justify-content: space-between; padding: 4px 0;
-    flex-shrink: 0;
+    flex: 1; max-width: 110px; display: flex; flex-direction: column;
+    gap: 7px; align-self: stretch; justify-content: center;
+    padding: 1px 0; flex-shrink: 1;
   }
   .zone-bar-wrap { display: none; } /* replaced by hr-right */
   .zone-bar { display: none; }
   .zone-seg { display: none; }
   .zone-pill {
-    flex: 1; border-radius: 8px;
-    opacity: .22; transition: opacity .3s, box-shadow .3s;
+    height: 36px; border-radius: 8px; position: relative;
     display: flex; align-items: center; justify-content: center;
+    transition: box-shadow .3s;
   }
-  .zone-pill.active { opacity: 1; box-shadow: 0 0 10px rgba(255,255,255,.35); }
-  .zone-pill-label { font-size: 16px; font-weight: 900; color: rgba(0,0,0,.75); display: block; }
-
+  #pill-z1 { background: rgba(29,74,60,.85);   border: 1px solid rgba(76,175,147,.35); }
+  #pill-z2 { background: rgba(55,80,29,.85);   border: 1px solid rgba(139,195,74,.35); }
+  #pill-z3 { background: rgba(102,80,11,.95);   border: 1px solid rgba(255,193,7,.55); }
+  #pill-z4 { background: rgba(102,41,26,.85);   border: 1px solid rgba(255,112,67,.35); }
+  #pill-z5 { background: rgba(94,23,21,.85);    border: 1px solid rgba(229,57,53,.35); }
+  .zone-pill.active { z-index: 5; box-shadow: 0 0 0 3px rgba(255,255,255,.14); }
+  .zone-pill-label {
+    font-size: 15px; font-weight: 900; font-family: var(--mono);
+    color: #fff; -webkit-text-stroke: 1.5px var(--red);
+    paint-order: stroke fill;
+  }
+  .zone-pill.active .zone-pill-label { display: none; }
+  /* Zona attiva: lettering enorme in cromo con bagliore rosso, deborda dalla pillola (stile "EUROPE") */
+  .zone-pill.active::before {
+    content: 'Z1'; position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -54%);
+    font-family: var(--mono); font-weight: 900; font-size: 58px; line-height: 1;
+    background: linear-gradient(180deg, #ffffff 0%, #cfdaf6 42%, #6d7fae 50%, #eef4ff 58%, #8b9cc9 80%, #2e3c66 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    -webkit-text-stroke: 2.5px #05060f; paint-order: stroke fill;
+    filter: drop-shadow(0 0 7px rgba(255,46,46,.45));
+    pointer-events: none; white-space: nowrap;
+  }
+  #pill-z1.active::before { content: 'Z1'; }
+  #pill-z2.active::before { content: 'Z2'; }
+  #pill-z3.active::before { content: 'Z3'; }
+  #pill-z4.active::before { content: 'Z4'; }
+  #pill-z5.active::before { content: 'Z5'; }
   /* STATS GRID */
   /* STAT ROWS inline — label: valore sulla stessa riga */
   .stats-grid { display: flex; flex-direction: column; gap: 0; margin-bottom: 0;
-    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; flex: 1; }
+    background: var(--card); border: 1px solid rgba(0,255,65,.22); border-radius: var(--radius); overflow: hidden; flex: 1; }
   .stat-card {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 13px 16px; border-bottom: 1px solid var(--border);
+    padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,.08);
   }
   .stats-grid .stat-card:last-child { border-bottom: none; }
-  .stat-card .label { font-size: 16px; color: #ddd; font-weight: 700; }
-  .stat-card .value { font-size: 30px; font-weight: 900; font-family: var(--mono); color: #fff; }
+  .stat-card .label { font-size: 13.5px; color: var(--muted); font-weight: 700; }
+  .stat-card .value { font-size: 21px; font-weight: 900; font-family: var(--mono); color: #fff;
+    -webkit-text-stroke: 2px var(--red); paint-order: stroke fill; }
 
   /* SESSION CONTROLS — oval buttons alongside stats, fixed 150px */
   .session-controls { width: 150px; flex-shrink: 0; display: flex; flex-direction: column; gap: 6px; justify-content: center; align-items: center; }
   .btn-session {
-    width: 130px; height: 58px; border-radius: 29px; border: none;
+    width: 130px; height: 58px; border-radius: 12px; border: none;
     font-size: 13px; font-weight: 800; cursor: pointer; transition: opacity .2s;
     line-height: 1.2; text-align: center;
   }
   .btn-session:disabled { opacity: .3; cursor: not-allowed; }
-  #btn-start  { background: var(--z1); color: #0a1a12; }
-  #btn-pause  { background: var(--z3); color: #1a0e00; }
-  #btn-resume { background: var(--z2); color: #0a1a04; display: none; }
-  #btn-stop   { background: var(--z4); color: #1a0a00; }
+  #btn-start  { background: var(--accent); color: #06240f; box-shadow: 0 0 16px rgba(0,255,65,.3); }
+  #btn-pause  { background: rgba(255,193,7,.35); color: #1a0e00; }
+  #btn-resume { background: rgba(0,255,65,.12); color: var(--accent-on); border: 1px solid rgba(0,255,65,.55); display: none; }
+  #btn-stop   { background: rgba(255,112,67,.35); color: #1a0a00; }
 
   /* ZONE TIME BARS — sotto i bottoni */
-  .zone-times { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px; }
-  .zone-times h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: #aaa; margin-bottom: 12px; font-weight: 700; }
+  .zone-times { background: var(--card); border: 1px solid rgba(0,255,65,.22); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px; }
+  .zone-times h3 { font-size: 12.5px; text-transform: none; letter-spacing: 0; color: #fff; margin-bottom: 12px; font-weight: 700; }
   .zone-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
   .zone-row:last-child { margin-bottom: 0; }
-  .zone-name { width: 24px; font-size: 13px; font-weight: 800; }
-  .zone-track { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
-  .zone-fill { height: 100%; border-radius: 4px; transition: width .6s ease; width: 0%; }
-  .zone-pct { width: 38px; text-align: right; font-size: 13px; color: #bbb; font-family: var(--mono); font-weight: 700; }
+  .zone-name { width: 24px; font-size: 11.5px; font-weight: 900; font-family: var(--mono); }
+  .zone-track { flex: 1; height: 10px; background: rgba(255,255,255,.07); border-radius: 5px; overflow: hidden; }
+  .zone-fill { height: 100%; border-radius: 5px; transition: width .6s ease; width: 0%; }
+  .zone-pct { width: 38px; text-align: right; font-size: 10.5px; color: #e8e8f0; font-family: var(--mono); font-weight: 700; }
 
   /* ── HISTORY VIEW ── */
   .history-empty { text-align: center; color: var(--muted); padding: 60px 0; font-size: 14px; }
   .session-card {
-    background: var(--card); border: 1px solid var(--border);
+    background: var(--card); border: 1px solid rgba(0,255,65,.22);
     border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
   }
   .session-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-  .session-date { font-size: 13px; color: var(--muted); }
-  .session-duration { font-size: 22px; font-weight: 700; font-family: var(--mono); }
+  .session-date { font-size: 10.5px; color: var(--muted); }
+  .session-duration { font-size: 19px; font-weight: 900; font-family: var(--mono); color: #fff;
+    -webkit-text-stroke: 1.8px var(--red); paint-order: stroke fill; }
   .session-stats { display: flex; gap: 20px; margin-bottom: 12px; }
-  .session-stat .sl { font-size: 11px; color: var(--muted); }
-  .session-stat .sv { font-size: 18px; font-weight: 700; font-family: var(--mono); }
+  .session-stat .sl { font-size: 9.5px; color: var(--muted); }
+  .session-stat .sv { font-size: 16px; font-weight: 900; font-family: var(--mono); color: #fff;
+    -webkit-text-stroke: 1.5px var(--red); paint-order: stroke fill; }
+  .session-card .track-btn.nav { background: rgba(0,255,65,.12); border: 1px solid rgba(0,255,65,.4);
+    color: var(--accent-on); border-radius: 8px; font-size: 10.5px; font-weight: 700; }
   .mini-zones { display: flex; gap: 4px; height: 40px; align-items: flex-end; }
   .mini-zone-bar { flex: 1; border-radius: 2px 2px 0 0; min-height: 4px; transition: height .5s; }
   .del-btn { background: none; border: 1px solid var(--border); color: var(--muted); padding: 5px 10px; border-radius: 8px; font-size: 12px; cursor: pointer; }
@@ -276,7 +333,7 @@
   .zone-inputs span { color: var(--muted); font-size: 12px; }
   .settings-btn {
     width: 100%; padding: 14px; border-radius: var(--radius); border: none;
-    background: var(--accent); color: var(--bg);
+    background: var(--accent); color: #06240f;
     font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 4px;
   }
   .settings-note { font-size: 12px; color: var(--muted); margin-top: 8px; text-align: center; }
@@ -306,20 +363,20 @@
   /* ── SALITE ── */
   /* Salita library */
   .climb-lib-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-  .climb-lib-header h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+  .climb-lib-header h2 { font-size: 17px; text-transform: none; letter-spacing: 0; color: #fff; font-weight: 800; }
   .btn-add-climb {
-    padding: 8px 16px; border-radius: 20px; border: none;
-    background: var(--accent); color: var(--bg);
-    font-size: 13px; font-weight: 700; cursor: pointer;
+    padding: 8px 16px; border-radius: 9px; border: none;
+    background: var(--accent); color: #06240f;
+    font-size: 12px; font-weight: 800; cursor: pointer;
   }
   .climb-card {
-    background: var(--card); border: 1px solid var(--border);
+    background: var(--card); border: 1px solid rgba(0,255,65,.22);
     border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px;
     cursor: pointer; transition: border-color .2s;
   }
   .climb-card:hover { border-color: var(--accent); }
   .climb-card-header { display: flex; justify-content: space-between; align-items: center; }
-  .climb-card-name { font-size: 19px; font-weight: 800; }
+  .climb-card-name { font-size: 14px; font-weight: 700; }
   .climb-card-del { background: none; border: 1px solid var(--border); color: var(--muted); padding: 4px 9px; border-radius: 8px; font-size: 11px; cursor: pointer; }
   .climb-empty { text-align: center; color: var(--muted); padding: 40px 0; font-size: 14px; }
 
@@ -346,7 +403,7 @@
     flex: 1; padding: 13px; border-radius: var(--radius); border: none;
     font-size: 14px; font-weight: 700; cursor: pointer;
   }
-  .modal-btn.primary { background: var(--accent); color: var(--bg); }
+  .modal-btn.primary { background: var(--accent); color: #06240f; }
   .modal-btn.cancel  { background: var(--card); color: var(--text); }
   .upload-area {
     border: 2px dashed var(--border); border-radius: var(--radius);
@@ -406,27 +463,29 @@
   /* FULLSCREEN BTN */
   .fs-btn {
     width: 58px; height: 58px; border-radius: 50%; flex-shrink: 0;
-    background: rgba(79,195,247,.12); border: 2px solid var(--accent);
+    background: rgba(0,255,65,.12); border: 2px solid var(--accent);
     color: var(--accent); font-size: 24px; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     font-weight: 900; transition: background .2s;
   }
-  .fs-btn:active { background: rgba(79,195,247,.35); }
+  .fs-btn:active { background: rgba(0,255,65,.35); }
 
   /* ── MAPPA ── */
   #view-map { padding: 0; }
   .map-wrap { position: relative; height: calc(100dvh - 54px); width: 100%; }
-  #leaflet-map { position: absolute; inset: 0; z-index: 1; background: #1a1a26; }
+  #leaflet-map { position: absolute; inset: 0; z-index: 1; background: #0d1028; }
 
   .map-hr-overlay {
     position: absolute; top: 12px; left: 12px; z-index: 500;
     width: 74px; height: 74px; border-radius: 50%;
-    background: #fff; border: 5px solid var(--muted);
+    background: rgba(13,15,44,.92); border: 5px solid var(--accent);
+    backdrop-filter: blur(4px);
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     box-shadow: 0 2px 14px rgba(0,0,0,.6); transition: border-color .4s;
   }
-  .map-hr-num { font-size: 24px; font-weight: 900; color: #111; font-family: var(--mono); line-height: 1; }
-  .map-hr-unit { font-size: 9px; color: #555; font-weight: 700; }
+  .map-hr-num { font-size: 24px; font-weight: 900; color: #fff; font-family: var(--mono); line-height: 1;
+    -webkit-text-stroke: 1.5px var(--red); paint-order: stroke fill; }
+  .map-hr-unit { font-size: 9px; color: var(--muted); font-weight: 700; }
 
 
   .map-fs-btn { position: absolute; top: 12px; right: 12px; z-index: 500; }
@@ -434,15 +493,15 @@
   .map-locate-btn {
     position: absolute; top: 50%; right: 12px; z-index: 500;
     transform: translateY(-50%);
-    width: 54px; height: 54px; border-radius: 50%; border: 2px solid var(--border);
-    background: rgba(19,19,28,.92); color: #aaa; font-size: 24px;
+    width: 54px; height: 54px; border-radius: 50%; border: 2px solid rgba(0,255,65,.25);
+    background: rgba(18,20,46,.85); color: var(--muted); font-size: 24px;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; backdrop-filter: blur(4px);
     transition: color .2s, border-color .2s, background .2s;
   }
   .map-locate-btn.active {
     color: var(--accent); border-color: var(--accent);
-    background: rgba(79,195,247,.15);
+    background: rgba(0,255,65,.15);
   }
 
   /* Cursore GPS direzionale (triangolo) */
@@ -509,14 +568,15 @@
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px;
   }
   .map-stat-card {
-    background: rgba(19,19,28,.94); border: 1px solid var(--border);
+    background: rgba(13,15,44,.88); border: 1px solid rgba(0,255,65,.18);
     border-radius: 11px; padding: 7px 4px; text-align: center;
     backdrop-filter: blur(4px);
   }
-  .map-stat-card .msl { font-size: 10.5px; color: #ccc; text-transform: uppercase; letter-spacing: .02em; font-weight: 600; margin-bottom: 1px; }
+  .map-stat-card .msl { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .02em; font-weight: 600; margin-bottom: 1px; }
   .map-stat-card .msv-row { display: flex; align-items: baseline; justify-content: center; gap: 3px; }
-  .map-stat-card .msv { font-size: 30px; font-weight: 900; font-family: var(--mono); color: #fff; line-height: 1.1; letter-spacing: -.01em; }
-  .map-stat-card .msu { font-size: 12px; color: #bbb; font-weight: 700; }
+  .map-stat-card .msv { font-size: 21px; font-weight: 900; font-family: var(--mono); color: #fff; line-height: 1.1; letter-spacing: -.01em;
+    -webkit-text-stroke: 1.3px var(--red); paint-order: stroke fill; }
+  .map-stat-card .msu { font-size: 12px; color: var(--muted); font-weight: 700; }
 
   .map-record-btns { display: flex; gap: 8px; }
   .map-rec-btn {
@@ -524,17 +584,17 @@
     font-size: 13px; font-weight: 800; cursor: pointer;
   }
   .map-rec-btn:disabled { opacity: .3; cursor: not-allowed; }
-  #map-btn-start  { background: var(--z1); color: #0a1a12; }
-  #map-btn-pause  { background: var(--z3); color: #1a0e00; }
-  #map-btn-resume { background: var(--z2); color: #0a1a04; display: none; }
-  #map-btn-stop   { background: var(--z4); color: #1a0a00; }
+  #map-btn-start  { background: var(--accent); color: #06240f; }
+  #map-btn-pause  { background: rgba(255,193,7,.35); color: #1a0e00; }
+  #map-btn-resume { background: rgba(139,195,74,.35); color: #0a1a04; display: none; }
+  #map-btn-stop   { background: rgba(255,112,67,.35); color: #1a0a00; }
 
   .map-topbar {
     position: absolute; top: 12px; left: 96px; right: 64px; z-index: 500;
     display: flex; gap: 8px;
   }
   .map-menu-btn {
-    background: rgba(19,19,28,.92); border: 1px solid var(--border);
+    background: rgba(18,20,46,.85); border: 1px solid rgba(0,255,65,.25);
     color: var(--text); padding: 9px 14px; border-radius: 20px;
     font-size: 12px; font-weight: 700; cursor: pointer; backdrop-filter: blur(4px);
     white-space: nowrap;
@@ -577,8 +637,8 @@
     flex: 1; padding: 9px 4px; border-radius: 9px; border: none;
     font-size: 11.5px; font-weight: 700; cursor: pointer;
   }
-  .track-btn.nav { background: var(--z2); color: #0a1a04; }
-  .track-btn.dl  { background: var(--accent); color: var(--bg); }
+  .track-btn.nav { background: rgba(139,195,74,.08); border: 1px solid rgba(139,195,74,.35); color: #b5e88a; }
+  .track-btn.dl  { background: var(--accent); color: #06240f; }
   .track-btn.del { background: var(--card); border: 1px solid var(--border); color: #ccc; }
 
   .tracks-sheet-header {
@@ -601,17 +661,17 @@
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .btn-toggle-overlay-compact.on {
-    background: rgba(79,195,247,.15); border-color: var(--accent); color: var(--accent);
+    background: rgba(0,255,65,.15); border-color: var(--accent); color: var(--accent);
   }
 
   .climb-history-access-btn {
     display: block; width: 100%; margin-top: 16px;
-    padding: 14px 0; background: rgba(79,195,247,.08);
-    border: 1px solid rgba(79,195,247,.3); border-radius: 12px;
-    color: var(--accent); font-size: 14px; font-weight: 800;
+    padding: 11px 0; background: rgba(0,255,65,.08);
+    border: 1px solid rgba(0,255,65,.3); border-radius: 12px;
+    color: var(--accent-on); font-size: 11.5px; font-weight: 700;
     letter-spacing: .02em; cursor: pointer;
   }
-  .climb-history-access-btn:active { background: rgba(79,195,247,.18); }
+  .climb-history-access-btn:active { background: rgba(0,255,65,.18); }
 
   /* Previsioni prestazioni */
   .pred-period-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
@@ -640,7 +700,7 @@
     flex: 1; padding: 9px 4px; border-radius: 9px; border: 1px solid var(--border);
     background: var(--card); color: #aaa; font-size: 12px; font-weight: 700; cursor: pointer;
   }
-  .pred-mode-tab.active { background: rgba(79,195,247,.15); border-color: var(--accent); color: var(--accent); }
+  .pred-mode-tab.active { background: rgba(0,255,65,.15); border-color: var(--accent); color: var(--accent); }
   .pred-select {
     width: 100%; padding: 11px; background: var(--card); border: 1px solid var(--border);
     border-radius: 10px; color: var(--text); font-size: 14px; margin-bottom: 6px;
@@ -682,7 +742,7 @@
   .merge-action-bar span { flex: 1; font-size: 12px; color: #ccc; }
   .btn-merge {
     padding: 8px 16px; border-radius: 20px; border: none;
-    background: var(--accent); color: var(--bg); font-size: 12px; font-weight: 800;
+    background: var(--accent); color: #06240f; font-size: 12px; font-weight: 800;
     cursor: pointer;
   }
   .btn-merge:disabled { opacity: .35; cursor: not-allowed; }
@@ -708,7 +768,7 @@
   .offline-progress-label { font-size: 12px; color: #ccc; text-align: center; }
   .btn-offline-dl {
     width: 100%; padding: 13px; border-radius: 12px; border: none;
-    background: var(--accent); color: var(--bg); font-size: 14px; font-weight: 800; cursor: pointer;
+    background: var(--accent); color: #06240f; font-size: 14px; font-weight: 800; cursor: pointer;
   }
   .btn-offline-dl:disabled { opacity: .4; cursor: not-allowed; }
   .offline-pack-card {
@@ -718,7 +778,7 @@
   }
 
   /* ── CORREZIONE ALTIMETRIA (DEM) ── */
-  .map-menu-btn.on { background: rgba(79,195,247,.15); border-color: var(--accent); color: var(--accent); }
+  .map-menu-btn.on { background: rgba(0,255,65,.15); border-color: var(--accent); color: var(--accent); }
   .corr-card {
     background: var(--card); border: 1px solid var(--accent); border-radius: 12px;
     padding: 14px 16px; margin-bottom: 14px;
@@ -738,7 +798,7 @@
   .corr-accept { background: var(--z2); color: #0a1a04; }
   .corr-reject { background: var(--card); border: 1px solid var(--border); color: #ccc; }
   .corr-note {
-    background: rgba(79,195,247,.06); border: 1px solid rgba(79,195,247,.25);
+    background: rgba(0,255,65,.06); border: 1px solid rgba(0,255,65,.25);
     border-radius: 10px; padding: 10px 12px; font-size: 12px; color: #bbb;
     margin-bottom: 14px; display: flex; align-items: center;
     justify-content: space-between; gap: 8px; flex-wrap: wrap;
@@ -746,6 +806,17 @@
   .corr-restore {
     background: none; border: 1px solid var(--border); color: var(--muted);
     padding: 6px 10px; border-radius: 8px; font-size: 11px; cursor: pointer;
+  }
+
+  /* ── Valori numerici: bianco bold con contorno rosso (tema "Countdown") ── */
+  .track-stats b, .lap-stats b, .lap-zone-label b, .corr-stats b {
+    color: #fff; -webkit-text-stroke: 1px var(--red); paint-order: stroke fill;
+  }
+  .mca-dist, .climb-detail-stat .cdv, .ascent-stat .av, .fitness-value, .offline-estimate b {
+    color: #fff; -webkit-text-stroke: 1.5px var(--red); paint-order: stroke fill;
+  }
+  .mco-val, .pred-time {
+    color: #fff; -webkit-text-stroke: 2px var(--red); paint-order: stroke fill;
   }
 </style>
 </head>
@@ -762,6 +833,17 @@
 
 <!-- ══════════ MONITOR ══════════ -->
 <div id="view-monitor" class="view active">
+  <svg class="app-watermark" viewBox="0 0 330 190" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+    <path d="M6 152 L44 152 L52 124 L60 152 L68 98 L76 152 L84 170 L96 50 L106 170 L118 152 L138 152 L148 128 L158 138 L182 110 L192 120 L214 104 L224 107 L314 65"
+      fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(238,100.5) rotate(-25)" stroke="#ff4fd8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="0" cy="-9" r="9" stroke-width="2"/>
+      <circle cx="44" cy="-9" r="9" stroke-width="2"/>
+      <path stroke-width="2.2" d="M0 -9 L17 -7 L13 -26 L0 -9 M13 -26 L36 -26.5 M17 -7 L38.5 -22 M36 -26.5 L38.5 -22 M38.5 -22 Q40.5 -16 44 -9 M13 -26 L12 -29 M8.5 -30 L15.5 -30 M36 -26.5 L37.5 -29.5 M37.5 -29.5 C41.5 -30 44 -28 43.6 -24.4 C43.2 -21.2 40.4 -20.6 38.6 -21.6"/>
+      <circle cx="17" cy="-7" r="1.3" stroke-width="1.2"/>
+      <path stroke-width="1.8" d="M17 -7 L14.3 -2.2 M12.8 -2.2 L15.8 -2.2"/>
+    </g>
+  </svg>
 
   <!-- Status bar + FS btn -->
   <div class="status-bar">
@@ -876,6 +958,17 @@
 
 <!-- ══════════ HISTORY ══════════ -->
 <div id="view-history" class="view">
+  <svg class="app-watermark" viewBox="0 0 330 190" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+    <path d="M6 152 L44 152 L52 124 L60 152 L68 98 L76 152 L84 170 L96 50 L106 170 L118 152 L138 152 L148 128 L158 138 L182 110 L192 120 L214 104 L224 107 L314 65"
+      fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(238,100.5) rotate(-25)" stroke="#ff4fd8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="0" cy="-9" r="9" stroke-width="2"/>
+      <circle cx="44" cy="-9" r="9" stroke-width="2"/>
+      <path stroke-width="2.2" d="M0 -9 L17 -7 L13 -26 L0 -9 M13 -26 L36 -26.5 M17 -7 L38.5 -22 M36 -26.5 L38.5 -22 M38.5 -22 Q40.5 -16 44 -9 M13 -26 L12 -29 M8.5 -30 L15.5 -30 M36 -26.5 L37.5 -29.5 M37.5 -29.5 C41.5 -30 44 -28 43.6 -24.4 C43.2 -21.2 40.4 -20.6 38.6 -21.6"/>
+      <circle cx="17" cy="-7" r="1.3" stroke-width="1.2"/>
+      <path stroke-width="1.8" d="M17 -7 L14.3 -2.2 M12.8 -2.2 L15.8 -2.2"/>
+    </g>
+  </svg>
   <div id="history-list"></div>
 </div>
 
@@ -1004,6 +1097,17 @@
 
 <!-- ══════════ SALITE ══════════ -->
 <div id="view-climb" class="view">
+  <svg class="app-watermark" viewBox="0 0 330 190" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+    <path d="M6 152 L44 152 L52 124 L60 152 L68 98 L76 152 L84 170 L96 50 L106 170 L118 152 L138 152 L148 128 L158 138 L182 110 L192 120 L214 104 L224 107 L314 65"
+      fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(238,100.5) rotate(-25)" stroke="#ff4fd8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="0" cy="-9" r="9" stroke-width="2"/>
+      <circle cx="44" cy="-9" r="9" stroke-width="2"/>
+      <path stroke-width="2.2" d="M0 -9 L17 -7 L13 -26 L0 -9 M13 -26 L36 -26.5 M17 -7 L38.5 -22 M36 -26.5 L38.5 -22 M38.5 -22 Q40.5 -16 44 -9 M13 -26 L12 -29 M8.5 -30 L15.5 -30 M36 -26.5 L37.5 -29.5 M37.5 -29.5 C41.5 -30 44 -28 43.6 -24.4 C43.2 -21.2 40.4 -20.6 38.6 -21.6"/>
+      <circle cx="17" cy="-7" r="1.3" stroke-width="1.2"/>
+      <path stroke-width="1.8" d="M17 -7 L14.3 -2.2 M12.8 -2.2 L15.8 -2.2"/>
+    </g>
+  </svg>
 
   <!-- Libreria salite: archivio puro, la navigazione avviene ora in Mappa -->
   <div id="climb-library">
@@ -1014,7 +1118,7 @@
     <div id="climb-list"></div>
 
     <button class="climb-history-access-btn" onclick="openAscentHistorySheet()">📜 Storico ascensioni</button>
-    <button class="climb-history-access-btn" style="margin-top:8px;background:rgba(139,195,74,.08);border-color:rgba(139,195,74,.3);color:var(--z2)" onclick="openPredictionsSheet()">📈 Previsioni prestazioni</button>
+    <button class="climb-history-access-btn" style="margin-top:8px;background:rgba(139,195,74,.08);border-color:rgba(139,195,74,.35);color:#b5e88a" onclick="openPredictionsSheet()">📈 Previsioni prestazioni</button>
   </div>
 </div>
 
@@ -1541,14 +1645,14 @@ const ZONE_NAMES  = ['Z1 Recupero','Z2 Aerobico','Z3 Tempo','Z4 Soglia','Z5 VO�
 function updateZoneUI(z, hr) {
   // Circle border color
   const circle = document.getElementById('hr-circle');
-  circle.style.borderColor = z >= 0 ? `var(${ZONE_COLORS[z]})` : 'var(--muted)';
+  circle.style.borderColor = z >= 0 ? `var(${ZONE_COLORS[z]})` : 'var(--accent)';
 
   // Badge
   const badge = document.getElementById('zone-badge');
   if (z >= 0) {
     badge.textContent = ZONE_NAMES[z];
     badge.style.background = `var(${ZONE_COLORS[z]})`;
-    badge.style.color = '#0a0a0f';
+    badge.style.color = '#0a0a12';
   } else {
     badge.textContent = '— fuori zona —';
     badge.style.background = 'var(--border)';
@@ -2651,7 +2755,7 @@ function updateClimbHR(hr, zone) {
   const mapCircle = document.getElementById('map-hr-circle');
   if (mapNum) {
     mapNum.textContent = hr || '—';
-    mapCircle.style.borderColor = zone >= 0 ? `var(${ZONE_COLORS[zone]})` : 'var(--muted)';
+    mapCircle.style.borderColor = zone >= 0 ? `var(${ZONE_COLORS[zone]})` : 'var(--accent)';
   }
 
   // Campiona BPM se una navigazione salita è attiva in Mappa
@@ -3479,7 +3583,7 @@ function calcBearing(a, b) {
 const GPS_ARROW_ICON = L.divIcon({
   className: 'gps-arrow-icon',
   html: '<svg class="gps-arrow" width="30" height="30" viewBox="0 0 24 24">' +
-        '<polygon points="12,2 20,21 12,16 4,21" fill="#4fc3f7" stroke="#0a0a0f" stroke-width="1.5" stroke-linejoin="round"/>' +
+        '<polygon points="12,2 20,21 12,16 4,21" fill="#00ff41" stroke="#0a0a12" stroke-width="1.5" stroke-linejoin="round"/>' +
         '</svg>',
   iconSize: [30, 30],
   iconAnchor: [15, 15],
@@ -4250,7 +4354,7 @@ function drawCorrectionSVG(climb, corr) {
   const Y = ee => H - PAD - (ee / maxE) * (H - 2 * PAD - 8);
   const toPts = pts => pts.map(p => `${X(p.d).toFixed(1)},${Y(p.e).toFixed(1)}`).join(' ');
 
-  let svg = `<polygon points="${toPts(measPts)} ${X(coveredM).toFixed(1)},${H - PAD} ${PAD},${H - PAD}" fill="rgba(79,195,247,.22)"/>`;
+  let svg = `<polygon points="${toPts(measPts)} ${X(coveredM).toFixed(1)},${H - PAD} ${PAD},${H - PAD}" fill="rgba(0,255,65,.22)"/>`;
   svg += `<polyline points="${toPts(archPts)}" fill="none" stroke="#888" stroke-width="2" stroke-dasharray="5,4"/>`;
   svg += `<polyline points="${toPts(measPts)}" fill="none" stroke="var(--accent)" stroke-width="2"/>`;
   return svg;
@@ -4405,7 +4509,7 @@ function startTrackRecording() {
   idbClearTrackRec(); // eventuali checkpoint vecchi di registrazioni precedenti
 
   if (trackPolyline) { leafletMap.removeLayer(trackPolyline); }
-  trackPolyline = L.polyline([], { color: '#4fc3f7', weight: 4 }).addTo(leafletMap);
+  trackPolyline = L.polyline([], { color: '#00ff41', weight: 4 }).addTo(leafletMap);
 
   document.getElementById('map-btn-start').disabled  = true;
   document.getElementById('map-btn-pause').disabled  = false;
@@ -5125,7 +5229,7 @@ function drawOfflineAreasOverlay() {
   offlinePacks.forEach(p => {
     const rect = L.rectangle(
       [[p.bounds.s, p.bounds.w], [p.bounds.n, p.bounds.e]],
-      { color: '#4fc3f7', weight: 2, fillColor: '#4fc3f7', fillOpacity: 0.12, dashArray: '4,4' }
+      { color: '#00ff41', weight: 2, fillColor: '#00ff41', fillOpacity: 0.12, dashArray: '4,4' }
     ).addTo(leafletMap);
     offlineAreaLayers.push(rect);
   });
