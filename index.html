@@ -3315,11 +3315,19 @@ async function cloudBackupNow(manual) {
   backupBusy = true;
   try {
     const json = JSON.stringify(await buildBackupDump());
-    // SHA del file esistente: serve a GitHub per aggiornare, senza crea
-    let sha = null;
-    const cur = await fetch('https://api.github.com/repos/' + cfg.repo + '/contents/' + BACKUP_PATH, { headers: ghHeaders(cfg) });
-    if (cur.ok) sha = (await cur.json()).sha;
-    const res = await fetch('https://api.github.com/repos/' + cfg.repo + '/contents/' + BACKUP_PATH, {
+    // SHA del file esistente: serve a GitHub per aggiornare, senza crea.
+    // fetchShaFailed = null → tutto ok (sha letto oppure 404 = file da creare)
+    async function fetchBackupSha() {
+      const cur = await fetch('https://api.github.com/repos/' + cfg.repo + '/contents/' + BACKUP_PATH,
+        { headers: ghHeaders(cfg), cache: 'no-store' });
+      if (cur.ok) return { sha: (await cur.json()).sha, err: null };
+      if (cur.status === 404) return { sha: null, err: null }; // file inesistente: creazione
+      return { sha: null, err: 'HTTP ' + cur.status + ' ' + (cur.statusText || '') };
+    }
+    let { sha, err: getErr } = await fetchBackupSha();
+    // Se il GET fallisce (non 404) non si blocca qui: si tenta comunque il PUT.
+    // Se il file esiste già, GitHub risponde 422 e sotto c'è il retry con sha.
+    let res = await fetch('https://api.github.com/repos/' + cfg.repo + '/contents/' + BACKUP_PATH, {
       method: 'PUT',
       headers: ghHeaders(cfg),
       body: JSON.stringify({
@@ -3328,6 +3336,30 @@ async function cloudBackupNow(manual) {
         ...(sha ? { sha } : {}),
       }),
     });
+    // Retry: se GitHub dice "sha wasn't supplied" il file esiste già ma il
+    // GET iniziale non l'ha visto. Rilegge lo sha e ritenta una volta sola.
+    if (res.status === 422) {
+      const errBody = await res.json().catch(() => ({}));
+      if (/sha.*wasn'?t supplied/i.test(errBody.message || '')) {
+        ({ sha, err: getErr } = await fetchBackupSha());
+        if (getErr) throw new Error('GitHub chiede lo sha del file ma la lettura dello stato in repo non riesce (' + getErr + ') — verifica che il token abbia accesso alla repo di backup');
+        if (sha) {
+          res = await fetch('https://api.github.com/repos/' + cfg.repo + '/contents/' + BACKUP_PATH, {
+            method: 'PUT',
+            headers: ghHeaders(cfg),
+            body: JSON.stringify({
+              message: 'Backup Cardio-App ' + new Date().toISOString(),
+              content: utf8ToBase64(json),
+              sha,
+            }),
+          });
+        } else {
+          throw new Error('GitHub chiede lo sha del file ma il file non risulta leggibile in repo (' + errBody.message + ')');
+        }
+      } else {
+        throw new Error(errBody.message || ('HTTP ' + res.status));
+      }
+    }
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.message || ('HTTP ' + res.status));
