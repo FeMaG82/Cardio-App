@@ -360,7 +360,7 @@
     color: var(--text); padding: 10px 20px; border-radius: 20px;
     font-size: 13px; z-index: 200; opacity: 0;
     transition: opacity .3s;
-    white-space: nowrap;
+    white-space: nowrap; pointer-events: none; /* FIX: da invisibile intercettava i tap sul tasto Zone */
   }
   .toast.show { opacity: 1; }
 
@@ -2062,6 +2062,36 @@ function showView(id, btn) {
   if (id === 'climb') { renderClimbList(); renderAscentList(); }
   if (id === 'map') initMapView();
 }
+
+// ── SWIPE: cambio vista trascinando il dito lateralmente ──
+// destra→sinistra = vista successiva, sinistra→destra = vista precedente.
+// Valido solo per le 4 viste della barra nav (Monitor/Sessioni/Salite/Mappa);
+// sulla vista Zone (impostazioni) e partendo da elementi interattivi
+// (bottoni, input, mappa Leaflet, modali) lo swipe è ignorato.
+const SWIPE_VIEWS = ['monitor', 'history', 'climb', 'map'];
+let swipeStartX = null, swipeStartY = null;
+document.addEventListener('touchstart', (e) => {
+  if (e.touches.length !== 1) { swipeStartX = null; return; }
+  const t = e.target;
+  if (t.closest && t.closest('button, input, select, textarea, a, label, .leaflet-container, .leaflet-pane, .modal-overlay, .modal-sheet, .map-sheet-overlay, .map-sheet')) { swipeStartX = null; return; }
+  swipeStartX = e.touches[0].clientX;
+  swipeStartY = e.touches[0].clientY;
+}, { passive: true });
+document.addEventListener('touchend', (e) => {
+  if (swipeStartX === null) return;
+  const t = e.changedTouches[0];
+  const dx = t.clientX - swipeStartX;
+  const dy = t.clientY - swipeStartY;
+  swipeStartX = null;
+  // solo swipe orizzontali decisi (≥60px, e il movimento orizzontale domina)
+  if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 2) return;
+  const cur = SWIPE_VIEWS.findIndex(v => document.getElementById('view-' + v).classList.contains('active'));
+  if (cur < 0) return; // vista Zone/impostazioni o altro: fuori dal ciclo swipe
+  const next = dx < 0 ? cur + 1 : cur - 1;
+  if (next < 0 || next >= SWIPE_VIEWS.length) return;
+  const navBtns = document.querySelectorAll('nav button');
+  if (navBtns[next]) showView(SWIPE_VIEWS[next], navBtns[next]);
+}, { passive: true });
 
 // ── SALITE STORAGE (IndexedDB — nessun limite pratico di spazio) ──
 // Le salite (con relative tracce GPX, potenzialmente centinaia di KB
