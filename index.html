@@ -386,6 +386,18 @@
   .climb-card-header { display: flex; justify-content: space-between; align-items: center; }
   .climb-card-name { font-size: 14px; font-weight: 700; }
   .climb-card-del { background: none; border: 1px solid var(--border); color: var(--muted); padding: 4px 9px; border-radius: 8px; font-size: 11px; cursor: pointer; }
+  .climb-card-arm { border-color: rgba(0,255,65,.45); color: var(--accent-on); font-weight: 700; }
+  .climb-detail-btns-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .climb-del-btn { background: rgba(229,57,53,.22) !important; border: 1px solid rgba(229,57,53,.55) !important; color: #ff8a80 !important; }
+  .climb-seg-edit-hint { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+  .climb-seg-edit-row { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: flex-end;
+    background: rgba(255,255,255,.04); border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px; margin-bottom: 8px; }
+  .cse-num { width: 100%; font-size: 12px; font-weight: 800; color: var(--accent-on); }
+  .cse-field { flex: 1; min-width: 105px; font-size: 11px; color: #ccc; font-weight: 600;
+    display: flex; flex-direction: column; gap: 3px; }
+  .cse-field input, .cse-field select { background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 8px; color: var(--text); font-size: 13px; }
   .climb-empty { text-align: center; color: var(--muted); padding: 40px 0; font-size: 14px; }
 
   /* Upload / AI parsing modal */
@@ -1171,6 +1183,12 @@
     <div class="climb-detail-profile-wrap">
       <svg id="climb-detail-svg" viewBox="0 0 360 120" preserveAspectRatio="none"></svg>
     </div>
+
+    <div class="climb-detail-btns-row">
+      <button class="settings-btn" onclick="toggleClimbSegEditor()">✏️ Correggi distanze/dislivello</button>
+      <button class="settings-btn climb-del-btn" id="climb-delete-btn" onclick="confirmDeleteClimb()">🗑️ Elimina salita</button>
+    </div>
+    <div id="climb-seg-editor" style="display:none"></div>
 
     <div id="climb-correction-slot"></div>
 
@@ -2301,7 +2319,7 @@ function renderClimbList() {
     <div class="climb-card" onclick="openClimbDetail(${c.addedAt})">
       <div class="climb-card-header">
         <div class="climb-card-name">${c.name}</div>
-        <button class="climb-card-del" onclick="event.stopPropagation();deleteClimb(${c.addedAt})">✕</button>
+        <button class="climb-card-del climb-card-arm" onclick="event.stopPropagation();armClimbApproach(${c.addedAt})">🚵 Carica</button>
       </div>
     </div>`
   ).join('');
@@ -2312,6 +2330,31 @@ function deleteClimb(id) {
   saveClimbs();
   renderClimbList();
   if (currentDetailClimbId === id) closeClimbDetail();
+}
+
+// "Carica salita" dal pannello Salite: arma il fumetto di avvicinamento per
+// la salita scelta e apre la scheda Mappa. Ignora eventuali chiusure manuali
+// precedenti e resta attivo a qualunque distanza finché non ci si aggancia
+// alla salita o non si chiude di nuovo il fumetto con ✕.
+function armClimbApproach(id) {
+  const climb = climbs.find(c => c.addedAt === id);
+  if (!climb) return;
+  if (!climb.startCoords) { toast('⚠️ Salita senza punto di partenza GPX'); return; }
+  if (mapClimbPhase === 'active') { toast('⚠️ Chiudi prima la navigazione della salita in corso'); return; }
+  mapClimbDismissedIds.delete(id);
+  mapDetectedClimb = climb;
+  mapClimbPhase = 'approaching';
+  mapClimbManualArm = true;
+  mapClimbLastMatchedIdx = null;
+  mapClimbGpxStartOffsetM = 0;
+  mapClimbApproachPrevDist = null;
+  mapClimbApproachAwayCount = 0;
+  const mapBtn = document.querySelector('nav button[onclick*="\'map\'"]');
+  if (mapBtn) showView('map', mapBtn);
+  showClimbApproachPopup(climb, mapLastPos
+    ? haversineMeters(mapLastPos, { latitude: climb.startCoords.lat, longitude: climb.startCoords.lon })
+    : null);
+  toast('🚵 Fumetto caricato: segui la mappa');
 }
 
 // ── DETTAGLIO SALITA ─────────────────────────────────────────────
@@ -2345,6 +2388,101 @@ function openClimbDetail(id) {
 function closeClimbDetail() {
   document.getElementById('climb-detail-sheet').classList.remove('open');
   currentDetailClimbId = null;
+  climbDeleteArmed = false;
+}
+
+// Elimina salita dal pannello di dettaglio (con conferma a doppio tocco)
+let climbDeleteArmed = false;
+function confirmDeleteClimb() {
+  const btn = document.getElementById('climb-delete-btn');
+  if (!btn) return;
+  if (!climbDeleteArmed) {
+    climbDeleteArmed = true;
+    btn.textContent = '⚠️ Sicuro? Tocca di nuovo per eliminare';
+    setTimeout(() => {
+      climbDeleteArmed = false;
+      if (document.getElementById('climb-delete-btn'))
+        document.getElementById('climb-delete-btn').textContent = '🗑️ Elimina salita';
+    }, 4000);
+    return;
+  }
+  climbDeleteArmed = false;
+  deleteClimb(currentDetailClimbId);
+  toast('Salita eliminata');
+}
+
+// ── EDITOR SEZIONI SALITA (correggi distanze/dislivello/landmark) ──
+function toggleClimbSegEditor() {
+  const ed = document.getElementById('climb-seg-editor');
+  if (!ed) return;
+  if (ed.style.display === 'none') {
+    renderClimbSegEditor();
+    ed.style.display = 'block';
+  } else {
+    ed.style.display = 'none';
+  }
+}
+
+function renderClimbSegEditor() {
+  const climb = climbs.find(c => c.addedAt === currentDetailClimbId);
+  const ed = document.getElementById('climb-seg-editor');
+  if (!climb || !ed) return;
+  let html = '<div class="climb-seg-edit-hint">Modifica i parametri di ogni sezione e salva. Dislivello negativo = sezione in discesa. La pendenza viene ricalcolata automaticamente.</div>';
+  climb.segments.forEach((seg, i) => {
+    const drop = Math.round(seg.altEnd - seg.altStart);
+    const lbl = (seg.label || '').replace(/"/g, '&quot;');
+    html += `
+    <div class="climb-seg-edit-row">
+      <div class="cse-num">Sezione ${i + 1}</div>
+      <label class="cse-field">Lunghezza (m)
+        <input type="number" id="cse-len-${i}" value="${Math.round(seg.km * 1000)}" step="10" min="1">
+      </label>
+      <label class="cse-field">Dislivello (m)
+        <input type="number" id="cse-drop-${i}" value="${drop}" step="1">
+      </label>
+      <label class="cse-field">Landmark
+        <input type="text" id="cse-lbl-${i}" value="${lbl}" placeholder="es. Curva della torre">
+      </label>
+      <label class="cse-field">Posizione landmark
+        <select id="cse-pos-${i}">
+          <option value="start"${seg.labelPos === 'end' ? '' : ' selected'}>Inizio sezione</option>
+          <option value="end"${seg.labelPos === 'end' ? ' selected' : ''}>Fine sezione</option>
+        </select>
+      </label>
+    </div>`;
+  });
+  html += '<button class="settings-btn" style="margin-top:4px" onclick="applyClimbSegEdits()">💾 Salva modifiche sezioni</button>';
+  ed.innerHTML = html;
+}
+
+function applyClimbSegEdits() {
+  const climb = climbs.find(c => c.addedAt === currentDetailClimbId);
+  if (!climb) return;
+  const newSegments = [];
+  let alt = climb.segments.length ? climb.segments[0].altStart : 0;
+  for (let i = 0; i < climb.segments.length; i++) {
+    const lenM  = parseFloat(document.getElementById(`cse-len-${i}`).value);
+    const dropM = parseFloat(document.getElementById(`cse-drop-${i}`).value);
+    const lbl   = document.getElementById(`cse-lbl-${i}`).value.trim().replace(/\./g, ' ');
+    const pos   = document.getElementById(`cse-pos-${i}`).value;
+    if (isNaN(lenM) || lenM <= 0) { toast(`⚠️ Sezione ${i + 1}: lunghezza non valida`); return; }
+    if (isNaN(dropM)) { toast(`⚠️ Sezione ${i + 1}: dislivello non valido`); return; }
+    newSegments.push({
+      km:       parseFloat((lenM / 1000).toFixed(3)),
+      grade:    parseFloat((dropM / lenM * 100).toFixed(2)),
+      label:    lbl,
+      labelPos: pos,
+      altStart: Math.round(alt),
+      altEnd:   Math.round(alt + dropM),
+    });
+    alt += dropM;
+  }
+  climb.segments = newSegments;
+  saveClimbs();
+  openClimbDetail(currentDetailClimbId); // ricarica stats, profilo e distanze
+  renderClimbSegEditor(); // editor allineato ai nuovi valori
+  document.getElementById('climb-seg-editor').style.display = 'block';
+  toast('Sezioni aggiornate ✓');
 }
 
 function saveClimbDetailName() {
@@ -2478,9 +2616,13 @@ function parseXlsx() {
       // Pendenza calcolata dai dati reali (dislivello / lunghezza)
       const grade = parseFloat(((altEnd - altStart) / lengthM * 100).toFixed(2));
 
-      // Landmark: rimuovi suffisso -P o -A, sostituisci punti con spazi
+      // Landmark: rimuovi suffisso -P o -A, sostituisci punti con spazi.
+      // Il suffisso indica la posizione del landmark nella sezione:
+      // -P (prima/inizio) → labelPos 'start'; -A (dopo/fine) → 'end'.
       let label = '';
+      let labelPos = 'start';
       if (landmark && landmark !== 'NaN' && landmark !== '') {
+        if (/-A$/i.test(landmark)) labelPos = 'end';
         label = landmark.replace(/-[PA]$/i, '').replace(/\./g, ' ').trim();
       }
 
@@ -2488,6 +2630,7 @@ function parseXlsx() {
         km:       parseFloat((lengthM / 1000).toFixed(3)),
         grade,
         label,
+        labelPos,
         altStart,
         altEnd,
       });
@@ -3543,8 +3686,8 @@ let mapElevOffsetM = null; // offset di calibrazione quota (quota mappa - quota 
 // l'ascensione nello storico al termine. La sezione Salite è ora un
 // archivio puro (libreria, storico, previsioni), senza logica di
 // navigazione propria.
-const MAP_CLIMB_APPROACH_RADIUS_M = 1000; // 1km di preavviso (non oltre)
-const MAP_CLIMB_GIVEUP_RADIUS_M   = 1300; // oltre questa distanza, annulla il rilevamento
+const MAP_CLIMB_APPROACH_RADIUS_M = 700;  // 700 m di preavviso (non oltre)
+const MAP_CLIMB_GIVEUP_RADIUS_M   = 700;  // oltre questa distanza, annulla il rilevamento
 const MAP_CLIMB_LOCK_RADIUS_M     = 20;
 const MAP_CLIMB_MIDWAY_PERP_M     = 20;
 const MAP_CLIMB_MAX_ANGLE_DIFF    = 100;  // gradi: oltre questa differenza tra la direzione
@@ -3571,6 +3714,7 @@ let mapClimbLostTrackCount = 0;    // letture consecutive fuori traccia (perpDis
 const MAP_CLIMB_LOST_TRACK_LIMIT = 5; // dopo N letture fuori traccia, valuta il completamento automatico
 let mapClimbApproachPrevDist = null; // per rilevare se ci si avvicina o allontana
 let mapClimbApproachAwayCount = 0;   // letture consecutive in allontanamento
+let mapClimbManualArm = false;       // fumetto armato manualmente da "Carica salita": non si annulla per distanza/allontanamento
 let mapClimbDismissedIds = new Set(); // salite chiuse manualmente (non ripropose finché si resta in zona)
 let mapClimbCheckCounter    = 0; // limita la frequenza del controllo "economico" su tutte le salite
 let mapElevCalibrating = false;
@@ -3825,8 +3969,15 @@ function checkNearbyClimbsForMap(coords) {
   let nearest = null, nearestDist = Infinity;
   for (const c of climbs) {
     if (!c.startCoords) continue;
-    if (mapClimbDismissedIds.has(c.addedAt)) continue;
     const d = haversineMeters(coords, { latitude: c.startCoords.lat, longitude: c.startCoords.lon });
+    // Salita chiusa manualmente: non viene riproposta finché si resta in zona,
+    // ma su percorso ad anello (o semplice allontanamento) viene "riarmata"
+    // appena si esce dal raggio di rilevamento, così al ritorno il fumetto
+    // ricompare regolarmente.
+    if (mapClimbDismissedIds.has(c.addedAt)) {
+      if (d > MAP_CLIMB_GIVEUP_RADIUS_M) mapClimbDismissedIds.delete(c.addedAt);
+      continue;
+    }
     if (d < nearestDist) { nearestDist = d; nearest = c; }
   }
   if (nearest && nearestDist <= MAP_CLIMB_APPROACH_RADIUS_M) {
@@ -3847,7 +3998,10 @@ function updateApproachingMapClimb(coords) {
   const distToStart = haversineMeters(coords, { latitude: c.startCoords.lat, longitude: c.startCoords.lon });
 
   // Troppo lontani di nuovo (es. svolta su un'altra strada): annulla
-  if (distToStart > MAP_CLIMB_GIVEUP_RADIUS_M) {
+  // — MA NON se il fumetto è stato armato manualmente con "Carica salita":
+  // in quel caso resta attivo a qualsiasi distanza finché non ci si aggancia
+  // o non lo si chiude di nuovo con ✕.
+  if (distToStart > MAP_CLIMB_GIVEUP_RADIUS_M && !mapClimbManualArm) {
     resetMapClimbDetection();
     return;
   }
@@ -3864,7 +4018,7 @@ function updateApproachingMapClimb(coords) {
     }
   }
   mapClimbApproachPrevDist = distToStart;
-  if (mapClimbApproachAwayCount >= 3) {
+  if (mapClimbApproachAwayCount >= 3 && !mapClimbManualArm) {
     resetMapClimbDetection();
     return;
   }
@@ -3904,6 +4058,7 @@ function updateApproachingMapClimb(coords) {
 
   if (locked) {
     mapClimbPhase = 'active';
+    mapClimbManualArm = false; // aggancio riuscito: il fumetto armato manuale torna al flusso normale
     mapClimbStartTime = Date.now();
     mapClimbLastGoodUpdateTime = Date.now();
     mapClimbLostTrackCount = 0;
@@ -4074,6 +4229,7 @@ function resetMapClimbDetection() {
   mapClimbCurrentSegIdx = -1;
   mapClimbApproachPrevDist = null;
   mapClimbApproachAwayCount = 0;
+  mapClimbManualArm = false;
   mapClimbStartTime = null;
   mapClimbHrSamples = [];
   mapClimbSegmentSplits = [];
@@ -4240,6 +4396,7 @@ async function demCorrectClimb(climbId) {
           km: parseFloat((take / 1000).toFixed(3)),
           grade: seg.grade,
           label: seg.label || '',
+          labelPos: seg.labelPos || 'start',
           altStart: Math.round(alt),
           altEnd: Math.round(alt + take * seg.grade / 100),
         });
@@ -4499,6 +4656,12 @@ function showClimbApproachPopup(climb, distM) {
 }
 function updateClimbApproachPopup(name, distM) {
   const el = document.getElementById('map-climb-approach');
+  if (distM == null) { // armato manualmente senza fix GPS disponibile
+    el.classList.remove('near');
+    document.getElementById('mca-name').textContent = `🚵 In avvicinamento: ${name}`;
+    document.getElementById('mca-dist').textContent = 'in attesa del GPS…';
+    return;
+  }
   el.classList.toggle('near', distM <= 300);
   document.getElementById('mca-name').textContent = `🚵 In avvicinamento: ${name}`;
   document.getElementById('mca-dist').textContent = distM >= 1000
