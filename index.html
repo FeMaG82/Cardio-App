@@ -387,17 +387,57 @@
   .climb-card-name { font-size: 14px; font-weight: 700; }
   .climb-card-del { background: none; border: 1px solid var(--border); color: var(--muted); padding: 4px 9px; border-radius: 8px; font-size: 11px; cursor: pointer; }
   .climb-card-arm { border-color: rgba(0,255,65,.45); color: var(--accent-on); font-weight: 700; }
-  .climb-detail-btns-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
-  .climb-del-btn { background: rgba(229,57,53,.22) !important; border: 1px solid rgba(229,57,53,.55) !important; color: #ff8a80 !important; }
+  /* Tasti omogenei del pannello salita (stile = tasto Verifica DEM) */
+  .climb-panel-btn {
+    width: 100%; padding: 12px; border: none; border-radius: 10px;
+    background: var(--z2); color: #0a1a04;
+    font-size: 13.5px; font-weight: 700; cursor: pointer; margin-bottom: 8px;
+  }
+  .climb-panel-btn:active { filter: brightness(1.1); }
+  .climb-panel-btn .x-red { color: #c1121f; font-weight: 900; }
   .climb-seg-edit-hint { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
   .climb-seg-edit-row { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: flex-end;
     background: rgba(255,255,255,.04); border: 1px solid var(--border); border-radius: 10px;
     padding: 10px; margin-bottom: 8px; }
-  .cse-num { width: 100%; font-size: 12px; font-weight: 800; color: var(--accent-on); }
+  .cse-num { width: 100%; font-size: 12px; font-weight: 800; color: var(--accent-on);
+    display: flex; justify-content: space-between; }
+  .cse-del-link { color: #ff8a80; cursor: pointer; font-weight: 600; }
   .cse-field { flex: 1; min-width: 105px; font-size: 11px; color: #ccc; font-weight: 600;
     display: flex; flex-direction: column; gap: 3px; }
   .cse-field input, .cse-field select { background: var(--bg); border: 1px solid var(--border);
     border-radius: 8px; padding: 7px 8px; color: var(--text); font-size: 13px; }
+  .cse-totals-panel {
+    background: rgba(0,255,65,.07); border: 1px solid rgba(0,255,65,.3); border-radius: 10px;
+    padding: 10px 12px; margin: 0 0 10px; display: flex; justify-content: space-between;
+    flex-wrap: wrap; gap: 6px 16px; }
+  .t-label { font-size: 11px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: .05em; font-weight: 700; }
+  .t-val { font-size: 16px; font-weight: 900; font-family: var(--mono); color: #fff; }
+  .cse-add-btn {
+    width: 100%; padding: 10px; border-radius: 10px; border: 1px dashed rgba(0,255,65,.5);
+    background: rgba(0,255,65,.06); color: var(--accent-on); font-size: 13px; font-weight: 700;
+    cursor: pointer; margin-top: 2px; }
+  /* Maschera di riconciliazione distanze sezioni / GPX */
+  .recon-mask { background: var(--surface); border: 1px solid rgba(255,213,79,.5);
+    border-radius: 12px; padding: 12px; margin: 10px 0; }
+  .recon-mask h3 { font-size: 13px; color: #ffd54f; margin-bottom: 8px; }
+  .recon-text { font-size: 12px; color: #ccc; line-height: 1.5; margin-bottom: 10px; }
+  .recon-text b { color: #fff; font-family: var(--mono); }
+  .recon-scale-bar { height: 26px; border-radius: 6px; overflow: hidden; display: flex; margin-bottom: 10px; }
+  .recon-scale-bar div { display: flex; align-items: center; justify-content: center;
+    font-size: 9.5px; font-weight: 800; color: #0a0a12; }
+  .recon-table { width: 100%; border-collapse: collapse; font-size: 11.5px; margin-bottom: 10px; }
+  .recon-table th { color: var(--muted); font-size: 10px; text-transform: uppercase;
+    text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--border); }
+  .recon-table td { padding: 5px 6px; border-bottom: 1px solid rgba(255,255,255,.06);
+    font-family: var(--mono); color: #ddd; }
+  .recon-table td.ok { color: var(--accent-on); }
+  .recon-table td.warn { color: #ffd54f; }
+  .recon-actions { display: flex; flex-direction: column; gap: 7px; }
+  .recon-btn { padding: 10px; border-radius: 10px; border: none; font-size: 12.5px;
+    font-weight: 700; cursor: pointer; }
+  .recon-btn.primary { background: var(--z2); color: #0a1a04; }
+  .recon-btn.ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); }
   .climb-empty { text-align: center; color: var(--muted); padding: 40px 0; font-size: 14px; }
 
   /* Upload / AI parsing modal */
@@ -1184,13 +1224,14 @@
       <svg id="climb-detail-svg" viewBox="0 0 360 120" preserveAspectRatio="none"></svg>
     </div>
 
-    <div class="climb-detail-btns-row">
-      <button class="settings-btn" onclick="toggleClimbSegEditor()">✏️ Correggi distanze/dislivello</button>
-      <button class="settings-btn climb-del-btn" id="climb-delete-btn" onclick="confirmDeleteClimb()">🗑️ Elimina salita</button>
-    </div>
-    <div id="climb-seg-editor" style="display:none"></div>
+    <button class="climb-panel-btn" onclick="toggleClimbSegEditor()">✏️ Correggi distanze/dislivello</button>
 
     <div id="climb-correction-slot"></div>
+
+    <button class="climb-panel-btn" id="climb-delete-btn" onclick="confirmDeleteClimb()">🗑️ Elimina salita <span class="x-red">✕</span></button>
+
+    <div id="climb-seg-editor" style="display:none"></div>
+    <div id="climb-recon-slot"></div>
 
     <h3 style="margin-top:20px">Storico ascensioni di questa salita</h3>
     <div id="climb-detail-ascents"></div>
@@ -2389,6 +2430,8 @@ function closeClimbDetail() {
   document.getElementById('climb-detail-sheet').classList.remove('open');
   currentDetailClimbId = null;
   climbDeleteArmed = false;
+  cseDraft = null;
+  dismissReconMask();
 }
 
 // Elimina salita dal pannello di dettaglio (con conferma a doppio tocco)
@@ -2398,11 +2441,11 @@ function confirmDeleteClimb() {
   if (!btn) return;
   if (!climbDeleteArmed) {
     climbDeleteArmed = true;
-    btn.textContent = '⚠️ Sicuro? Tocca di nuovo per eliminare';
+    btn.innerHTML = '⚠️ Sicuro? Tocca di nuovo per eliminare';
     setTimeout(() => {
       climbDeleteArmed = false;
-      if (document.getElementById('climb-delete-btn'))
-        document.getElementById('climb-delete-btn').textContent = '🗑️ Elimina salita';
+      const b2 = document.getElementById('climb-delete-btn');
+      if (b2) b2.innerHTML = '🗑️ Elimina salita <span class="x-red">✕</span>';
     }, 4000);
     return;
   }
@@ -2412,28 +2455,59 @@ function confirmDeleteClimb() {
 }
 
 // ── EDITOR SEZIONI SALITA (correggi distanze/dislivello/landmark) ──
+// cseDraft: copia di lavoro dell'editor. Le aggiunte/rimozioni di riga
+// modificano SOLO la bozza; la salita reale viene toccata solo al "Salva".
+let cseDraft = null;
 function toggleClimbSegEditor() {
   const ed = document.getElementById('climb-seg-editor');
   if (!ed) return;
   if (ed.style.display === 'none') {
+    cseDraft = null; // bozza fresca dalla salita corrente
     renderClimbSegEditor();
     ed.style.display = 'block';
   } else {
     ed.style.display = 'none';
+    cseDraft = null;
   }
+}
+
+function updateClimbSegTotals() {
+  let len = 0, drop = 0, i = 0;
+  while (document.getElementById('cse-len-' + i)) {
+    const l = parseFloat(document.getElementById('cse-len-' + i).value);
+    const d = parseFloat(document.getElementById('cse-drop-' + i).value);
+    if (!isNaN(l)) len += l;
+    if (!isNaN(d)) drop += d;
+    i++;
+  }
+  const elL = document.getElementById('cse-tot-len');
+  if (!elL) return;
+  elL.textContent = (len / 1000).toFixed(2) + ' km';
+  document.getElementById('cse-tot-drop').textContent = (drop >= 0 ? '+' : '') + Math.round(drop) + ' m';
+  document.getElementById('cse-tot-avg').textContent = len > 0 ? (drop / len * 100).toFixed(1) + '%' : '—';
 }
 
 function renderClimbSegEditor() {
   const climb = climbs.find(c => c.addedAt === currentDetailClimbId);
   const ed = document.getElementById('climb-seg-editor');
   if (!climb || !ed) return;
+  if (!cseDraft) cseDraft = climb.segments.map(s => ({ ...s }));
   let html = '<div class="climb-seg-edit-hint">Modifica i parametri di ogni sezione e salva. Dislivello negativo = sezione in discesa. La pendenza viene ricalcolata automaticamente.</div>';
-  climb.segments.forEach((seg, i) => {
+  const totalKm  = cseDraft.reduce((s, seg) => s + seg.km, 0);
+  const totalDrop = cseDraft.reduce((s, seg) => s + (seg.altEnd - seg.altStart), 0);
+  const avgGrade = totalKm > 0 ? totalDrop / (totalKm * 1000) * 100 : 0;
+  html += `
+    <div class="cse-totals-panel">
+      <div><div class="t-label">Lunghezza totale</div><div class="t-val" id="cse-tot-len">${(totalKm).toFixed(2)} km</div></div>
+      <div><div class="t-label">Dislivello totale</div><div class="t-val" id="cse-tot-drop">${(totalDrop >= 0 ? '+' : '') + Math.round(totalDrop)} m</div></div>
+      <div><div class="t-label">Pendenza media</div><div class="t-val" id="cse-tot-avg">${avgGrade.toFixed(1)}%</div></div>
+    </div>`;
+  cseDraft.forEach((seg, i) => {
     const drop = Math.round(seg.altEnd - seg.altStart);
     const lbl = (seg.label || '').replace(/"/g, '&quot;');
     html += `
     <div class="climb-seg-edit-row">
-      <div class="cse-num">Sezione ${i + 1}</div>
+      <div class="cse-num"><span>Sezione ${i + 1}</span><span class="cse-del-link" onclick="removeClimbSegRow(${i})">✕ rimuovi</span></div>
       <label class="cse-field">Lunghezza (m)
         <input type="number" id="cse-len-${i}" value="${Math.round(seg.km * 1000)}" step="10" min="1">
       </label>
@@ -2451,38 +2525,308 @@ function renderClimbSegEditor() {
       </label>
     </div>`;
   });
-  html += '<button class="settings-btn" style="margin-top:4px" onclick="applyClimbSegEdits()">💾 Salva modifiche sezioni</button>';
+  html += '<button class="cse-add-btn" onclick="addClimbSegRow()">➕ Aggiungi nuova sezione</button>';
+  html += '<button class="climb-panel-btn" style="margin-top:8px" onclick="applyClimbSegEdits()">💾 Salva modifiche sezioni</button>';
   ed.innerHTML = html;
+  // totali live a ogni modifica
+  let i = 0;
+  while (document.getElementById('cse-len-' + i)) {
+    ['len', 'drop'].forEach(k => {
+      const inp = document.getElementById(`cse-${k}-${i}`);
+      if (inp) inp.addEventListener('input', updateClimbSegTotals);
+    });
+    i++;
+  }
+}
+
+// Legge i valori dagli input dell'editor e li sincronizza nella bozza
+// (ricalcolando pendenza e quote a catena). null se gli input non esistono.
+function readCseRows() {
+  const rows = [];
+  let i = 0;
+  while (document.getElementById('cse-len-' + i)) {
+    const lenM  = parseFloat(document.getElementById(`cse-len-${i}`).value);
+    const dropM = parseFloat(document.getElementById(`cse-drop-${i}`).value);
+    const lbl   = document.getElementById(`cse-lbl-${i}`).value.trim().replace(/\./g, ' ');
+    const pos   = document.getElementById(`cse-pos-${i}`).value;
+    if (isNaN(lenM) || lenM <= 0) return { invalid: `⚠️ Sezione ${i + 1}: lunghezza non valida` };
+    if (isNaN(dropM)) return { invalid: `⚠️ Sezione ${i + 1}: dislivello non valido` };
+    rows.push({ lenM, dropM, lbl, pos });
+    i++;
+  }
+  return { rows };
+}
+
+function syncCseDraftFromInputs() {
+  const r = readCseRows();
+  if (!r || r.invalid) return r;
+  let alt = cseDraft.length ? cseDraft[0].altStart : 0;
+  cseDraft = r.rows.map(row => {
+    const seg = {
+      km:       parseFloat((row.lenM / 1000).toFixed(3)),
+      grade:    parseFloat((row.dropM / row.lenM * 100).toFixed(2)),
+      label:    row.lbl,
+      labelPos: row.pos,
+      altStart: Math.round(alt),
+      altEnd:   Math.round(alt + row.dropM),
+    };
+    alt += row.dropM;
+    return seg;
+  });
+  return r;
+}
+
+function addClimbSegRow() {
+  const r = syncCseDraftFromInputs();
+  if (!r) { toast('⚠️ Editor non attivo'); return; }
+  if (r.invalid) { toast(r.invalid); return; }
+  const last = cseDraft[cseDraft.length - 1];
+  cseDraft.push({
+    km: 0.1, grade: 5, label: '', labelPos: 'start',
+    altStart: last ? last.altEnd : 0,
+    altEnd: (last ? last.altEnd : 0) + 5,
+  });
+  renderClimbSegEditor();
+  const i = cseDraft.length - 1;
+  const inp = document.getElementById(`cse-len-${i}`);
+  if (inp) { inp.focus(); inp.select(); }
+}
+
+function removeClimbSegRow(i) {
+  if (cseDraft && cseDraft.length <= 1) { toast('⚠️ Serve almeno una sezione'); return; }
+  const r = syncCseDraftFromInputs();
+  if (!r) { toast('⚠️ Editor non attivo'); return; }
+  if (r.invalid) { toast(r.invalid); return; }
+  cseDraft.splice(i, 1);
+  renderClimbSegEditor();
 }
 
 function applyClimbSegEdits() {
   const climb = climbs.find(c => c.addedAt === currentDetailClimbId);
   if (!climb) return;
-  const newSegments = [];
+  const r = readCseRows();
+  if (!r || r.invalid) { if (r && r.invalid) toast(r.invalid); return; }
+  const snapshot = climb.segments.map(s => ({ ...s })); // confini pre-modifica
   let alt = climb.segments.length ? climb.segments[0].altStart : 0;
-  for (let i = 0; i < climb.segments.length; i++) {
-    const lenM  = parseFloat(document.getElementById(`cse-len-${i}`).value);
-    const dropM = parseFloat(document.getElementById(`cse-drop-${i}`).value);
-    const lbl   = document.getElementById(`cse-lbl-${i}`).value.trim().replace(/\./g, ' ');
-    const pos   = document.getElementById(`cse-pos-${i}`).value;
-    if (isNaN(lenM) || lenM <= 0) { toast(`⚠️ Sezione ${i + 1}: lunghezza non valida`); return; }
-    if (isNaN(dropM)) { toast(`⚠️ Sezione ${i + 1}: dislivello non valido`); return; }
-    newSegments.push({
-      km:       parseFloat((lenM / 1000).toFixed(3)),
-      grade:    parseFloat((dropM / lenM * 100).toFixed(2)),
-      label:    lbl,
-      labelPos: pos,
+  climb.segments = r.rows.map(row => {
+    const seg = {
+      km:       parseFloat((row.lenM / 1000).toFixed(3)),
+      grade:    parseFloat((row.dropM / row.lenM * 100).toFixed(2)),
+      label:    row.lbl,
+      labelPos: row.pos,
       altStart: Math.round(alt),
-      altEnd:   Math.round(alt + dropM),
-    });
-    alt += dropM;
-  }
-  climb.segments = newSegments;
+      altEnd:   Math.round(alt + row.dropM),
+    };
+    alt += row.dropM;
+    return seg;
+  });
+  const newTotalM = climb.segments.reduce((s, seg) => s + seg.km * 1000, 0);
   saveClimbs();
+  cseDraft = null; // la bozza si riallinea ai segmenti appena salvati
   openClimbDetail(currentDetailClimbId); // ricarica stats, profilo e distanze
   renderClimbSegEditor(); // editor allineato ai nuovi valori
   document.getElementById('climb-seg-editor').style.display = 'block';
   toast('Sezioni aggiornate ✓');
+  // Riconciliazione: se il totale cambia e c'è un GPX, proponi la maschera
+  const gpxTotalM = climb.gpxPoints && climb.gpxPoints.length
+    ? climb.gpxPoints[climb.gpxPoints.length - 1].dist : null;
+  if (gpxTotalM && Math.abs(newTotalM - gpxTotalM) > 15) {
+    renderReconMask(climb.addedAt, snapshot, newTotalM, gpxTotalM);
+  } else {
+    dismissReconMask();
+  }
+}
+
+// ── MASCHERA DI RICONCILIAZIONE DISTANZE SEZIONI / GPX (opzione B) ──
+let reconCtx = null; // { climbId, snapshot, gpxTotalM }
+function renderReconMask(climbId, snapshot, newTotalM, gpxTotalM) {
+  const climb = climbs.find(c => c.addedAt === climbId);
+  const slot = document.getElementById('climb-recon-slot');
+  if (!climb || !slot) return;
+  reconCtx = { climbId, snapshot, gpxTotalM };
+  const gpxKm = gpxTotalM / 1000;
+  const palette = ['#8bc34a', '#ffc107', '#ff7043', '#e53935', '#4caf93'];
+  let barHtml = '', rowsHtml = '';
+  let cumNew = 0, cumOld = 0;
+  climb.segments.forEach((seg, i) => {
+    cumNew += seg.km * 1000;
+    cumOld += snapshot[i] ? snapshot[i].km * 1000 : seg.km * 1000;
+    const w = Math.min(100, seg.km / gpxKm * 100);
+    if (w >= 6) barHtml += `<div style="width:${w.toFixed(2)}%;background:${palette[i % palette.length]}">S${i + 1}</div>`;
+    else barHtml += `<div style="width:${w.toFixed(2)}%;background:${palette[i % palette.length]}"></div>`;
+    const diff = Math.round(cumNew - cumOld);
+    rowsHtml += `<tr><td>${i + 1}</td><td>${(cumNew / 1000).toFixed(2)} km</td><td>${(cumOld / 1000).toFixed(2)} km</td>` +
+      `<td class="${diff === 0 ? 'ok' : 'warn'}">${diff > 0 ? '+' : ''}${diff} m</td></tr>`;
+  });
+  const dTot = Math.round(newTotalM - gpxTotalM);
+  slot.innerHTML = `
+  <div class="recon-mask">
+    <h3>⚖️ Riconciliazione distanze sezioni / GPX</h3>
+    <div class="recon-text">Le sezioni ora sommano a <b>${(newTotalM / 1000).toFixed(2)} km</b>, ma la traccia GPX è lunga <b>${gpxKm.toFixed(2)} km</b> (${dTot > 0 ? '+' : ''}${dTot} m). La navigazione usa le distanze del GPX: scegli come riconciliare.</div>
+    <div class="recon-scale-bar">${barHtml}</div>
+    <table class="recon-table">
+      <tr><th>Sez.</th><th>Fine sezione (modificata)</th><th>Fine prima della modifica</th><th>Differenza</th></tr>
+      ${rowsHtml}
+    </table>
+    <div class="recon-actions">
+      <button class="recon-btn primary" onclick="reconAutoScale()">⚖️ Riconcilia automaticamente (scale proporzionali, dislivelli invariati)</button>
+      <button class="recon-btn ghost" onclick="reconManualMode()">✏️ Ritaglia le sezioni lungo il GPX (manuale)</button>
+      <button class="recon-btn ghost" onclick="reconLoadNewGpx()">🗺️ Carica nuovo GPX</button>
+      <button class="recon-btn ghost" onclick="dismissReconMask()">Lascia così, non importa</button>
+    </div>
+  </div>`;
+}
+
+function dismissReconMask() {
+  reconCtx = null;
+  const slot = document.getElementById('climb-recon-slot');
+  if (slot) slot.innerHTML = '';
+}
+
+function reconAutoScale() {
+  if (!reconCtx) return;
+  const climb = climbs.find(c => c.addedAt === reconCtx.climbId);
+  if (!climb) return;
+  const gpxTotalM = reconCtx.gpxTotalM;
+  const curTotalM = climb.segments.reduce((s, seg) => s + seg.km * 1000, 0);
+  if (curTotalM <= 0) return;
+  const f = gpxTotalM / curTotalM;
+  let alt = climb.segments.length ? climb.segments[0].altStart : 0;
+  climb.segments = climb.segments.map(seg => {
+    const km = Math.max(0.001, parseFloat((seg.km * f).toFixed(4)));
+    const drop = seg.altEnd - seg.altStart; // dislivello invariato
+    const out = {
+      km,
+      grade: parseFloat((drop / (km * 1000) * 100).toFixed(2)),
+      label: seg.label,
+      labelPos: seg.labelPos || 'start',
+      altStart: Math.round(alt),
+      altEnd: Math.round(alt + drop),
+    };
+    alt += drop;
+    return out;
+  });
+  saveClimbs();
+  toast('⚖️ Sezioni riscalate sul GPX ✓');
+  const id = reconCtx.climbId;
+  dismissReconMask();
+  openClimbDetail(id);
+  cseDraft = null;
+  renderClimbSegEditor();
+  document.getElementById('climb-seg-editor').style.display = 'block';
+}
+
+function reconManualMode() {
+  if (!reconCtx) return;
+  const climb = climbs.find(c => c.addedAt === reconCtx.climbId);
+  const slot = document.getElementById('climb-recon-slot');
+  if (!climb || !slot) return;
+  const gpxKm = reconCtx.gpxTotalM / 1000;
+  let cum = 0;
+  let rowsHtml = '';
+  climb.segments.forEach((seg, i) => {
+    cum += seg.km;
+    const isLast = i === climb.segments.length - 1;
+    rowsHtml += `
+    <div class="climb-seg-edit-row">
+      <div class="cse-num"><span>Sezione ${i + 1}</span></div>
+      <label class="cse-field">Fine sezione (km)
+        ${isLast
+          ? `<input type="number" id="rcm-end-${i}" value="${gpxKm.toFixed(2)}" disabled>`
+          : `<input type="number" id="rcm-end-${i}" value="${cum.toFixed(2)}" step="0.05" min="0.05" max="${gpxKm.toFixed(2)}">`}
+      </label>
+      <label class="cse-field">Landmark
+        <input type="text" id="rcm-lbl-${i}" value="${(seg.label || '').replace(/"/g, '&quot;')}" disabled>
+      </label>
+    </div>`;
+  });
+  slot.innerHTML = `
+  <div class="recon-mask">
+    <h3>✏️ Ritaglio manuale sezioni lungo il GPX</h3>
+    <div class="recon-text">Imposta dove finisce ogni sezione lungo la traccia GPX (totale <b>${gpxKm.toFixed(2)} km</b>). L'ultima sezione termina necessariamente a fine GPX. I dislivelli restano quelli attuali, le pendenze si ricalcolano.</div>
+    ${rowsHtml}
+    <div class="recon-actions">
+      <button class="recon-btn primary" onclick="reconApplyManual()">💾 Applica ritaglio</button>
+      <button class="recon-btn ghost" onclick="dismissReconMask()">Annulla</button>
+    </div>
+  </div>`;
+}
+
+function reconApplyManual() {
+  if (!reconCtx) return;
+  const climb = climbs.find(c => c.addedAt === reconCtx.climbId);
+  if (!climb) return;
+  const gpxTotalM = reconCtx.gpxTotalM;
+  const n = climb.segments.length;
+  let prev = 0;
+  const ends = [];
+  for (let i = 0; i < n; i++) {
+    let endM;
+    if (i === n - 1) {
+      endM = gpxTotalM; // l'ultima sezione chiude a fine GPX
+    } else {
+      const endKm = parseFloat(document.getElementById(`rcm-end-${i}`).value);
+      if (isNaN(endKm) || endKm <= prev / 1000) { toast(`⚠️ Sezione ${i + 1}: la fine deve superare i ${(prev / 1000).toFixed(2)} km`); return; }
+      endM = endKm * 1000;
+      if (endM >= gpxTotalM) { toast(`⚠️ Sezione ${i + 1}: la fine deve restare entro i ${(gpxTotalM / 1000).toFixed(2)} km`); return; }
+    }
+    if (endM <= prev) { toast(`⚠️ Sezione ${i + 1}: confini non crescenti`); return; }
+    ends.push(endM);
+    prev = endM;
+  }
+  let alt = climb.segments.length ? climb.segments[0].altStart : 0;
+  const newSegments = [];
+  for (let i = 0; i < n; i++) {
+    const lenM = ends[i] - (i === 0 ? 0 : ends[i - 1]);
+    const drop = climb.segments[i].altEnd - climb.segments[i].altStart; // dislivello invariato
+    newSegments.push({
+      km:       parseFloat((lenM / 1000).toFixed(3)),
+      grade:    parseFloat((drop / lenM * 100).toFixed(2)),
+      label:    climb.segments[i].label,
+      labelPos: climb.segments[i].labelPos || 'start',
+      altStart: Math.round(alt),
+      altEnd:   Math.round(alt + drop),
+    });
+    alt += drop;
+  }
+  climb.segments = newSegments;
+  saveClimbs();
+  toast('✏️ Sezioni ritagliate sul GPX ✓');
+  const id = reconCtx.climbId;
+  dismissReconMask();
+  openClimbDetail(id);
+  cseDraft = null;
+  renderClimbSegEditor();
+  document.getElementById('climb-seg-editor').style.display = 'block';
+}
+
+function reconLoadNewGpx() {
+  if (!reconCtx) return;
+  const climbId = reconCtx.climbId;
+  const inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = '.gpx';
+  inp.onchange = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const pts = parseGPX(ev.target.result);
+        if (pts.length < 2) { toast('⚠️ File GPX non valido'); return; }
+        const climb = climbs.find(c => c.addedAt === climbId);
+        if (!climb) return;
+        climb.gpxPoints = pts;
+        if (!climb.startCoords) climb.startCoords = { lat: pts[0].lat, lon: pts[0].lon };
+        saveClimbs();
+        dismissReconMask();
+        openClimbDetail(climbId);
+        toast('🗺️ Nuovo GPX caricato (' + pts.length + ' punti, ' + (pts[pts.length - 1].dist / 1000).toFixed(1) + ' km)');
+      } catch (err) { toast('⚠️ Errore lettura GPX'); }
+    };
+    reader.readAsText(file);
+  };
+  inp.click();
 }
 
 function saveClimbDetailName() {
@@ -4546,7 +4890,7 @@ function renderPendingCorrection(climbId) {
   // Tasto manuale: verifica/correzione DEM su richiesta (utile se al
   // salvataggio la rete non era disponibile, o per salite vecchie)
   if (!corr && climb.gpxPoints && climb.gpxPoints.length >= 10) {
-    html += `<div class="corr-note"><button class="corr-accept" style="width:100%" onclick="demCorrectClimb(${climbId})">⛰️ Verifica/correggi altimetria con DEM</button></div>`;
+    html += `<div class="corr-note"><button class="climb-panel-btn" onclick="demCorrectClimb(${climbId})">⛰️ Verifica/correggi altimetria con DEM</button></div>`;
   }
   if (!corr) { slot.innerHTML = html; return; }
 
