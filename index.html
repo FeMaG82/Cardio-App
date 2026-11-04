@@ -395,6 +395,14 @@
   }
   .climb-panel-btn:active { filter: brightness(1.1); }
   .climb-panel-btn .x-red { color: #c1121f; font-weight: 900; }
+  /* Fumetto traslucido contenitore dei tre tasti (stesso stile del vecchio corr-note) */
+  .climb-btns-box {
+    background: rgba(0,255,65,.06); border: 1px solid rgba(0,255,65,.25);
+    border-radius: 10px; padding: 10px 12px; margin: 12px 0 8px;
+    display: flex; flex-direction: column;
+  }
+  .climb-btns-box .climb-panel-btn { margin-bottom: 8px; }
+  .climb-btns-box .climb-panel-btn:last-child { margin-bottom: 0; }
   .climb-seg-edit-hint { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
   .climb-seg-edit-row { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: flex-end;
     background: rgba(255,255,255,.04); border: 1px solid var(--border); border-radius: 10px;
@@ -1224,11 +1232,13 @@
       <svg id="climb-detail-svg" viewBox="0 0 360 120" preserveAspectRatio="none"></svg>
     </div>
 
-    <button class="climb-panel-btn" onclick="toggleClimbSegEditor()">✏️ Correggi distanze/dislivello</button>
+    <div class="climb-btns-box">
+      <button class="climb-panel-btn" onclick="toggleClimbSegEditor()">✏️ Correggi distanze/dislivello</button>
+      <button class="climb-panel-btn" id="climb-dem-btn" style="display:none" onclick="demCorrectClimb(currentDetailClimbId)">⛰️ Verifica/correggi altimetria con DEM</button>
+      <button class="climb-panel-btn" id="climb-delete-btn" onclick="confirmDeleteClimb()">🗑️ Elimina salita <span class="x-red">✕</span></button>
+    </div>
 
     <div id="climb-correction-slot"></div>
-
-    <button class="climb-panel-btn" id="climb-delete-btn" onclick="confirmDeleteClimb()">🗑️ Elimina salita <span class="x-red">✕</span></button>
 
     <div id="climb-seg-editor" style="display:none"></div>
     <div id="climb-recon-slot"></div>
@@ -2431,6 +2441,10 @@ function closeClimbDetail() {
   currentDetailClimbId = null;
   climbDeleteArmed = false;
   cseDraft = null;
+  // L'editor sezioni e la maschera di riconciliazione si chiudono uscendo
+  // dalla scheda della salita (prima restavano aperti al rientro)
+  const ed = document.getElementById('climb-seg-editor');
+  if (ed) ed.style.display = 'none';
   dismissReconMask();
 }
 
@@ -2871,6 +2885,11 @@ function drawClimbDetailProfile(climb) {
     const p1 = toSVG(x1, y1);
     const color = gradeColor(seg.grade);
     svgContent += `<polygon points="${p0.x},${p0.y} ${p1.x},${p1.y} ${p1.x},${H-PAD} ${p0.x},${H-PAD}" fill="${color}"/>`;
+    // Linea bianca di separazione tra sezioni: rende visibili i confini
+    // anche quando due sezioni adiacenti hanno la stessa pendenza (stesso colore)
+    if (i > 0) {
+      svgContent += `<line x1="${p0.x}" y1="${PAD}" x2="${p0.x}" y2="${H - PAD}" stroke="rgba(255,255,255,.65)" stroke-width="1.5"/>`;
+    }
   });
   svgContent += `<line x1="${PAD}" y1="${H-PAD}" x2="${W-PAD}" y2="${H-PAD}" stroke="var(--border)" stroke-width="1"/>`;
 
@@ -4879,18 +4898,18 @@ function renderPendingCorrection(climbId) {
   const slot = document.getElementById('climb-correction-slot');
   if (!slot) return;
   const climb = climbs.find(c => c.addedAt === climbId);
-  if (!climb) { slot.innerHTML = ''; return; }
+  if (!climb) { slot.innerHTML = ''; const db = document.getElementById('climb-dem-btn'); if (db) db.style.display = 'none'; return; }
   const corr = loadClimbCorrections().find(c => c.climbId === climbId);
+
+  // Tasto Verifica DEM: mostrato/nascosto dentro il fumetto unico dei tre tasti
+  const demBtn = document.getElementById('climb-dem-btn');
+  if (demBtn) demBtn.style.display =
+    (!corr && climb.gpxPoints && climb.gpxPoints.length >= 10) ? 'block' : 'none';
 
   let html = '';
   if (climb.originalSegments && !corr) {
     const when = climb.correctedAt ? new Date(climb.correctedAt).toLocaleDateString('it-IT') : 'data non nota';
     html += `<div class="corr-note"><span>⛰️ Profilo corretto con DEM (${when})</span><button class="corr-restore" onclick="restoreOriginalSegments(${climbId})">↩︎ Ripristina originale</button></div>`;
-  }
-  // Tasto manuale: verifica/correzione DEM su richiesta (utile se al
-  // salvataggio la rete non era disponibile, o per salite vecchie)
-  if (!corr && climb.gpxPoints && climb.gpxPoints.length >= 10) {
-    html += `<div class="corr-note"><button class="climb-panel-btn" onclick="demCorrectClimb(${climbId})">⛰️ Verifica/correggi altimetria con DEM</button></div>`;
   }
   if (!corr) { slot.innerHTML = html; return; }
 
