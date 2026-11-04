@@ -595,6 +595,16 @@
     width: 28px; height: 28px; border-radius: 50%; font-size: 14px;
     font-weight: 800; cursor: pointer; flex-shrink: 0;
   }
+  .mca-rec {
+    background: rgba(255,46,46,.25); border: 1px solid rgba(255,46,46,.6);
+    color: #ff8a80; padding: 6px 10px; border-radius: 9px; font-size: 12px;
+    font-weight: 800; cursor: pointer; flex-shrink: 0; white-space: nowrap;
+  }
+  .ascent-prop-btn {
+    width: 100%; margin-top: 8px; padding: 9px; border-radius: 9px;
+    border: 1px solid rgba(139,195,74,.5); background: rgba(139,195,74,.12);
+    color: #b5e88a; font-size: 12px; font-weight: 700; cursor: pointer;
+  }
 
   /* Pop-up 2: navigazione attiva su salita rilevata */
   .map-climb-overlay {
@@ -1238,6 +1248,8 @@
       <button class="climb-panel-btn" id="climb-delete-btn" onclick="confirmDeleteClimb()">🗑️ Elimina salita <span class="x-red">✕</span></button>
     </div>
 
+    <div id="climb-recorder-slot"></div>
+
     <div id="climb-correction-slot"></div>
 
     <div id="climb-seg-editor" style="display:none"></div>
@@ -1341,6 +1353,7 @@
         <div class="mca-name" id="mca-name">—</div>
         <div class="mca-dist" id="mca-dist">—</div>
       </div>
+      <button class="mca-rec" onclick="armClimbRecording()">🔴 Registra</button>
       <button class="mca-close" onclick="dismissClimbApproachPopup()">✕</button>
     </div>
 
@@ -2408,6 +2421,173 @@ function armClimbApproach(id) {
   toast('🚵 Fumetto caricato: segui la mappa');
 }
 
+// ── MODALITÀ RECORDING SALITA ────────────────────────────────────
+// Il tasto "🔴 Registra" nel fumetto di avvicinamento arma la modalità
+// recording: l'app NON aggancia la salita da sola (vedi updateApproachingMapClimb)
+// finché non si preme "▶️ Inizia registrazione" nella scheda salita.
+// "Nuova sezione" segna manualmente il confine tra due sezioni; "Termina"
+// salva l'ascensione con i dati misurati (distanze e dislivelli GPS).
+function armClimbRecording() {
+  const c = mapDetectedClimb;
+  if (!c) { toast('⚠️ Nessuna salita in avvicinamento'); return; }
+  if (mapClimbPhase === 'active') { toast('⚠️ Navigazione già in corso'); return; }
+  if (!c.gpxPoints || c.gpxPoints.length < 10) { toast('⚠️ Serve il GPX della salita per la registrazione'); return; }
+  mapClimbRecordArmed = true;
+  openClimbDetail(c.addedAt);
+  toast('🔴 Registrazione armata: premi "Inizia" nella scheda salita');
+}
+
+function renderClimbRecorderUI() {
+  const slot = document.getElementById('climb-recorder-slot');
+  if (!slot) return;
+  const c = mapDetectedClimb;
+  // Caso 1: armato, in attesa di "Inizia" (scheda aperta sulla salita giusta)
+  if (mapClimbRecordArmed && mapClimbPhase !== 'active' && c && currentDetailClimbId === c.addedAt) {
+    slot.innerHTML = `
+      <div class="recon-mask" style="border-color:rgba(255,46,46,.4)">
+        <h3 style="color:#ff8a80">🔴 Modalità registrazione</h3>
+        <div class="recon-text">La navigazione <b>non partirà da sola</b>: quando sei al punto d'inizio premi il tasto qui sotto. L'aggancio avverrà alla tua posizione attuale.</div>
+        <div class="recon-actions">
+          <button class="recon-btn primary" onclick="recordStart()">▶️ Inizia registrazione</button>
+          <button class="recon-btn ghost" onclick="recordCancel()">Annulla</button>
+        </div>
+      </div>`;
+    return;
+  }
+  // Caso 2: registrazione in corso sulla salita mostrata
+  if (mapClimbRecordArmed && mapClimbPhase === 'active' && c && currentDetailClimbId === c.addedAt) {
+    slot.innerHTML = `
+      <div class="recon-mask" style="border-color:rgba(255,46,46,.4)">
+        <h3 style="color:#ff8a80">🔴 Registrazione in corso</h3>
+        <div class="recon-text">Sezioni segnalate manualmente: <b>${mapClimbManualSections.length}</b>. Premi "Nuova sezione" al passaggio del landmark.</div>
+        <div class="recon-actions">
+          <button class="recon-btn primary" onclick="recordNewSection()">⏭️ Nuova sezione</button>
+          <button class="recon-btn ghost" onclick="recordFinish()">⏹️ Termina</button>
+        </div>
+      </div>`;
+    return;
+  }
+  slot.innerHTML = '';
+}
+
+function recordCancel() {
+  mapClimbRecordArmed = false;
+  renderClimbRecorderUI();
+  toast('Modalità registrazione annullata');
+}
+
+function recordStart() {
+  const c = mapDetectedClimb;
+  if (!c) { toast('⚠️ Nessuna salita in avvicinamento'); return; }
+  if (!mapLastPos) { toast('⚠️ GPS non ancora pronto'); return; }
+  const coords = mapLastPos.coords || mapLastPos;
+  const proj = projectOntoTrack(coords.latitude, coords.longitude, c.gpxPoints, null, null);
+  mapClimbGpxStartOffsetM = proj ? proj.distAlongTrack : 0;
+  mapClimbLastMatchedIdx = proj ? proj.matchedIdx : null;
+  mapClimbDistanceDone = 0;
+  mapClimbManualSections = [];
+  mapClimbStartAltM = (coords.altitude != null && !isNaN(coords.altitude)) ? coords.altitude : null;
+  mapClimbCurAltM = mapClimbStartAltM;
+  mapClimbPhase = 'active';
+  mapClimbManualArm = true; // force-lock: l'aggancio è alla posizione attuale, non al punto GPX di partenza
+  mapClimbStartTime = Date.now();
+  mapClimbLastGoodUpdateTime = Date.now();
+  mapClimbLostTrackCount = 0;
+  mapClimbHrSamples = [];
+  mapClimbSegmentSplits = [];
+  mapClimbTotalDistM = 0;
+  mapClimbTotalElevM = 0;
+  mapClimbLastTrackPos = coords;
+  mapClimbCurrentSegIdx = -1;
+  showActiveClimbOverlay(c);
+  updateActiveClimbOverlayUI();
+  hideClimbApproachPopup();
+  renderClimbRecorderUI();
+  toast('▶️ Registrazione salita avviata');
+}
+
+function recordNewSection() {
+  if (mapClimbPhase !== 'active' || !mapClimbRecordArmed) return;
+  const elapsedS = Math.floor(((mapClimbLastGoodUpdateTime || Date.now()) - mapClimbStartTime) / 1000);
+  mapClimbManualSections.push({
+    distM: Math.round(mapClimbDistanceDone),
+    altM: mapClimbCurAltM,
+    elapsedS,
+  });
+  renderClimbRecorderUI();
+  toast(`⏭️ Sezione ${mapClimbManualSections.length} segnata`);
+}
+
+function recordFinish() {
+  if (mapClimbPhase !== 'active' || !mapClimbStartTime || !mapDetectedClimb) return;
+  saveMapAscent(mapDetectedClimb);
+  const id = mapDetectedClimb.addedAt;
+  resetMapClimbDetection();
+  toast('⏹️ Registrazione terminata');
+  openClimbDetail(id); // mostra lo storico aggiornato con il bottone di proposta correzione
+}
+
+// Costruisce l'oggetto `measured` per l'ascensione: distanze e dislivelli
+// misurati dal GPS durante la registrazione, per sezione e in totale.
+function buildMeasuredData(climb) {
+  const totalDistM = Math.round(mapClimbDistanceDone);
+  const startAlt = mapClimbStartAltM, endAlt = mapClimbCurAltM;
+  const totalElevM = (startAlt != null && endAlt != null) ? Math.round(endAlt - startAlt) : null;
+  // Confini di sezione: manuali se segnalati con "Nuova sezione",
+  // altrimenti gli split automatici (con distM), altrimenti null
+  let bounds = null, alts = null;
+  if (mapClimbManualSections.length > 0) {
+    bounds = [0, ...mapClimbManualSections.map(s => s.distM), totalDistM];
+    alts = [startAlt, ...mapClimbManualSections.map(s => s.altM), endAlt];
+  } else {
+    const splits = (mapClimbSegmentSplits || []).filter(s => s.distM != null);
+    if (splits.length > 0) {
+      bounds = [0, ...splits.map(s => s.distM), totalDistM];
+      alts = [startAlt, ...splits.map(s => s.altM), endAlt];
+    }
+  }
+  let sections = null;
+  if (bounds) {
+    sections = [];
+    for (let i = 0; i < bounds.length - 1; i++) {
+      const lenM = Math.max(0, bounds[i + 1] - bounds[i]);
+      const dropM = (alts[i] != null && alts[i + 1] != null) ? Math.round(alts[i + 1] - alts[i]) : null;
+      sections.push({ lenM, dropM });
+    }
+  }
+  return { totalDistM, totalElevM, sections };
+}
+
+// "📐 Proponi come correzione Excel": apre l'editor "correggi
+// distanze/dislivello" della salita precompilato con i dati misurati
+function proposeMeasuredCorrection(ascentId) {
+  const a = ascents.find(x => x.id === ascentId);
+  if (!a || !a.measured) return;
+  const climb = climbs.find(c => c.addedAt === a.climbId);
+  if (!climb) { toast('⚠️ Salita non trovata'); return; }
+  openClimbDetail(climb.addedAt);
+  // Precompila la bozza dell'editor con i dati misurati
+  let baseAlt = 0, missingAlt = false;
+  cseDraft = a.measured.sections.map((sec, i) => {
+    const altStart = baseAlt;
+    const drop = (sec.dropM == null) ? 0 : sec.dropM;
+    if (sec.dropM == null) missingAlt = true;
+    baseAlt += drop;
+    return {
+      km: Math.round(sec.lenM) / 1000,
+      grade: sec.lenM > 0 ? Math.round((drop / sec.lenM) * 1000) / 10 : 0,
+      label: climb.segments[i] && climb.segments[i].label ? climb.segments[i].label : '',
+      labelPos: climb.segments[i] && climb.segments[i].labelPos ? climb.segments[i].labelPos : 'start',
+      altStart: Math.round(altStart),
+      altEnd: Math.round(baseAlt),
+    };
+  });
+  renderClimbSegEditor();
+  document.getElementById('climb-seg-editor').style.display = 'block';
+  if (missingAlt) toast('📐 Editor precompilato (quota GPS assente su alcune sezioni: dislivelli stimati a 0 — controlla)');
+  else toast('📐 Editor precompilato coi dati registrati — controlla e salva');
+}
+
 // ── DETTAGLIO SALITA ─────────────────────────────────────────────
 function openClimbDetail(id) {
   const climb = climbs.find(c => c.addedAt === id);
@@ -2432,6 +2612,7 @@ function openClimbDetail(id) {
   drawClimbDetailProfile(climb);
   renderClimbDetailAscents(id);
   renderPendingCorrection(id); // eventuale proposta di correzione altimetria
+  renderClimbRecorderUI(); // pannello modalità recording, se armata/attiva su questa salita
 
   document.getElementById('climb-detail-sheet').classList.add('open');
 }
@@ -2885,10 +3066,10 @@ function drawClimbDetailProfile(climb) {
     const p1 = toSVG(x1, y1);
     const color = gradeColor(seg.grade);
     svgContent += `<polygon points="${p0.x},${p0.y} ${p1.x},${p1.y} ${p1.x},${H-PAD} ${p0.x},${H-PAD}" fill="${color}"/>`;
-    // Linea bianca di separazione tra sezioni: rende visibili i confini
-    // anche quando due sezioni adiacenti hanno la stessa pendenza (stesso colore)
+    // Linea bianca di separazione tra sezioni: dal profilo della salita
+    // (altezza al confine) fino alla base — non invade l'area scura sopra
     if (i > 0) {
-      svgContent += `<line x1="${p0.x}" y1="${PAD}" x2="${p0.x}" y2="${H - PAD}" stroke="rgba(255,255,255,.65)" stroke-width="1.5"/>`;
+      svgContent += `<line x1="${p0.x}" y1="${p0.y}" x2="${p0.x}" y2="${H - PAD}" stroke="rgba(255,255,255,.65)" stroke-width="1.5"/>`;
     }
   });
   svgContent += `<line x1="${PAD}" y1="${H-PAD}" x2="${W-PAD}" y2="${H-PAD}" stroke="var(--border)" stroke-width="1"/>`;
@@ -3542,6 +3723,9 @@ function buildAscentCardHTML(a) {
           <div class="av">${a.avgVAM ?? '—'} <span class="au">m/h</span></div>
         </div>
       </div>
+      ${(a.measured && a.measured.sections && a.measured.sections.length)
+        ? `<button class="ascent-prop-btn" onclick="proposeMeasuredCorrection(${a.id})">📐 Proponi come correzione Excel</button>`
+        : ''}
     </div>`;
 }
 
@@ -4078,6 +4262,10 @@ const MAP_CLIMB_LOST_TRACK_LIMIT = 5; // dopo N letture fuori traccia, valuta il
 let mapClimbApproachPrevDist = null; // per rilevare se ci si avvicina o allontana
 let mapClimbApproachAwayCount = 0;   // letture consecutive in allontanamento
 let mapClimbManualArm = false;       // fumetto armato manualmente da "Carica salita": non si annulla per distanza/allontanamento
+let mapClimbRecordArmed = false;    // modalità recording: niente aggancio automatico, si parte solo con "Inizia"
+let mapClimbManualSections = [];     // confini di sezione segnalati manualmente durante la registrazione [{distM, altM, elapsedS}]
+let mapClimbStartAltM = null;        // quota GPS all'avvio della registrazione (per dislivello misurato)
+let mapClimbCurAltM = null;          // quota GPS corrente durante la registrazione
 let mapClimbDismissedIds = new Set(); // salite chiuse manualmente (non ripropose finché si resta in zona)
 let mapClimbCheckCounter    = 0; // limita la frequenza del controllo "economico" su tutte le salite
 let mapElevCalibrating = false;
@@ -4388,6 +4576,11 @@ function updateApproachingMapClimb(coords) {
 
   updateClimbApproachPopup(c.name, distToStart);
 
+  // Modalità registrazione: nessun aggancio automatico — il fumetto si
+  // aggiorna ma la navigazione parte solo premendo "Inizia" nella scheda
+  // salita, anche se si oltrepassa il punto di aggancio normale
+  if (mapClimbRecordArmed) return;
+
   // Test aggancio: entro il raggio dal punto di partenza, OPPURE molto
   // vicini alla traccia GPX (permette di agganciare anche a metà salita).
   // In entrambi i casi, verifica anche che la direzione di marcia sia
@@ -4462,6 +4655,12 @@ function updateActiveMapClimbTracking(coords) {
   const prevSegIdx = mapClimbCurrentSegIdx;
   let trackedOk = false;
 
+  // Traccia la quota GPS per il dislivello misurato in modalità recording
+  if (coords.altitude != null && !isNaN(coords.altitude)) {
+    if (mapClimbStartAltM === null) mapClimbStartAltM = coords.altitude;
+    mapClimbCurAltM = coords.altitude;
+  }
+
   if (c.gpxPoints) {
     const proj = projectOntoTrack(coords.latitude, coords.longitude, c.gpxPoints, 80, mapClimbLastMatchedIdx);
     if (proj && proj.perpDist < 60) {
@@ -4516,7 +4715,7 @@ function updateActiveMapClimbTracking(coords) {
     const elapsedS = Math.floor(((mapClimbLastGoodUpdateTime || Date.now()) - mapClimbStartTime) / 1000);
     for (let i = prevSegIdx + 1; i <= mapClimbCurrentSegIdx; i++) {
       if (!mapClimbSegmentSplits.some(s => s.segIdx === i)) {
-        mapClimbSegmentSplits.push({ segIdx: i, elapsedS });
+        mapClimbSegmentSplits.push({ segIdx: i, elapsedS, distM: Math.round(mapClimbDistanceDone), altM: mapClimbCurAltM });
       }
     }
   }
@@ -4573,6 +4772,7 @@ function saveMapAscent(climb) {
     avgSpeed,
     avgVAM,
     segmentSplits: mapClimbSegmentSplits.length ? [...mapClimbSegmentSplits] : null,
+    measured: buildMeasuredData(climb),
     weightAtTimeKg: userWeightKg || null,
     bikeGearAtTimeKg: bikeGearKg != null ? bikeGearKg : null,
   };
@@ -4593,6 +4793,10 @@ function resetMapClimbDetection() {
   mapClimbApproachPrevDist = null;
   mapClimbApproachAwayCount = 0;
   mapClimbManualArm = false;
+  mapClimbRecordArmed = false;
+  mapClimbManualSections = [];
+  mapClimbStartAltM = null;
+  mapClimbCurAltM = null;
   mapClimbStartTime = null;
   mapClimbHrSamples = [];
   mapClimbSegmentSplits = [];
