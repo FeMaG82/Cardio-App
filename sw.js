@@ -1,6 +1,6 @@
 // sw.js — Service Worker per HRM Polar H9
 // Aggiorna CACHE_NAME ogni volta che modifichi i file (es. 'hrm-v2')
-const CACHE_NAME = 'hrm-v44';
+const CACHE_NAME = 'hrm-v45';
 const FILES = [
   './',
   './index.html',
