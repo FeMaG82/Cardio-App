@@ -578,21 +578,25 @@
 
   /* Pop-up 1: avvicinamento a salita salvata */
   .map-climb-approach {
-    display: none; position: absolute; top: 70px; left: 12px; right: 12px; z-index: 550;
+    display: none; position: absolute; top: 18px; left: 96px; right: 54px; z-index: 550;
     background: rgba(18,18,46,.95); color: #fff;
     border: 1px solid rgba(0,255,65,.45);
-    border-radius: 14px; padding: 12px 16px;
+    border-radius: 12px; padding: 7px 8px;
     box-shadow: 0 4px 16px rgba(0,0,0,.5);
-    align-items: center; justify-content: space-between; gap: 10px;
+    align-items: center; gap: 8px;
   }
   .map-climb-approach.visible { display: flex; }
   .map-climb-approach.near { background: rgba(0,255,65,.16); border-color: rgba(0,255,65,.8); }
-  .mca-text { flex: 1; text-align: center; }
-  .mca-name { font-size: 14px; font-weight: 800; margin-bottom: 2px; color: #00ff41; }
-  .mca-dist { font-size: 20px; font-weight: 900; font-family: var(--mono); color: #fff; }
+  .mca-text { flex: 1; min-width: 0; }
+  .mca-title { font-size: 9px; font-weight: 700; color: var(--muted); line-height: 1.2; }
+  .mca-name { font-size: 10.5px; font-weight: 800; color: #00ff41; line-height: 1.3;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden; word-break: break-word; }
+  .mca-side { display: flex; flex-direction: column; align-items: center; gap: 3px; flex-shrink: 0; }
+  .mca-dist { font-size: 14px; font-weight: 900; font-family: var(--mono); color: #fff; line-height: 1.1; }
   .mca-close {
     background: rgba(255,255,255,.12); border: none; color: #fff;
-    width: 28px; height: 28px; border-radius: 50%; font-size: 14px;
+    width: 24px; height: 24px; border-radius: 50%; font-size: 12px;
     font-weight: 800; cursor: pointer; flex-shrink: 0;
   }
   .mca-rec {
@@ -656,7 +660,7 @@
     -webkit-text-stroke: 1.3px var(--red); paint-order: stroke fill; }
   .map-stat-card .msu { font-size: 12px; color: var(--muted); font-weight: 700; }
 
-  .map-record-btns { display: flex; gap: 8px; }
+  .map-record-btns { display: flex; gap: 8px; margin-bottom: 10px; }
   .map-rec-btn {
     flex: 1; padding: 13px; border-radius: 12px; border: none;
     font-size: 13px; font-weight: 800; cursor: pointer;
@@ -667,16 +671,55 @@
   #map-btn-resume { background: rgba(139,195,74,.35); color: #0a1a04; display: none; }
   #map-btn-stop   { background: rgba(255,112,67,.35); color: #1a0a00; }
 
-  .map-topbar {
-    position: absolute; top: 12px; left: 96px; right: 64px; z-index: 500;
-    display: flex; gap: 8px;
-  }
+  /* Tracce/Offline ora in fondo al pannello registrazione (la top bar
+     della mappa resta libera per il fumetto salita) */
+  .map-bottom-btns { display: flex; gap: 8px; margin-top: 10px; }
+  .map-bottom-btns .map-menu-btn { flex: 1; text-align: center; padding: 10px 0; }
   .map-menu-btn {
     background: rgba(18,20,46,.85); border: 1px solid rgba(0,255,65,.25);
     color: var(--text); padding: 9px 14px; border-radius: 20px;
     font-size: 12px; font-weight: 700; cursor: pointer; backdrop-filter: blur(4px);
     white-space: nowrap;
   }
+
+  /* Card Quota: cifre a sinistra, LED stato sensore barometrico a destra */
+  .map-stat-card.quota { cursor: pointer; }
+  .map-stat-card.quota .msv-row { justify-content: flex-start; padding-left: 6px; gap: 5px; }
+  .map-stat-card.quota.baro-on { border-color: rgba(0,255,65,.55); }
+  .baro-led {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    align-self: center; margin-left: auto;
+    background: var(--red); box-shadow: 0 0 6px rgba(255,46,46,.7);
+  }
+  .baro-led.on { background: var(--accent); box-shadow: 0 0 6px rgba(0,255,65,.7); }
+
+  /* Pannello sensore barometrico (sheet dal basso, come Tracce/Offline) */
+  .baro-status { display: flex; align-items: center; gap: 7px; font-size: 12px;
+    color: var(--muted); margin: 12px 0; }
+  .baro-status .baro-led { margin-left: 0; }
+  .baro-live { display: flex; gap: 8px; margin-bottom: 12px; }
+  .baro-cell { flex: 1; background: rgba(255,255,255,.05); border: 1px solid var(--border);
+    border-radius: 11px; padding: 10px 6px; text-align: center; }
+  .baro-cell .bl { font-size: 9.5px; color: var(--muted); font-weight: 700; text-transform: uppercase; }
+  .baro-cell .bv { font-size: 17px; font-weight: 900; font-family: var(--mono); color: #fff; }
+  .baro-cell .bv .bu { font-size: 10px; color: var(--muted); font-weight: 700; }
+  .baro-cell.main { border-color: rgba(0,255,65,.45); background: rgba(0,255,65,.07); }
+  .baro-cell.main .bv { color: var(--accent); }
+  .qnh-box { background: rgba(255,213,79,.06); border: 1px solid rgba(255,213,79,.4);
+    border-radius: 11px; padding: 10px; }
+  .qnh-box .qt { font-size: 11px; font-weight: 800; color: #ffd54f; margin-bottom: 6px; }
+  .qnh-box .qd { font-size: 11px; color: var(--muted); line-height: 1.45; margin-bottom: 9px; }
+  .qnh-row { display: flex; gap: 8px; }
+  .qnh-input {
+    flex: 1; background: rgba(0,0,0,.35); border: 1px solid var(--border); color: #fff;
+    font-family: var(--mono); font-size: 16px; font-weight: 800; padding: 9px 10px;
+    border-radius: 9px; width: 100%;
+  }
+  .baro-btn { padding: 10px 12px; border-radius: 9px; border: none; font-size: 12px; font-weight: 800;
+    white-space: nowrap; cursor: pointer; }
+  .baro-btn.primary { background: var(--accent); color: #0a1a04; }
+  .baro-btn.ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .qnh-note { font-size: 10.5px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
 
   /* Bottom sheets (tracks library / offline manager) */
   .map-sheet-overlay {
@@ -1338,22 +1381,17 @@
       <div class="map-hr-unit">bpm</div>
     </div>
 
-    <!-- Top bar: menu tracce + offline -->
-    <div class="map-topbar">
-      <button class="map-menu-btn" onclick="openTracksSheet()">🗂️ Tracce</button>
-      <button class="map-menu-btn" onclick="openOfflineSheet()">⬇️ Offline</button>
-    </div>
-
-    <button class="fs-btn map-fs-btn" onclick="toggleFullscreen()">⛶</button>
-    <button class="map-locate-btn active" id="map-locate-btn" onclick="toggleFollowMode()">◉</button>
-
-    <!-- Pop-up 1: avvicinamento a una salita salvata -->
+    <!-- Pop-up 1: avvicinamento a una salita salvata (in alto, tra il
+         cerchio FC e il tasto schermo intero) -->
     <div class="map-climb-approach" id="map-climb-approach">
       <div class="mca-text">
+        <div class="mca-title">🚵 In avvicinamento</div>
         <div class="mca-name" id="mca-name">—</div>
+      </div>
+      <div class="mca-side">
+        <button class="mca-rec" onclick="armClimbRecording()">🔴 Registra</button>
         <div class="mca-dist" id="mca-dist">—</div>
       </div>
-      <button class="mca-rec" onclick="armClimbRecording()">🔴 Registra</button>
       <button class="mca-close" onclick="dismissClimbApproachPopup()">✕</button>
     </div>
 
@@ -1382,8 +1420,15 @@
       <button class="mco-close" onclick="stopTrackNavigation()">✕</button>
     </div>
 
-    <!-- Pannello registrazione in basso -->
+    <!-- Pannello registrazione in basso: tasti sopra le card,
+         Tracce/Offline in fondo (top bar libera per il fumetto salita) -->
     <div class="map-record-panel">
+      <div class="map-record-btns">
+        <button class="map-rec-btn" id="map-btn-start"  onclick="startTrackRecording()">▶ Avvia</button>
+        <button class="map-rec-btn" id="map-btn-pause"  onclick="pauseTrackRecording()" disabled>⏸ Pausa</button>
+        <button class="map-rec-btn" id="map-btn-resume" onclick="resumeTrackRecording()">▶ Riprendi</button>
+        <button class="map-rec-btn" id="map-btn-stop"   onclick="stopTrackRecording()" disabled>■ Termina</button>
+      </div>
       <div class="map-stats-row">
         <div class="map-stat-card">
           <div class="msl">Velocità</div>
@@ -1393,9 +1438,9 @@
           <div class="msl">Vel. Media</div>
           <div class="msv-row"><span class="msv" id="map-avg-speed">—</span><span class="msu">km/h</span></div>
         </div>
-        <div class="map-stat-card">
+        <div class="map-stat-card quota" id="map-quota-card" onclick="openBaroSheet()">
           <div class="msl">Quota</div>
-          <div class="msv-row"><span class="msv" id="map-altitude">—</span><span class="msu">mslm</span></div>
+          <div class="msv-row"><span class="msv" id="map-altitude">—</span><span class="msu">mslm</span><span class="baro-led" id="baro-led"></span></div>
         </div>
         <div class="map-stat-card">
           <div class="msl">Percorsi</div>
@@ -1410,11 +1455,62 @@
           <div class="msv-row"><span class="msv" id="map-elevgain">0</span><span class="msu">m</span></div>
         </div>
       </div>
-      <div class="map-record-btns">
-        <button class="map-rec-btn" id="map-btn-start"  onclick="startTrackRecording()">▶ Avvia</button>
-        <button class="map-rec-btn" id="map-btn-pause"  onclick="pauseTrackRecording()" disabled>⏸ Pausa</button>
-        <button class="map-rec-btn" id="map-btn-resume" onclick="resumeTrackRecording()">▶ Riprendi</button>
-        <button class="map-rec-btn" id="map-btn-stop"   onclick="stopTrackRecording()" disabled>■ Termina</button>
+      <div class="map-bottom-btns">
+        <button class="map-menu-btn" onclick="openTracksSheet()">🗂️ Tracce</button>
+        <button class="map-menu-btn" onclick="openOfflineSheet()">⬇️ Offline</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sheet: Sensore barometrico (ESP32 + BMP280 "Altimetro-Bici") -->
+<div class="map-sheet-overlay" id="baro-sheet">
+  <div class="map-sheet">
+    <div class="tracks-sheet-header">
+      <h3 style="margin-bottom:0">⛰️ Sensore barometrico</h3>
+      <button class="map-sheet-close-top" onclick="closeBaroSheet()">✕ Chiudi</button>
+    </div>
+
+    <div class="baro-status">
+      <span class="baro-led" id="baro-sheet-led"></span>
+      <span id="baro-sheet-status">Non connesso</span>
+    </div>
+
+    <div id="baro-connect-view">
+      <div class="baro-live">
+        <div class="baro-cell"><div class="bl">Quota</div><div class="bv">—</div></div>
+        <div class="baro-cell"><div class="bl">Pressione</div><div class="bv">—</div></div>
+        <div class="baro-cell"><div class="bl">Temp.</div><div class="bv">—</div></div>
+      </div>
+      <button class="baro-btn primary" style="width:100%" onclick="connectBaroSensor()">🔍 Connetti Altimetro-Bici</button>
+      <p class="hint" style="font-size:11px; color:#9aa0c3; margin-top:10px; line-height:1.5">
+        Connessione via Bluetooth (Chrome su Android). Finché il sensore non è connesso, quota e
+        dislivello usano il GPS; se la connessione cade, l'app prova a riconnettersi da sola.
+      </p>
+    </div>
+
+    <div id="baro-connected-view" style="display:none">
+      <div class="baro-live">
+        <div class="baro-cell main"><div class="bl">Quota</div><div class="bv" id="baro-sheet-alt">—</div></div>
+        <div class="baro-cell"><div class="bl">Pressione</div><div class="bv" id="baro-sheet-press">—</div></div>
+        <div class="baro-cell"><div class="bl">Temp.</div><div class="bv" id="baro-sheet-temp">—</div></div>
+      </div>
+      <div class="qnh-box">
+        <div class="qt">Calibrazione QNH (manuale)</div>
+        <div class="qd">Inserisci il QNH del giorno (dall'app meteo, tipico 980–1040 hPa) e premi
+          Imposta: il sensore ricalcola la quota assoluta. La quota mostrata si aggiorna subito.
+          Il dislivello non è influenzato dal QNH.</div>
+        <div class="qnh-row">
+          <input class="qnh-input" id="baro-qnh-input" type="number" step="0.1" inputmode="decimal" placeholder="es. 1013.2">
+          <button class="baro-btn primary" onclick="setBaroQnh()">💾 Imposta</button>
+        </div>
+        <div style="margin-top:8px">
+          <button class="baro-btn ghost" style="width:100%" onclick="gpsBaroQnh()">📍 Calcola QNH dalla quota GPS attuale</button>
+        </div>
+        <div class="qnh-note" id="baro-qnh-note">QNH attuale sul sensore: —</div>
+      </div>
+      <div style="margin-top:12px">
+        <button class="baro-btn ghost" style="width:100%" onclick="disconnectBaroSensor()">🔌 Disconnetti</button>
       </div>
     </div>
   </div>
@@ -2486,7 +2582,10 @@ function recordStart() {
   mapClimbLastMatchedIdx = proj ? proj.matchedIdx : null;
   mapClimbDistanceDone = 0;
   mapClimbManualSections = [];
-  mapClimbStartAltM = (coords.altitude != null && !isNaN(coords.altitude)) ? coords.altitude : null;
+  // Quota iniziale: barometrica se connessa, GPS altrimenti
+  const startAltM = (baroConnected && baroAltM != null) ? baroAltM
+    : ((coords.altitude != null && !isNaN(coords.altitude)) ? coords.altitude : null);
+  mapClimbStartAltM = startAltM;
   mapClimbCurAltM = mapClimbStartAltM;
   mapClimbPhase = 'active';
   mapClimbManualArm = true; // force-lock: l'aggancio è alla posizione attuale, non al punto GPX di partenza
@@ -4452,17 +4551,19 @@ function onMapGPSUpdate(pos) {
   }
   document.getElementById('map-speed').textContent = speedKmh != null ? speedKmh.toFixed(1) : '—';
 
-  // Quota corrente, calibrata con dato di elevazione reale (offset una
-  // tantum per sessione mappa) per correggere la sovrastima tipica del GPS
-  if (altitude != null) {
+  // Quota corrente: sensore barometrico se connesso (precisione ~0,1 m),
+  // altrimenti GPS calibrato con offset di elevazione reale (una tantum
+  // per sessione mappa) per correggere la sovrastima tipica del GPS
+  let altM = null;
+  if (baroConnected && baroAltM != null) {
+    altM = baroAltM;
+  } else if (altitude != null) {
     if (mapElevOffsetM === null && !mapElevCalibrating) {
       calibrateLiveAltitude(lat, lon, altitude);
     }
-    const corrected = mapElevOffsetM !== null ? altitude + mapElevOffsetM : altitude;
-    document.getElementById('map-altitude').textContent = Math.round(corrected);
-  } else {
-    document.getElementById('map-altitude').textContent = '—';
+    altM = mapElevOffsetM !== null ? altitude + mapElevOffsetM : altitude;
   }
+  document.getElementById('map-altitude').textContent = altM != null ? Math.round(altM) : '—';
 
   // Se registrazione attiva e non in pausa, accumula traccia + dislivello
   if (trackRecording && !trackPaused && accuracy != null && accuracy <= 30) {
@@ -4470,27 +4571,29 @@ function onMapGPSUpdate(pos) {
       const d = haversineMeters(mapLastPos.coords, pos.coords);
       if (d > 1 && d < 300) {
         trackDistM += d;
-        trackPoints.push({ lat, lon, ele: altitude || null, t: Date.now() });
+        trackPoints.push({ lat, lon, ele: altM ?? null, t: Date.now() });
         if (trackPolyline) trackPolyline.addLatLng([lat, lon]);
         updateTrackStats();
       }
     } else {
-      trackPoints.push({ lat, lon, ele: altitude || null, t: Date.now() });
+      trackPoints.push({ lat, lon, ele: altM ?? null, t: Date.now() });
     }
 
     // Dislivello positivo live: filtro a soglia per ridurre il rumore
     // tipico dell'altitudine GPS (±5-10m). Verrà ricalibrato a fine
     // registrazione con dati di quota più accurati, se disponibili.
-    if (altitude != null) {
+    // Con il sensore barometrico connesso il rumore è minimo e la soglia
+    // filtra solo le micro-oscillazioni.
+    if (altM != null) {
       if (trackLastEle === null) {
-        trackLastEle = altitude;
+        trackLastEle = altM;
       } else {
-        const diff = altitude - trackLastEle;
+        const diff = altM - trackLastEle;
         if (diff > ELEV_NOISE_THRESHOLD_M) {
           trackElevGainM += diff;
-          trackLastEle = altitude;
+          trackLastEle = altM;
         } else if (diff < -ELEV_NOISE_THRESHOLD_M) {
-          trackLastEle = altitude;
+          trackLastEle = altM;
         }
       }
       document.getElementById('map-elevgain').textContent = Math.round(trackElevGainM);
@@ -4670,10 +4773,12 @@ function updateActiveMapClimbTracking(coords) {
   const prevSegIdx = mapClimbCurrentSegIdx;
   let trackedOk = false;
 
-  // Traccia la quota GPS per il dislivello misurato in modalità recording
-  if (coords.altitude != null && !isNaN(coords.altitude)) {
-    if (mapClimbStartAltM === null) mapClimbStartAltM = coords.altitude;
-    mapClimbCurAltM = coords.altitude;
+  // Traccia la quota per il dislivello misurato in modalità recording:
+  // sensore barometrico se connesso, altrimenti quota GPS
+  const trackAltM = (baroConnected && baroAltM != null) ? baroAltM : coords.altitude;
+  if (trackAltM != null && !isNaN(trackAltM)) {
+    if (mapClimbStartAltM === null) mapClimbStartAltM = trackAltM;
+    mapClimbCurAltM = trackAltM;
   }
 
   if (c.gpxPoints) {
@@ -5240,15 +5345,15 @@ function updateClimbApproachPopup(name, distM) {
   const el = document.getElementById('map-climb-approach');
   if (distM == null) { // armato manualmente senza fix GPS disponibile
     el.classList.remove('near');
-    document.getElementById('mca-name').textContent = `🚵 In avvicinamento: ${name}`;
-    document.getElementById('mca-dist').textContent = 'in attesa del GPS…';
+    document.getElementById('mca-name').textContent = name;
+    document.getElementById('mca-dist').textContent = 'GPS…';
     return;
   }
   el.classList.toggle('near', distM <= 300);
-  document.getElementById('mca-name').textContent = `🚵 In avvicinamento: ${name}`;
+  document.getElementById('mca-name').textContent = name;
   document.getElementById('mca-dist').textContent = distM >= 1000
-    ? `${(distM/1000).toFixed(1)} km all'inizio`
-    : `${Math.round(distM)} m all'inizio`;
+    ? `${(distM/1000).toFixed(1)} km`
+    : `${Math.round(distM)} m`;
 }
 function hideClimbApproachPopup() {
   document.getElementById('map-climb-approach').classList.remove('visible');
@@ -5260,6 +5365,177 @@ function hideClimbApproachPopup() {
 function dismissClimbApproachPopup() {
   if (mapDetectedClimb) mapClimbDismissedIds.add(mapDetectedClimb.addedAt);
   resetMapClimbDetection();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ── SENSORE BAROMETRICO BLE (Altimetro-Bici: ESP32 + BMP280) ───
+// ═══════════════════════════════════════════════════════════════
+// Il sensore trasmette ogni secondo pressione (Pa), quota (m) e
+// temperatura (°C) via notify; il QNH è scrivibile per la
+// calibrazione. Quando è connesso, quota e dislivello di traccia e
+// modulo Salite usano la barometrica; altrimenti fallback GPS.
+const BARO_SVC_UUID  = '19b10000-e8f2-537e-4f6c-d104768a1214';
+const BARO_CHAR_PRESS = '19b10001-e8f2-537e-4f6c-d104768a1214';
+const BARO_CHAR_ALT   = '19b10002-e8f2-537e-4f6c-d104768a1214';
+const BARO_CHAR_TEMP  = '19b10003-e8f2-537e-4f6c-d104768a1214';
+const BARO_CHAR_QNH   = '19b10004-e8f2-537e-4f6c-d104768a1214';
+let baroDevice = null, baroCharQnh = null;
+let baroConnected = false;
+let baroAltM = null, baroPressPa = null, baroTempC = null, baroQnhHpa = null;
+let baroReconnectTimer = null, baroReconnectTries = 0;
+
+function openBaroSheet() {
+  document.getElementById('baro-sheet').classList.add('open');
+  updateBaroUI();
+}
+function closeBaroSheet() {
+  document.getElementById('baro-sheet').classList.remove('open');
+}
+
+async function connectBaroSensor() {
+  if (!navigator.bluetooth) { toast('⚠️ Bluetooth non supportato da questo browser'); return; }
+  try {
+    toast('🔍 Ricerca Altimetro-Bici…');
+    baroDevice = await navigator.bluetooth.requestDevice({
+      filters: [{ name: 'Altimetro-Bici' }],
+      optionalServices: [BARO_SVC_UUID],
+    });
+    baroDevice.addEventListener('gattserverdisconnected', onBaroDisconnected);
+    await baroGattSetup();
+  } catch (e) {
+    // Annullato dall'utente o sensore non trovato: nessun allarme
+    if (e && e.name !== 'NotFoundError') toast('⚠️ Connessione al sensore fallita');
+  }
+}
+
+async function baroGattSetup() {
+  const server = await baroDevice.gatt.connect();
+  const svc = await server.getPrimaryService(BARO_SVC_UUID);
+  const cAlt = await svc.getCharacteristic(BARO_CHAR_ALT);
+  await cAlt.startNotifications();
+  cAlt.addEventListener('characteristicvaluechanged', e => {
+    baroAltM = e.target.value.getFloat32(0, true);
+    updateBaroUI();
+  });
+  const cPress = await svc.getCharacteristic(BARO_CHAR_PRESS);
+  await cPress.startNotifications();
+  cPress.addEventListener('characteristicvaluechanged', e => {
+    baroPressPa = e.target.value.getFloat32(0, true);
+    updateBaroUI();
+  });
+  const cTemp = await svc.getCharacteristic(BARO_CHAR_TEMP);
+  await cTemp.startNotifications();
+  cTemp.addEventListener('characteristicvaluechanged', e => {
+    baroTempC = e.target.value.getFloat32(0, true);
+    updateBaroUI();
+  });
+  baroCharQnh = await svc.getCharacteristic(BARO_CHAR_QNH);
+  try { baroQnhHpa = (await baroCharQnh.readValue()).getFloat32(0, true); } catch (e) {}
+  baroConnected = true;
+  baroReconnectTries = 0;
+  if (baroReconnectTimer) { clearTimeout(baroReconnectTimer); baroReconnectTimer = null; }
+  updateBaroUI();
+  toast('⛰️ Sensore barometrico connesso');
+}
+
+function onBaroDisconnected() {
+  baroConnected = false;
+  updateBaroUI();
+  if (baroReconnectTries >= 6) return; // già provato troppo: attende un tap
+  const delay = 3000 * (baroReconnectTries + 1);
+  baroReconnectTimer = setTimeout(tryBaroReconnect, delay);
+}
+
+async function tryBaroReconnect() {
+  if (!baroDevice || baroDevice.gatt.connected) return;
+  try {
+    toast('⛰️ Riconnessione al sensore…');
+    await baroGattSetup();
+  } catch (e) {
+    baroReconnectTries++;
+    if (baroReconnectTries >= 6) {
+      toast('⚠️ Sensore non raggiungibile: tocca la card Quota per ricollegarlo');
+    } else {
+      baroReconnectTimer = setTimeout(tryBaroReconnect, 3000 * (baroReconnectTries + 1));
+    }
+  }
+}
+
+function disconnectBaroSensor() {
+  if (baroReconnectTimer) { clearTimeout(baroReconnectTimer); baroReconnectTimer = null; }
+  baroReconnectTries = 99; // niente riconnessioni automatiche dopo lo stop manuale
+  if (baroDevice) {
+    baroDevice.removeEventListener('gattserverdisconnected', onBaroDisconnected);
+    try { baroDevice.gatt.disconnect(); } catch (e) {}
+  }
+  baroConnected = false;
+  baroReconnectTries = 0;
+  updateBaroUI();
+  toast('Sensore barometrico disconnesso');
+}
+
+async function setBaroQnh() {
+  const v = parseFloat(document.getElementById('baro-qnh-input').value);
+  if (isNaN(v) || v < 900 || v > 1060) {
+    document.getElementById('baro-qnh-note').innerHTML =
+      '<span style="color:#ff8a80">⚠️ Valore QNH non valido (tipico 980–1040 hPa)</span>';
+    return;
+  }
+  if (!baroCharQnh) { toast('⚠️ Sensore non connesso'); return; }
+  try {
+    await baroCharQnh.writeValue(new Float32Array([v]));
+    baroQnhHpa = v;
+    document.getElementById('baro-qnh-note').innerHTML =
+      `QNH aggiornato sul sensore: <b style="color:var(--accent)">${v.toFixed(1)} hPa ✓</b>`;
+    toast('💾 QNH impostato');
+  } catch (e) {
+    toast('⚠️ Scrittura QNH fallita');
+  }
+}
+
+function gpsBaroQnh() {
+  if (baroPressPa == null) { toast('⚠️ Pressione non ancora ricevuta dal sensore'); return; }
+  const gpsAlt = mapLastPos && mapLastPos.coords && mapLastPos.coords.altitude;
+  if (gpsAlt == null || isNaN(gpsAlt)) { toast('⚠️ Quota GPS non disponibile'); return; }
+  // Inversa della formula del sensore: h = 44330*(1-(p/QNH)^0.19029)
+  const qnhHpa = (baroPressPa / 100) / Math.pow(1 - gpsAlt / 44330, 1 / 0.19029);
+  document.getElementById('baro-qnh-input').value = qnhHpa.toFixed(1);
+  document.getElementById('baro-qnh-note').innerHTML =
+    `QNH ricavato dalla quota GPS (${Math.round(gpsAlt)} m): <b style="color:var(--accent)">${qnhHpa.toFixed(1)} hPa</b> — premi 💾 per scriverlo sul sensore`;
+}
+
+function updateBaroUI() {
+  const led = document.getElementById('baro-led');
+  const card = document.getElementById('map-quota-card');
+  if (led) led.classList.toggle('on', baroConnected);
+  if (card) card.classList.toggle('baro-on', baroConnected);
+  const sheetLed = document.getElementById('baro-sheet-led');
+  if (sheetLed) sheetLed.classList.toggle('on', baroConnected);
+  const status = document.getElementById('baro-sheet-status');
+  if (status) status.textContent = baroConnected
+    ? 'Connesso · Altimetro-Bici · aggiornamento 1 s'
+    : 'Non connesso';
+  const cv = document.getElementById('baro-connect-view');
+  const xv = document.getElementById('baro-connected-view');
+  if (cv) cv.style.display = baroConnected ? 'none' : 'block';
+  if (xv) xv.style.display = baroConnected ? 'block' : 'none';
+  if (baroConnected) {
+    const a = document.getElementById('baro-sheet-alt');
+    if (a) a.textContent = baroAltM != null ? Math.round(baroAltM) : '—';
+    const p = document.getElementById('baro-sheet-press');
+    if (p) p.innerHTML = baroPressPa != null
+      ? (baroPressPa / 100).toFixed(1) + '<span class="bu"> hPa</span>' : '—';
+    const t = document.getElementById('baro-sheet-temp');
+    if (t) t.innerHTML = baroTempC != null
+      ? baroTempC.toFixed(1) + '<span class="bu"> °C</span>' : '—';
+    const note = document.getElementById('baro-qnh-note');
+    if (note && baroQnhHpa != null && !note.innerHTML.includes('✓') && !note.innerHTML.includes('ricavato')) {
+      note.textContent = `QNH attuale sul sensore: ${baroQnhHpa.toFixed(1)} hPa`;
+    }
+    if (baroAltM != null) {
+      document.getElementById('map-altitude').textContent = Math.round(baroAltM);
+    }
+  }
 }
 
 // ── UI: pop-up navigazione attiva ───────────────────────────────
