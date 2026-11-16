@@ -101,6 +101,8 @@
   /* ── VIEWS ── */
   .view { display: none; padding: 20px 16px 100px; position: relative; }
   .view.active { display: block; }
+  /* Monitor: elimina lo spazio vuoto sotto le etichette delle schede */
+  #view-monitor { padding-top: 6px; }
 
   /* Filigrana cardiogramma-montagna con bici da corsa (come il logo dell'app) */
   .app-watermark {
@@ -301,14 +303,14 @@
   .history-empty { text-align: center; color: var(--muted); padding: 60px 0; font-size: 14px; }
   .session-card {
     background: var(--card); border: 1px solid rgba(0,255,65,.22);
-    border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
+    border-radius: var(--radius); padding: 12px; margin-bottom: 12px;
   }
-  .session-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .session-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
   .session-date { font-size: 10.5px; color: var(--muted); }
   .session-duration { font-size: 19px; font-weight: 900; font-family: var(--mono); color: #fff;
     -webkit-text-stroke: 1.8px var(--red); paint-order: stroke fill; }
-  .session-stats { display: flex; gap: 20px; margin-bottom: 12px; }
-  .session-stat .sl { font-size: 9.5px; color: var(--muted); }
+  .session-stats { display: flex; gap: 20px; margin-bottom: 6px; }
+  .session-stat .sl { font-size: 11.5px; color: #c9cde6; }
   .session-stat .sv { font-size: 16px; font-weight: 900; font-family: var(--mono); color: #fff;
     -webkit-text-stroke: 1.5px var(--red); paint-order: stroke fill; }
   .session-card .track-btn.nav { background: rgba(0,255,65,.12); border: 1px solid rgba(0,255,65,.4);
@@ -578,7 +580,7 @@
 
   /* Pop-up 1: avvicinamento a salita salvata */
   .map-climb-approach {
-    display: none; position: absolute; top: 18px; left: 96px; right: 54px; z-index: 550;
+    display: none; position: absolute; top: 18px; left: 96px; right: 84px; z-index: 550;
     background: rgba(18,18,46,.95); color: #fff;
     border: 1px solid rgba(0,255,65,.45);
     border-radius: 12px; padding: 7px 8px;
@@ -647,7 +649,7 @@
     position: absolute; bottom: 12px; left: 12px; right: 12px; z-index: 500;
   }
   .map-stats-row {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
   }
   .map-stat-card {
     background: rgba(13,15,44,.88); border: 1px solid rgba(0,255,65,.18);
@@ -660,9 +662,9 @@
     -webkit-text-stroke: 1.3px var(--red); paint-order: stroke fill; }
   .map-stat-card .msu { font-size: 12px; color: var(--muted); font-weight: 700; }
 
-  .map-record-btns { display: flex; gap: 8px; margin-bottom: 10px; }
+  .map-record-btns { display: flex; gap: 0; }
   .map-rec-btn {
-    flex: 1; padding: 13px; border-radius: 12px; border: none;
+    flex: 1; padding: 13px; border-radius: 12px; border: 1px solid rgba(0,255,65,.18);
     font-size: 13px; font-weight: 800; cursor: pointer;
   }
   .map-rec-btn:disabled { opacity: .3; cursor: not-allowed; }
@@ -673,8 +675,8 @@
 
   /* Tracce/Offline ora in fondo al pannello registrazione (la top bar
      della mappa resta libera per il fumetto salita) */
-  .map-bottom-btns { display: flex; gap: 8px; margin-top: 10px; }
-  .map-bottom-btns .map-menu-btn { flex: 1; text-align: center; padding: 10px 0; }
+  .map-bottom-btns { display: flex; gap: 0; }
+  .map-bottom-btns .map-menu-btn { flex: 1; text-align: center; padding: 10px 0; border-radius: 12px; }
   .map-menu-btn {
     background: rgba(18,20,46,.85); border: 1px solid rgba(0,255,65,.25);
     color: var(--text); padding: 9px 14px; border-radius: 20px;
@@ -1395,6 +1397,9 @@
       <button class="mca-close" onclick="dismissClimbApproachPopup()">✕</button>
     </div>
 
+    <button class="fs-btn map-fs-btn" onclick="toggleFullscreen()">⛶</button>
+    <button class="map-locate-btn active" id="map-locate-btn" onclick="toggleFollowMode()">◉</button>
+
     <!-- Pop-up 2: navigazione attiva sulla salita -->
     <div class="map-climb-overlay" id="map-climb-overlay">
       <div class="mco-header">
@@ -2097,7 +2102,7 @@ function renderHistory() {
       </div>
       <div style="display:flex;gap:8px;align-items:flex-end">
         <div class="mini-zones">${bars}</div>
-        <div style="font-size:11px;color:var(--muted);padding-bottom:2px">${s.zonePcts.map((p,i)=>`Z${i+1}:${p}%`).join(' ')}</div>
+        <div style="font-size:12.5px;color:#c9cde6;padding-bottom:2px">${s.zonePcts.map((p,i)=>`Z${i+1}:${p}%`).join(' ')}</div>
       </div>
       ${s.laps && s.laps.length > 1 ? `<button class="track-btn nav" style="width:100%;margin-top:10px" onclick="openLapSheet(${s.id})">🏁 Vedi Lap (${s.laps.length})</button>` : ''}
     </div>`;
